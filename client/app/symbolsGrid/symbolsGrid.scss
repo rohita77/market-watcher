@@ -1,0 +1,50 @@
+
+.panel-rounded {
+    border-radius: 10px;
+    /* margin: 5px; /* Rohit: correct way of doing it? */
+}
+
+.panel-heading-rounded {
+    border-top-right-radius: 10px;
+    border-top-left-radius: 10px;
+    /* margin: 5px; /* Rohit: correct way of doing it? */
+}
+
+.row.gutter-3 > [class*="col-"] {
+        padding-left: 3px;
+        padding-right: 3px;
+        margin-top: -6px;
+        margin-bottom: -6px;
+    }
+
+.row.gutter-1 > [class*="col-"] {
+        padding-left: 1px;
+        padding-right: 1px;
+        margin-top: -1px;
+        margin-bottom: -1px;
+    }
+
+.panel-primary {
+    transition: 0.25s linear all;
+}
+
+
+.quote-pchg-u-xxx {
+    color: green
+}
+
+.quote-pchg-u-xx {
+    color: lawngreen
+}
+.quote-pchg-u-x {
+    color: lightgreen
+}
+.quote-pchg-d-xxx {
+    color: red
+}
+.quote-pchg-d-xx {
+    color: orange
+}
+.quote-pchg-d-x {
+    color: palevioletred
+}

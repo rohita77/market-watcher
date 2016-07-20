@@ -1,0 +1,183 @@
+
+
+<div class="container-fluid">
+  <!--  <img ng-src="{{event.imageUrl}}" alt="{{event.name}}"> -->
+
+  <h4>Quotes Grid
+      <small><small>as on {{ symbolsGridCtrl.quotes.time | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.quotes.refreshtime | date : 'HH:mm:ss' : '+0800'}} SGT </small></small>
+  </h4>
+
+ <uib-accordion>
+  <uib-accordion-group>
+    <uib-accordion-heading>
+      <button type="button" class="btn btn-info" aria-label="Left Align">
+            <span class="glyphicon glyphicon-filter" aria-hidden="true"></span> Filter
+          </button>
+    </uib-accordion-heading>
+    <form class="form-inline">
+      <div class="form-group">
+        <label for="sortBy"> Sort By : </label>
+        <select name="sortBy" id="sortBy" ng-model="symbolsGridCtrl.sortorder" class="form-control">
+            <option value="symbol" selected>Symbol</option>
+            <option value="-per">Change</option>
+          </select>
+      </div>
+      <div class="form-group">
+        <label for="beta"> Beta :</label>
+        <select name="beta" id="beta" ng-model="symbolsGridCtrl.query.level" class="form-control" ng-options="o.value as o.label for o in symbolsGridCtrl.betaFilterOptions">
+            <!--
+         <option selected="true" value="{}">All</option>
+          <option value="0.5" >less than 0.5</option>
+          <option value="1" > between 0.5 and 1.5 </option>
+          <option value="1.5" >greater than 1.5</option>
+        -->
+          </select>
+
+      </div>
+
+      <div class="form-group">
+        <label for="symbName"> Name :</label>
+        <input id="symbName" name="symbName" class="form-control" type="text" required ng-pattern="/^[a-zA-Z0-9]*$/" ng-model="symbolsGridCtrl.query.symbol"
+          placeholder="filter by name" />
+
+      </div>
+    </form>
+  </uib-accordion-group>
+</uib-accordion>
+  <!-- Gutter3 = reduced padding -->
+  <div class="row gutter-3">
+
+    <!--TD// new row after every four -->
+    <!-- correctly reduce padding
+      <!--Use a filter to identify selected instead of manipulating the model -->
+    <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="quote in symbolsGridCtrl.quotes.data | orderBy:symbolsGridCtrl.sortorder | limitTo:50 | filter:symbolsGridCtrl.query">
+      <div class="panel panel-rounded panel-default" ng-class="{'panel-primary' : (quote.symbol == symbolsGridCtrl.selectedSymbolName)}" ng-click="symbolsGridCtrl.toggleSelectedSymbol(quote)">
+
+        <div class="panel-heading panel-heading-rounded">
+          <h5 class="panel-title"><strong> {{quote.symbol | uppercase}} </strong> </h5>
+          <small><small>{{quote.name | limitTo:60}}</small></small>
+        </div>
+        <div class="panel-body">
+          <div class="row gutter-1">
+            <!-- Not working on small devices -->
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Last Price : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{ 1 * quote.ltP.replace(',','') | currency}}   <!-- TD: Convert to filter -->
+            </div>
+
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Change : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ quote.chg_sign + (quote.per )">
+                <!-- | movesize : [1,2,3] -->
+              {{quote.ptsC1 | currency}}({{quote.per| number:1}}%)
+            </div>
+
+          </div>
+
+          <div class="row gutter-1">
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Bid : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{quote.bid | currency}}
+            </div>
+
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Ask : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{quote.ask | currency}}
+            </div>
+
+          </div>
+
+          <div class="row gutter-1">
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Open : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{quote.open | currency}}
+            </div>
+
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Prev Close : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{quote.cl | currency}}   <!-- Close not available <--></-->
+            </div>
+
+          </div>
+
+          <div class="row gutter-1">
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>High : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{quote.high | currency}}
+            </div>
+
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Low : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{quote.low | currency}}
+            </div>
+
+          </div>
+
+          <div class="row gutter-1">
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>52 Wk High : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{quote.wkhi | currency}}
+            </div>
+
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>52 Wk Low : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{quote.wklo | currency}}
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+
+  </div>
+</div>
+
+<ul class="thumbnails">
+  <li ng-repeat="quote in symbolsGridCtrl.quotes.data | orderBy:symbolsGridCtrl.sortorder | limitTo:20 | filter:symbolsGridCtrl.query" ng-show="quote.symbol == symbolsGridCtrl.selectedSymbolName">
+
+    <div class="row session">
+      <div class="span0 well votingWidget">
+        <div class="votingButton" ng-click="upVoteSession(session)">
+          <i class="icon-chevron-up icon-white"></i>
+        </div>
+        <div class="badge badge-inverse">
+          <div>{{session.upVoteCount}}</div>
+        </div>
+        <div class="votingButton" ng-click="downVoteSession(session)">
+          <i class="icon-chevron-down"></i>
+        </div>
+      </div>
+
+      <div class="well span12">
+        <h4 class="well-title">{{quote.symbol}}</h4>
+        <h6 style="margin-top:-10px">{{quote.name}}</h6>
+        <span>Duration: {{session.duration}}</span><br />
+        <span>Level: {{session.level}}</span>
+
+        <p>{{session.abstract}}</p>
+      </div>
+    </div>
+
+  </li>
+</ul>

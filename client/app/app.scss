@@ -1,5 +1,12 @@
+/*
 $icon-font-path: "../bower_components/bootstrap-sass-official/vendor/assets/fonts/bootstrap/";
 @import '../bower_components/bootstrap-sass-official/vendor/assets/stylesheets/bootstrap';
+*/
+
+//Rohit: Need to fix as mixins may not get loaded correctly
+ $icon-font-path: "../bower_components/bootstrap/fonts/";
+@import '../bower_components/bootstrap-sass-official/vendor/assets/stylesheets/bootstrap';
+
 $fa-font-path: "../bower_components/font-awesome/fonts";
 @import '../bower_components/font-awesome/scss/font-awesome';
 
@@ -18,6 +25,7 @@ $fa-font-path: "../bower_components/font-awesome/fonts";
 /* inject:scss */
 @import 'admin/admin';
 @import 'main/main';
+@import 'symbolsGrid/symbolsGrid';
 @import '../components/footer/footer';
 @import '../components/modal/modal';
 /* endinject */
