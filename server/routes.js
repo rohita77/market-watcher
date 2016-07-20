@@ -7,8 +7,13 @@
 import errors from './components/errors';
 import path from 'path';
 
+import * as auth from './auth/auth.service';
+
+
 export default function(app) {
   // Insert routes below
+  app.use('/api/quotes',auth.isAuthenticated(), require('./api/quote'));
+  app.use('/api/watchlists',auth.isAuthenticated(), require('./api/watchlist'));
   app.use('/api/things', require('./api/thing'));
   app.use('/api/users', require('./api/user'));
 
