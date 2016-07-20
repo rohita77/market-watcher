@@ -8,6 +8,8 @@ class NavbarController {
     this.isLoggedIn = Auth.isLoggedIn;
     this.isAdmin = Auth.isAdmin;
     this.getCurrentUser = Auth.getCurrentUser;
+    this.menu = [{state:'symbolsGrid',title:'Grid'}];
+    this.isCollapsed = true;
   }
 
 }
