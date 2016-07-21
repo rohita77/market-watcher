@@ -78,9 +78,9 @@ export function show(req, res) {
 
   client.get('niftyStockWatch.json', (error, response, body) => {
     if (!error && response.statusCode === 200) {
-      console.log('Number of Quotes: ' + body.data.length);
-      body.data.time = new Date(Date.parse(body.data.time + ' GMT+0530'));
+      body.time = new Date(body.time + ' GMT+0530');
       body.refreshtime = new Date();
+      console.log('Number of Quotes: ' + body.data.length + " as of " + body.time.toLocaleTimeString("en-US", {timeZone:"Asia/Calcutta", timeZoneName:"short"})  + " retrieved at "  + body.refreshtime.toLocaleTimeString("en-US", {timeZone:"Asia/Singapore", timeZoneName:"short"}) );
       return res.json(body);
     }
   })
