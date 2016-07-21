@@ -37,7 +37,7 @@
             console.log('number of quotes:  ' + this.quotes.data.length);
           }) //based on format
           .catch((data, status, headers, config) => {
-            this.$log.warn(data, status, headers(), config);
+            this.$log.warn(data, status, headers, config);
           });
 
       }, 5 * 60 * 1000);
@@ -65,7 +65,7 @@
           console.log('first call - number of quotes: ' + this.quotes.data.length);
         }) //based on format
         .catch((data, status, headers, config) => {
-          this.$log.warn(data, status, headers(), config);
+          this.$log.warn(data, status, headers, config);
         });
 
     }
