@@ -68,62 +68,28 @@
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Change : </small></small>
+              <small><small>Change% : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ quote.chg_sign + (quote.per )">
-                <!-- | movesize : [1,2,3] -->
-              {{quote.ptsC1 | currency}}({{quote.per| number:1}}%)
-            </div>
-
-          </div>
-
-          <div class="row gutter-1">
-            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Bid : </small></small>
-            </div>
-            <div class="col-md-3 col-xs-3 col-sm-3">
-              {{quote.bid | currency}}
-            </div>
-
-            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Ask : </small></small>
-            </div>
-            <div class="col-md-3 col-xs-3 col-sm-3">
-              {{quote.ask | currency}}
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (quote.per | moveSize : [2,5,7])">
+                <!-- | movesize : [2,5,7] -->
+              {{quote.per| number:1 }}%
             </div>
 
           </div>
 
           <div class="row gutter-1">
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Open : </small></small>
+              <small><small>30D Chg : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3">
-              {{quote.open | currency}}
-            </div>
-
-            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Prev Close : </small></small>
-            </div>
-            <div class="col-md-3 col-xs-3 col-sm-3">
-              {{quote.cl | currency}}   <!-- Close not available <--></-->
-            </div>
-
-          </div>
-
-          <div class="row gutter-1">
-            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>High : </small></small>
-            </div>
-            <div class="col-md-3 col-xs-3 col-sm-3">
-              {{quote.high | currency}}
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (quote.mPC | moveSize : [5,7,10])">
+              {{quote.mPC | number:1}}%
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Low : </small></small>
+              <small><small>52W Chg : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3">
-              {{quote.low | currency}}
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (quote.yPC | moveSize : [7,10,15])">
+              {{quote.yPC | number:1}}%
             </div>
 
           </div>
@@ -133,14 +99,48 @@
               <small><small>52 Wk High : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{quote.wkhi | currency}}
+              {{1 * quote.wkhi.replace(',','') | currency}}
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>52 Wk Low : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{quote.wklo | currency}}
+              {{1 * quote.wklo.replace(',','') | currency}}
+            </div>
+
+          </div>
+
+          <div class="row gutter-1">
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Open : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{1 * quote.open.replace(',','') | currency}}
+            </div>
+
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Change : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{quote.ptsC | currency}}   <!-- Close not available <--></-->
+            </div>
+
+          </div>
+
+          <div class="row gutter-1">
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>High : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{1 * quote.high.replace(',','') | currency}}
+            </div>
+
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+              <small><small>Low : </small></small>
+            </div>
+            <div class="col-md-3 col-xs-3 col-sm-3">
+              {{1 * quote.low.replace(',','') | currency}}
             </div>
 
           </div>
