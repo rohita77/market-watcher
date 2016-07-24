@@ -5,10 +5,13 @@ function moveSizeFilter() {
     let move = Number(input);
     let sz = ((move >= 0) ? 'u' : 'd') + '-';
     let i = 0;
+    let sortedThresholds = thresholds.sort((a,b)=>a-b);
 
-    for (i = 0; i < thresholds.length; i++) {
+    move = Math.abs(move);
 
-      if (Math.abs(move) <= thresholds[i]) {
+    for (i = 0; i < sortedThresholds.length; i++) {
+
+      if (move <= sortedThresholds[i]) {
         return sz += 'x';
       }
       else {
