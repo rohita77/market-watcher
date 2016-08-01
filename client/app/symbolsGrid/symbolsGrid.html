@@ -3,8 +3,8 @@
 <div class="container-fluid">
   <!--  <img ng-src="{{event.imageUrl}}" alt="{{event.name}}"> -->
 
-  <h4>Quotes Grid
-      <small><small>as on {{ symbolsGridCtrl.quotes.time | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.quotes.refreshtime | date : 'HH:mm:ss' : '+0800'}} SGT </small></small>
+  <h4>Quotes Grid ({{ symbolsGridCtrl.watchlist.name }})
+      <small><small>as on {{ symbolsGridCtrl.quoteTime | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.refreshTime | date : 'HH:mm:ss' : '+0800'}} SGT </small></small>
   </h4>
 
  <uib-accordion>
@@ -19,7 +19,7 @@
         <label for="sortBy"> Sort By : </label>
         <select name="sortBy" id="sortBy" ng-model="symbolsGridCtrl.sortorder" class="form-control">
             <option value="symbol" selected>Symbol</option>
-            <option value="-per">Change</option>
+            <option value="-quote.per">Change</option>
           </select>
       </div>
       <div class="form-group">
@@ -37,7 +37,7 @@
 
       <div class="form-group">
         <label for="symbName"> Name :</label>
-        <input id="symbName" name="symbName" class="form-control" type="text" required ng-pattern="/^[a-zA-Z0-9]*$/" ng-model="symbolsGridCtrl.query.symbol"
+        <input id="symbName" name="symbName" class="form-control" type="text" required ng-pattern="/^[a-zA-Z0-9]*$/" ng-model="symbolsGridCtrl.query.key"
           placeholder="filter by name" />
 
       </div>
@@ -50,12 +50,12 @@
     <!--TD// new row after every four -->
     <!-- correctly reduce padding
       <!--Use a filter to identify selected instead of manipulating the model -->
-    <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="quote in symbolsGridCtrl.quotes.data | orderBy:symbolsGridCtrl.sortorder | limitTo:50 | filter:symbolsGridCtrl.query">
-      <div class="panel panel-rounded panel-default" ng-class="{'panel-primary' : (quote.symbol == symbolsGridCtrl.selectedSymbolName)}" ng-click="symbolsGridCtrl.toggleSelectedSymbol(quote)">
+    <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.sortorder | limitTo:50 | filter:symbolsGridCtrl.query">
+      <div class="panel panel-rounded panel-default" ng-class="{'panel-primary' : (symbol.symbol == symbolsGridCtrl.selectedSymbol)}" ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)">
 
         <div class="panel-heading panel-heading-rounded">
-          <h5 class="panel-title"><strong> {{quote.symbol | uppercase}} </strong> </h5>
-          <small><small>{{quote.name | limitTo:60}}</small></small>
+          <h5 class="panel-title"><strong> {{symbol.symbol | uppercase}} </strong> </h5>
+          <small><small>{{symbol.name | limitTo:60}}</small></small>
         </div>
         <div class="panel-body">
           <div class="row gutter-1">
@@ -64,15 +64,15 @@
               <small><small>Last Price : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{ 1 * quote.ltP.replace(',','') | currency}}   <!-- TD: Convert to filter -->
+              {{ 1 * symbol.quote.ltP.replace(',','') | currency}}   <!-- TD: Convert to filter -->
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>Change% : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (quote.per | moveSize : [2,5,7])">
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.per | moveSize : [2,5,7])">
                 <!-- | movesize : [2,5,7] -->
-              {{quote.per| number:1 }}%
+              {{symbol.quote.per| number:1 }}%
             </div>
 
           </div>
@@ -81,15 +81,15 @@
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>30D Chg : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (quote.mPC | moveSize : [5,7,10])">
-              {{quote.mPC | number:1}}%
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.mPC | moveSize : [5,7,10])">
+              {{symbol.quote.mPC | number:1}}%
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>52W Chg : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (quote.yPC | moveSize : [7,10,15])">
-              {{quote.yPC | number:1}}%
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.yPC | moveSize : [7,10,15])">
+              {{symbol.quote.yPC | number:1}}%
             </div>
 
           </div>
@@ -99,14 +99,14 @@
               <small><small>52 Wk High : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{1 * quote.wkhi.replace(',','') | currency}}
+              {{1 * symbol.quote.wkhi.replace(',','') | currency}}
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>52 Wk Low : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{1 * quote.wklo.replace(',','') | currency}}
+              {{1 * symbol.quote.wklo.replace(',','') | currency}}
             </div>
 
           </div>
@@ -116,14 +116,14 @@
               <small><small>Open : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{1 * quote.open.replace(',','') | currency}}
+              {{1 * symbol.quote.open.replace(',','') | currency}}
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>Change : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{quote.ptsC | currency}}   <!-- Close not available <--></-->
+              {{symbol.quote.ptsC | currency}}   <!-- Close not available <--></-->
             </div>
 
           </div>
@@ -133,14 +133,14 @@
               <small><small>High : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{1 * quote.high.replace(',','') | currency}}
+              {{1 * symbol.quote.high.replace(',','') | currency}}
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>Low : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{1 * quote.low.replace(',','') | currency}}
+              {{1 * symbol.quote.low.replace(',','') | currency}}
             </div>
 
           </div>
@@ -154,7 +154,7 @@
 </div>
 
 <ul class="thumbnails">
-  <li ng-repeat="quote in symbolsGridCtrl.quotes.data | orderBy:symbolsGridCtrl.sortorder | limitTo:20 | filter:symbolsGridCtrl.query" ng-show="quote.symbol == symbolsGridCtrl.selectedSymbolName">
+  <li ng-repeat="quote in symbolsGridCtrl.quotes.data | orderBy:symbolsGridCtrl.sortorder | limitTo:20 | filter:symbolsGridCtrl.query" ng-show="symbol.quote.symbol == symbolsGridCtrl.selectedSymbolName">
 
     <div class="row session">
       <div class="span0 well votingWidget">
@@ -170,8 +170,8 @@
       </div>
 
       <div class="well span12">
-        <h4 class="well-title">{{quote.symbol}}</h4>
-        <h6 style="margin-top:-10px">{{quote.name}}</h6>
+        <h4 class="well-title">{{symbol.quote.symbol}}</h4>
+        <h6 style="margin-top:-10px">{{symbol.quote.name}}</h6>
         <span>Duration: {{session.duration}}</span><br />
         <span>Level: {{session.level}}</span>
 
