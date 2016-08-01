@@ -90,17 +90,17 @@ function getSymbolsInWatchList(name, cb) {
     watchlist.symbols.forEach((elem) => {
       elem.name = elem['Company Name'];
       delete elem['Company Name'];
-      elem.symbol = elem['Symbol'];
-      delete elem['Symbol'];
-      elem.industry = elem['Industry'];
-      delete elem['Industry'];
+      elem.symbol = elem.Symbol;
+      delete elem.Symbol;
+      elem.industry = elem.Industry;
+      delete elem.Industry;
       elem.id = elem['ISIN Code'];
       delete elem['ISIN Code'];
 
     });
 
     cb(watchlist);    //CB called from another CB?
-    console.log('Found INFY:' + jsonArray.find((symbol) => { return symbol['name'].match('\^Inf') })['symbol']);
+    console.log('Found LT:' + jsonArray.find(symbol => { return symbol.symbol.match('\^LT$') }).symbol);
   });
   request.get(options).on('response', () => { }).pipe(converter);
   return watchlist;
@@ -117,10 +117,10 @@ export function index(req, res) {
 // Gets a single Watchlist from the DB
 export function show(req, res) {
 
-if (req.params.id == 'Nifty50') {
+if (req.params.id === 'Nifty50') {
 
     getSymbolsInWatchList('Nifty50', (watchlist) => {
-      console.log(watchlist); //here is your result json object
+      //console.log(watchlist); //here is your result json object
       res.status(200).json(watchlist);
     });
 
