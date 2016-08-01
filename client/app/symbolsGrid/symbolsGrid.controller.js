@@ -3,7 +3,7 @@
 (function () {
 
   class SymbolsGridComponent {
-    constructor($log, $interval, $resource) {
+    constructor($log, $interval, $resource,$sce) {
       this.$resource = $resource;
       this.$interval = $interval;
       this.$log = $log;
@@ -32,7 +32,6 @@
               symbol.key.name = symbol.name;
             */
             symbol.key = symbol.symbol + ':' + symbol.name;
-            console.log(symbol);
             //no match?
           });
 

@@ -19,7 +19,12 @@
         <label for="sortBy"> Sort By : </label>
         <select name="sortBy" id="sortBy" ng-model="symbolsGridCtrl.sortorder" class="form-control">
             <option value="symbol" selected>Symbol</option>
-            <option value="-quote.per">Change</option>
+            <option value="-quote.per*1.0">Change(Desc)</option>
+            <option value="quote.per*1.0">Change(Asc)</option>
+            <option value="-quote.mPC*1.0">30D Change(Desc)</option>
+            <option value="quote.mPC*1.0">30D Change(Asc)</option>
+            <option value="-quote.yPC*1.0">52W Change(Desc)</option>
+            <option value="quote.yPC*1.0">52W Change(Asc)</option>
           </select>
       </div>
       <div class="form-group">
@@ -39,7 +44,7 @@
         <label for="symbName"> Name :</label>
         <input id="symbName" name="symbName" class="form-control" type="text" required ng-pattern="/^[a-zA-Z0-9]*$/" ng-model="symbolsGridCtrl.query.key"
           placeholder="filter by name" />
-
+       <!-- <br> key : <div ng-bind-html="$sce.trustAsHtml(symbolsGridCtrl.query.key)"> </div> -->
       </div>
     </form>
   </uib-accordion-group>
