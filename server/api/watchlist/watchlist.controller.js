@@ -59,12 +59,9 @@ function handleError(res, statusCode) {
   };
 }
 
-function getSymbolsInWatchList(name, cb) {
+function getSymbolsInWatchList(name) {
   //NSEAdapter.getSymbolsInIndex('Nifty50') --> {symbol,name,id,id, type}
-  var watchlist = {};
-  watchlist.name = name;
-  watchlist.active = true;
-  watchlist.description = 'Some Index';
+
 
   var request = require('request');
 
@@ -81,29 +78,37 @@ function getSymbolsInWatchList(name, cb) {
 
   //Converter Class
   var Converter = require("csvtojson").Converter;
-
   var converter = new Converter({ constructResult: true }); //for small csv data
 
   //end_parsed will be emitted once parsing finished
-  converter.on("end_parsed", function (jsonArray) {
-    watchlist.symbols = jsonArray;
-    watchlist.symbols.forEach((elem) => {
-      elem.name = elem['Company Name'];
-      delete elem['Company Name'];
-      elem.symbol = elem.Symbol;
-      delete elem.Symbol;
-      elem.industry = elem.Industry;
-      delete elem.Industry;
-      elem.id = elem['ISIN Code'];
-      delete elem['ISIN Code'];
+  var symbolsPromise = new Promise((resolve, reject) => {
 
+    converter.on("end_parsed", function (jsonArray) {
+      jsonArray;
+
+      jsonArray.forEach(elem => {
+        elem.name = elem['Company Name'];
+        delete elem['Company Name'];
+        elem.symbol = elem.Symbol;
+        delete elem.Symbol;
+        elem.industry = elem.Industry;
+        delete elem.Industry;
+        elem.id = elem['ISIN Code'];
+        delete elem['ISIN Code'];
+
+      });
+
+      resolve(jsonArray);    //CB called from another CB?
+      console.log('Found LT:' + jsonArray.find(symbol => { return symbol.symbol.match('\^LT$') }).symbol);
     });
 
-    cb(watchlist);    //CB called from another CB?
-    console.log('Found LT:' + jsonArray.find(symbol => { return symbol.symbol.match('\^LT$') }).symbol);
+    request.get(options).pipe(converter);
+
+
   });
-  request.get(options).on('response', () => { }).pipe(converter);
-  return watchlist;
+
+
+  return symbolsPromise;
 }
 
 
@@ -117,15 +122,19 @@ export function index(req, res) {
 // Gets a single Watchlist from the DB
 export function show(req, res) {
 
-if (req.params.id === 'Nifty50') {
+  //TD: Remove when symbols are stored in DB
+  if (req.params.id === 'Nifty50') {
 
-    getSymbolsInWatchList('Nifty50', (watchlist) => {
-      //console.log(watchlist); //here is your result json object
-      res.status(200).json(watchlist);
-    });
+    var watchlist = {};
+    watchlist.name = 'Nifty50';
+    watchlist.active = true;
+    watchlist.description = 'Some Index';
 
-    //   return res.status(200).json(getSymbolsInWatchList('Nifty50'));
-
+    getSymbolsInWatchList('Nifty50')
+      .then(symbols => {
+        watchlist.symbols = symbols;
+        res.status(200).json(watchlist);
+      });
   }
   else {
     return Watchlist.findById(req.params.id).exec()
