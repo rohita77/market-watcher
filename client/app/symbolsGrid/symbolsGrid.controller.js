@@ -4,12 +4,10 @@
 
   class SymbolsGridComponent {
     constructor($log, $interval, $resource) {
-      this.message = 'Hello';
       this.$resource = $resource;
       this.$interval = $interval;
       this.$log = $log;
       this.filterIsCollapsed = true;
-
 
       this.betaFilterOptions = [
         { 'value': undefined, 'label': 'All' },
@@ -19,34 +17,42 @@
       ];
 
       this.sortorder = 'symbol';
-      this.refreshQuoteData();
 
-      //      let refreshQuoteDataPromise = this.$interval (this.refreshQuoteData, 1000);
+      //GetSymbols
+      var watchlistData = this.$resource('/api/watchlists/Nifty50');
+      watchlistData.get().$promise
+        .then((data) => {
+          this.watchlist = data;
+          console.log('watchlist: ' + data.name + ' has ' + data.symbols.length + ' symbols');
 
-      let refreshQuoteDataPromise = this.$interval(() => {
-        let quoteData = this.$resource('/api/quotes/niftyStockWatch');
-
-        /*cross domain error
-        let quoteData = self.$resource('https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/niftyStockWatch.json');
-        */
-
-        //TD: Refreshing only Data and not Symbols?
-        quoteData.get().$promise
-          .then((data) => {
-            this.quotes = data;
-            console.log('number of quotes:  ' + this.quotes.data.length);
-          }) //based on format
-          .catch((data, status, headers, config) => {
-            this.$log.warn(data, status, headers, config);
+          this.watchlist.symbols.forEach(symbol => {
+            /*
+              symbol.key = {};
+              symbol.key.symbol = symbol.symbol;
+              symbol.key.name = symbol.name;
+            */
+            symbol.key = symbol.symbol + ':' + symbol.name;
+            console.log(symbol);
+            //no match?
           });
 
-      }, 5 * 60 * 1000);
+          this.refreshQuoteData();
+
+          //      let refreshQuoteDataPromise = this.$interval (this.refreshQuoteData, 1000);
+
+          let refreshQuoteDataPromise = this.$interval(this.refreshQuoteData.bind(this), 5 * 60 * 1000);
+
+
+        }) //based on format
+        .catch((data, status, headers, config) => {
+          this.$log.warn(data, status, headers, config);
+        });
 
 
     }
 
-    toggleSelectedSymbol(quote) {
-      this.selectedSymbolName = quote.symbol;
+    toggleSelectedSymbol(symbol) {
+      this.selectedSymbol = symbol;
     }
 
 
@@ -56,13 +62,28 @@
 
     refreshQuoteData() {
       //not working
-      let quoteData = this.$resource('/api/quotes/niftyStockWatch');
+      let quoteData = this.$resource('/api/quotes'); //niftyStockWatch
 
       //TD: Refreshing only Data and not Symbols?
       quoteData.get().$promise
         .then((data) => {
-          this.quotes = data;
-          console.log('first call - number of quotes: ' + this.quotes.data.length);
+          //      this.quotes = data;
+          this.quoteTime = data.time;
+          this.refreshTime = data.refreshtime;
+          console.log('first call - number of quotes: ' + data.length);
+
+          //       if (this.watchlist == undefined)  {
+          //         this.watchlist = this.watchlistInit;
+          //       }
+
+          this.watchlist.symbols.forEach(symbol => {
+            symbol.quote = data.data.find(quote => {
+              return quote.symbol.match(
+                new RegExp('^' + symbol.symbol + '$'));
+            });
+            //no match?
+          });
+
         }) //based on format
         .catch((data, status, headers, config) => {
           this.$log.warn(data, status, headers, config);
