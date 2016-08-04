@@ -1,23 +1,21 @@
-
-
 <div class="container-fluid">
   <!--  <img ng-src="{{event.imageUrl}}" alt="{{event.name}}"> -->
 
-  <h4>Quotes Grid ({{ symbolsGridCtrl.watchlist.name }})
-      <small><small>as on {{ symbolsGridCtrl.quoteTime | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.refreshTime | date : 'HH:mm:ss' : '+0800'}} SGT </small></small>
+  <h4>{{ symbolsGridCtrl.watchlist.name }} Grid
+    <small><small>as on {{ symbolsGridCtrl.quoteTime | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.refreshTime | date : 'HH:mm:ss' : '+0800'}} SGT </small></small>
   </h4>
 
- <uib-accordion>
-  <uib-accordion-group>
-    <uib-accordion-heading>
-      <button type="button" class="btn btn-info" aria-label="Left Align">
+  <uib-accordion>
+    <uib-accordion-group>
+      <uib-accordion-heading>
+        <button type="button" class="btn btn-info" aria-label="Left Align">
             <span class="glyphicon glyphicon-filter" aria-hidden="true"></span> Filter
           </button>
-    </uib-accordion-heading>
-    <form class="form-inline">
-      <div class="form-group">
-        <label for="sortBy"> Sort By : </label>
-        <select name="sortBy" id="sortBy" ng-model="symbolsGridCtrl.sortBy" class="form-control">
+      </uib-accordion-heading>
+      <form class="form-inline">
+        <div class="form-group">
+          <label for="sortBy"> Sort By : </label>
+          <select name="sortBy" id="sortBy" ng-model="symbolsGridCtrl.sortBy" class="form-control">
             <option value="symbol" selected>Symbol</option>
 <!--
             <option value="-quote.per*1.0">Change(Desc)</option>
@@ -34,10 +32,10 @@
 
 
           </select>
-      </div>
-      <div class="form-group">
-        <label for="beta"> Beta :</label>
-        <select name="beta" id="beta" ng-model="symbolsGridCtrl.query.level" class="form-control" ng-options="o.value as o.label for o in symbolsGridCtrl.betaFilterOptions">
+        </div>
+        <div class="form-group">
+          <label for="beta"> Beta :</label>
+          <select name="beta" id="beta" ng-model="symbolsGridCtrl.query.level" class="form-control" ng-options="o.value as o.label for o in symbolsGridCtrl.betaFilterOptions">
             <!--
          <option selected="true" value="{}">All</option>
           <option value="0.5" >less than 0.5</option>
@@ -46,29 +44,57 @@
         -->
           </select>
 
-      </div>
-      <div class="form-group">
-        <label for="symbName"> Name :</label>
-        <input id="symbName" name="symbName" class="form-control" type="text" required ng-pattern="/^[a-zA-Z0-9]*$/" ng-model="symbolsGridCtrl.query.key"
-          placeholder="filter by name" />
-       <!-- <br> key : <div ng-bind-html="$sce.trustAsHtml(symbolsGridCtrl.query.key)"> </div> -->
-      </div>
-    </form>
-  </uib-accordion-group>
-</uib-accordion>
-  <!-- Gutter3 = reduced padding -->
-  <div class="row gutter-3">
-
-    <!--TD// new row after every four -->
-    <!-- correctly reduce padding
-      <!--Use a filter to identify selected instead of manipulating the model -->
-    <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder | limitTo:50 | filter:symbolsGridCtrl.query">
-      <div class="panel panel-rounded panel-default" ng-class="{'panel-primary' : (symbol.symbol == symbolsGridCtrl.selectedSymbol)}" ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)">
-
-        <div class="panel-heading panel-heading-rounded">
-          <h5 class="panel-title"><strong> {{symbol.symbol | uppercase}} </strong> </h5>
-          <small><small>{{symbol.name | limitTo:60}}</small></small>
         </div>
+        <div class="form-group">
+          <label for="symbName"> Name :</label>
+          <input id="symbName" name="symbName" class="form-control" type="text" required ng-pattern="/^[a-zA-Z0-9]*$/" ng-model="symbolsGridCtrl.query.key"
+            placeholder="filter by name" />
+          <!-- <br> key : <div ng-bind-html="$sce.trustAsHtml(symbolsGridCtrl.query.key)"> </div> -->
+        </div>
+      </form>
+    </uib-accordion-group>
+  </uib-accordion>
+  <!-- Gutter3 = reduced padding -->
+  <uib-accordion close-others="true">
+    <div class="row gutter-3">
+
+      <!--TD// new row after every four -->
+      <!-- correctly reduce padding
+      <!--Use a filter to identify selected instead of manipulating the model -->
+      <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder | limitTo:50 | filter:symbolsGridCtrl.query">
+
+        <uib-accordion-group class="{{'panel panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-info' : 'panel-default') }}"
+          ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)">
+
+        <uib-accordion-heading class="panel-heading panel-heading-rounded">
+          <div class="row gutter-2">
+            <div class="col-md-4 col-xs-4 col-sm-4">
+              <h5 class="panel-title">
+                <strong> {{symbol.symbol | uppercase}} </strong>
+              </h5>
+            </div>
+            <div class="col-md-4 col-xs-4 col-sm-4 pull-right">
+              <small ng-if="symbol.quote">
+                    {{ 1 * symbol.quote.ltP.replace(',','') | currency}}
+                    <!-- TD: Convert to filter -->
+                    <span ng-class="'quote-pchg-'+ (symbol.quote.per | moveSize : [2,5,7])">
+                      <!-- | movesize : [2,5,7] -->
+                      {{symbol.quote.per| number:1 }}%
+                </ng-if>
+
+              </small>
+
+            </div>
+
+          </div>
+
+          <div class="row gutter-2">
+            <div class="col-md-12 col-xs-12 col-sm-12">
+              <small><small>{{symbol.name | limitTo:60}}</small></small>
+            </div>
+          </div>
+        </uib-accordion-heading>
+
         <div class="panel-body">
           <div class="row gutter-1">
             <!-- Not working on small devices -->
@@ -82,7 +108,7 @@
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>Change% : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.per | moveSize : [2,5,7])">
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.per|| 0 | moveSize : [2,5,7])">
                 <!-- | movesize : [2,5,7] -->
               {{symbol.quote.per| number:1 }}%
             </div>
@@ -93,14 +119,14 @@
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>30D Chg : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.mPC | moveSize : [5,7,10])">
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.mPC || 0 | moveSize : [5,7,10])">
               {{symbol.quote.mPC | number:1}}%
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>52W Chg : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.yPC | moveSize : [7,10,15])">
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.yPC || 0 | moveSize : [7,10,15])">
               {{symbol.quote.yPC | number:1}}%
             </div>
 
@@ -158,11 +184,13 @@
           </div>
         </div>
 
+        </uib-accordion-group>
+
       </div>
+
+
     </div>
-
-
-  </div>
+  </uib-accordion>
 </div>
 <!--
 <ul class="thumbnails">

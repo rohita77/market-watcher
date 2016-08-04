@@ -35,7 +35,7 @@
             //no match?
           });
 
-          this.refreshQuoteData();
+          this.refreshQuoteData(true);
 
           //      let refreshQuoteDataPromise = this.$interval (this.refreshQuoteData, 1000);
 
@@ -59,7 +59,7 @@
       this.filterIsCollapsed = true;
     }
 
-    refreshQuoteData() {
+    refreshQuoteData(isFirstCall) {
       //not working
       let quoteData = this.$resource('/api/quotes'); //niftyStockWatch
 
@@ -69,7 +69,9 @@
           //      this.quotes = data;
           this.quoteTime = data.time;
           this.refreshTime = data.refreshtime;
-          console.log('first call - number of quotes: ' + data.length);
+
+          if (isFirstCall)
+            console.log('first quotes reresh: number of quotes: ' + data.data.length);
 
           //Start error for sort/match
           //       if (this.watchlist == undefined)  {
@@ -93,7 +95,7 @@
 
         if(this.sortBy.match('^quote.')) {
 
-          //string in dotNotation to object reference
+          //convert string in dotNotation to object reference
           let sortOrder = this.sortBy.split('.').reduce((o,i)=>o[i], symbol);
 
           return -1.0 * Math.abs(sortOrder);
