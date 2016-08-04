@@ -3,7 +3,7 @@
 (function () {
 
   class SymbolsGridComponent {
-    constructor($log, $interval, $resource,$sce) {
+    constructor($log, $interval, $resource, $sce) {
       this.$resource = $resource;
       this.$interval = $interval;
       this.$log = $log;
@@ -16,7 +16,7 @@
         { 'value': 1.5, 'label': 'greater than 1.5' },
       ];
 
-      this.sortorder = 'symbol';
+      this.sortBy = 'symbol';
 
       //GetSymbols
       var watchlistData = this.$resource('/api/watchlists/Nifty50');
@@ -71,6 +71,7 @@
           this.refreshTime = data.refreshtime;
           console.log('first call - number of quotes: ' + data.length);
 
+          //Start error for sort/match
           //       if (this.watchlist == undefined)  {
           //         this.watchlist = this.watchlistInit;
           //       }
@@ -88,7 +89,25 @@
           this.$log.warn(data, status, headers, config);
         });
 
+      this.getSortOrder = (symbol) => {
+
+        if(this.sortBy.match('^quote.')) {
+
+          //string in dotNotation to object reference
+          let sortOrder = this.sortBy.split('.').reduce((o,i)=>o[i], symbol);
+
+          return -1.0 * Math.abs(sortOrder);
+        }
+        else {
+          return symbol[this.sortBy];
+        }
+      //  return -1.0 * Math.abs(symbol.quote['per']);
+      };
+
+
+
     }
+
 
   }
 

@@ -17,14 +17,22 @@
     <form class="form-inline">
       <div class="form-group">
         <label for="sortBy"> Sort By : </label>
-        <select name="sortBy" id="sortBy" ng-model="symbolsGridCtrl.sortorder" class="form-control">
+        <select name="sortBy" id="sortBy" ng-model="symbolsGridCtrl.sortBy" class="form-control">
             <option value="symbol" selected>Symbol</option>
+<!--
             <option value="-quote.per*1.0">Change(Desc)</option>
             <option value="quote.per*1.0">Change(Asc)</option>
             <option value="-quote.mPC*1.0">30D Change(Desc)</option>
             <option value="quote.mPC*1.0">30D Change(Asc)</option>
             <option value="-quote.yPC*1.0">52W Change(Desc)</option>
             <option value="quote.yPC*1.0">52W Change(Asc)</option>
+-->
+
+            <option value="quote.per">Change(+/-)</option>
+            <option value="quote.mPC">30D Change(+/-)</option>
+            <option value="quote.yPC">52W Change(+/-)</option>
+
+
           </select>
       </div>
       <div class="form-group">
@@ -39,7 +47,6 @@
           </select>
 
       </div>
-
       <div class="form-group">
         <label for="symbName"> Name :</label>
         <input id="symbName" name="symbName" class="form-control" type="text" required ng-pattern="/^[a-zA-Z0-9]*$/" ng-model="symbolsGridCtrl.query.key"
@@ -55,7 +62,7 @@
     <!--TD// new row after every four -->
     <!-- correctly reduce padding
       <!--Use a filter to identify selected instead of manipulating the model -->
-    <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.sortorder | limitTo:50 | filter:symbolsGridCtrl.query">
+    <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder | limitTo:50 | filter:symbolsGridCtrl.query">
       <div class="panel panel-rounded panel-default" ng-class="{'panel-primary' : (symbol.symbol == symbolsGridCtrl.selectedSymbol)}" ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)">
 
         <div class="panel-heading panel-heading-rounded">
@@ -157,9 +164,9 @@
 
   </div>
 </div>
-
+<!--
 <ul class="thumbnails">
-  <li ng-repeat="quote in symbolsGridCtrl.quotes.data | orderBy:symbolsGridCtrl.sortorder | limitTo:20 | filter:symbolsGridCtrl.query" ng-show="symbol.quote.symbol == symbolsGridCtrl.selectedSymbolName">
+  <li ng-repeat="quote in symbolsGridCtrl.quotes.data | orderBy:symbolsGridCtrl.sortOrder | limitTo:20 | filter:symbolsGridCtrl.query" ng-show="symbol.quote.symbol == symbolsGridCtrl.selectedSymbolName">
 
     <div class="row session">
       <div class="span0 well votingWidget">
@@ -186,3 +193,4 @@
 
   </li>
 </ul>
+-->
