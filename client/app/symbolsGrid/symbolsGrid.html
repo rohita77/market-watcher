@@ -63,10 +63,10 @@
       <!--Use a filter to identify selected instead of manipulating the model -->
       <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder | limitTo:50 | filter:symbolsGridCtrl.query">
 
-        <uib-accordion-group class="{{'panel panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-info' : 'panel-default') }}"
+        <uib-accordion-group class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-info' : 'panel-default') }}"
           ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)">
 
-        <uib-accordion-heading class="panel-heading panel-heading-rounded">
+        <uib-accordion-heading>
           <div class="row gutter-2">
             <div class="col-md-4 col-xs-4 col-sm-4">
               <h5 class="panel-title">
@@ -74,18 +74,13 @@
               </h5>
             </div>
             <div class="col-md-4 col-xs-4 col-sm-4 pull-right">
-              <small ng-if="symbol.quote">
-                    {{ 1 * symbol.quote.ltP.replace(',','') | currency}}
-                    <!-- TD: Convert to filter -->
+              <small ng-if="symbol.quote" >
+                    {{ 1 * symbol.quote.ltP.replace(',','') | currency}} |
                     <span ng-class="'quote-pchg-'+ (symbol.quote.per | moveSize : [2,5,7])">
-                      <!-- | movesize : [2,5,7] -->
                       {{symbol.quote.per| number:1 }}%
-                </ng-if>
-
+                    </span>
               </small>
-
             </div>
-
           </div>
 
           <div class="row gutter-2">
@@ -95,7 +90,7 @@
           </div>
         </uib-accordion-heading>
 
-        <div class="panel-body">
+        <div>
           <div class="row gutter-1">
             <!-- Not working on small devices -->
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
