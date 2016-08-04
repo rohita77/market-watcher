@@ -70,8 +70,9 @@
           this.quoteTime = data.time;
           this.refreshTime = data.refreshtime;
 
-          if (isFirstCall)
+          if (isFirstCall) {
             console.log('first quotes reresh: number of quotes: ' + data.data.length);
+          }
 
           //Start error for sort/match
           //       if (this.watchlist == undefined)  {
