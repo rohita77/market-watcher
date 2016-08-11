@@ -16,7 +16,7 @@
         { 'value': 1.5, 'label': 'greater than 1.5' },
       ];
 
-      this.sortBy = 'symbol';
+      this.sortBy = 'quote.per';
 
       //GetSymbols
       var watchlistData = this.$resource('/api/watchlists/Nifty50');
