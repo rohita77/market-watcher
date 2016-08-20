@@ -13,7 +13,7 @@ class NavbarController {
 
     $scope.navClose = () => {
       this.isCollapsed = true;
-    }
+    };
 
   }
 
