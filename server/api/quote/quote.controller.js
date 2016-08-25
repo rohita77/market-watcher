@@ -13,6 +13,8 @@ import _ from 'lodash';
 import Quote from './quote.model';
 import stub from './quote.stub';
 
+import request from 'request-json';
+
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
   return function (entity) {
@@ -63,17 +65,29 @@ function handleError(res, statusCode) {
 // Gets a list of Quotes
 export function index(req, res) {
 
+  var client = request.createClient('https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/');
+
+  client.get('niftyStockWatch.json', (error, response, body) => {
+    if (!error && response.statusCode === 200) {
+      body.time = new Date(body.time + ' GMT+0530');
+      body.refreshtime = new Date();
+      console.log('Number of Quotes: ' + body.data.length + " as of " + body.time.toLocaleTimeString("en-US", {timeZone:"Asia/Calcutta", timeZoneName:"short"})  + " retrieved at "  + body.refreshtime.toLocaleTimeString("en-US", {timeZone:"Asia/Singapore", timeZoneName:"short"}) );
+      return res.json(body);
+    }
+/*
   return Quote.find().exec()
     .then(respondWithResult(res))
     .catch(handleError(res));
+*/
+
+});
+
 }
 
 // Gets a single Quote from the DB
 export function show(req, res) {
 
   //  return res.sendFile(__dirname + '/' + req.params.id + '.stub.json');
-
-  var request = require('request-json');
   var client = request.createClient('https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/');
 
   client.get('niftyStockWatch.json', (error, response, body) => {
