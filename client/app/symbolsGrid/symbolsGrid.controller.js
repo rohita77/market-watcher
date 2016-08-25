@@ -8,6 +8,7 @@
       this.$interval = $interval;
       this.$log = $log;
       this.filterIsCollapsed = true;
+      this.sortBy = 'symbol';
 
       this.betaFilterOptions = [
         { 'value': undefined, 'label': 'All' },
@@ -15,8 +16,6 @@
         { 'value': 1, 'label': 'between 0.5 and 1.5' },
         { 'value': 1.5, 'label': 'greater than 1.5' },
       ];
-
-      this.sortBy = 'quote.per';
 
       //GetSymbols
       var watchlistData = this.$resource('/api/watchlists/Nifty50');
@@ -71,6 +70,7 @@
           this.refreshTime = data.refreshtime;
 
           if (isFirstCall) {
+            this.sortBy = 'quote.per';
             console.log('first quotes reresh: number of quotes: ' + data.data.length);
           }
 
