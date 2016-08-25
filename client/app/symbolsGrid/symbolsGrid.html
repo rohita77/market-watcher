@@ -73,13 +73,17 @@
                 <strong> {{symbol.symbol | uppercase}} </strong>
               </h5>
             </div>
-            <div class="col-md-4 col-xs-4 col-sm-4 pull-right">
-              <small ng-if="symbol.quote" >
-                    {{ 1 * symbol.quote.ltP.replace(',','') | currency}} |
+            <div class="col-md-8 col-xs-8 col-sm-8 pull-right">
+               <div class="btn-group btn-group-xs pull-right" ng-if="symbol.quote">
+
+                <label class="btn btn-default disabled"> {{ 1 * symbol.quote.ltP.replace(',','') | currency}}</label>
+                <label class="btn btn-default disabled">
                     <span ng-class="'quote-pchg-'+ (symbol.quote.per | moveSize : [2,5,7])">
                       {{symbol.quote.per| number:1 }}%
                     </span>
-              </small>
+                </label>
+                <label class="btn btn-warning disabled"><span class="badge"><small>E4</small></span></label>
+              </div>
             </div>
           </div>
 
@@ -114,14 +118,14 @@
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>30D Chg : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.mPC || 0 | moveSize : [5,7,10])">
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.mPC || 0 | moveSize : [5,9,15])">
               {{symbol.quote.mPC | number:1}}%
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>52W Chg : </small></small>
             </div>
-            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.yPC || 0 | moveSize : [7,10,15])">
+            <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.yPC || 0 | moveSize : [10,15,20])">
               {{symbol.quote.yPC | number:1}}%
             </div>
 

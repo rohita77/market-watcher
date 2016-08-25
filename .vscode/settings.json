@@ -1,0 +1,16 @@
+// Place your settings in this file to overwrite default and user settings.
+{"files.autoSave": "off",
+"files.autoSaveDelay": 1000,
+"files.trimTrailingWhitespace": true,
+"editor.wrappingColumn": 120,
+"editor.renderWhitespace": true,
+
+    "files.exclude": {
+        "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/.DS_Store": true,
+        "**.tmp/":true
+    }
+
+}
