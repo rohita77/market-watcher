@@ -5,6 +5,41 @@
     <small><small>as on {{ symbolsGridCtrl.quoteTime | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.refreshTime | date : 'HH:mm:ss' : '+0800'}} SGT </small></small>
   </h4>
 
+
+    <!-- Split button -->
+    <div class="btn-group" uib-dropdown>
+      <button id="split-button" type="button" class="btn btn-info">Sort</button>
+      <button type="button" class="btn btn-info" uib-dropdown-toggle>
+        <span class="glyphicon glyphicon-sort" aria-hidden="true"></span>
+        <span class="sr-only">Sort</span>
+      </button>
+      <ul class="dropdown-menu" uib-dropdown-menu role="menu" aria-labelledby="split-button">
+         <!-- <li class="dropdown-header">Dropdown header</li> -->
+
+
+        <li role="menuitem"><a ng-click="symbolsGridCtrl.setSortBy('symbol')" href="">
+          <span class="glyphicon" ng-class="(symbolsGridCtrl.getReverse('symbol'))?'glyphicon-sort-by-alphabet-alt':'glyphicon-sort-by-alphabet'"></span> Symbol %
+        </a></li>
+
+        <li role="menuitem"><a ng-click="symbolsGridCtrl.setSortBy('quote.per')" href="">
+          <span class="glyphicon" ng-class="(symbolsGridCtrl.getReverse('quote.per'))?'glyphicon-sort-by-attributes':'glyphicon-sort-by-attributes-alt'"></span> Daily %
+        </a></li>
+
+        <li role="menuitem"><a ng-click="symbolsGridCtrl.setSortBy('quote.mPC')" href="">
+          <span class="glyphicon" ng-class="(symbolsGridCtrl.getReverse('quote.mPC'))?'glyphicon-sort-by-attributes':'glyphicon-sort-by-attributes-alt'"></span> Monthly %
+        </a></li>
+
+        <li role="menuitem"><a ng-click="symbolsGridCtrl.setSortBy('quote.yPC')" href="">
+          <span class="glyphicon" ng-class="(symbolsGridCtrl.getReverse('quote.yPC'))?'glyphicon-sort-by-attributes':'glyphicon-sort-by-attributes-alt'"></span> Yearly %
+        </a></li>
+
+
+        <li class="divider"></li>
+        <li role="menuitem"><a href="#">Separated link</a></li>
+      </ul>
+    </div><br>
+
+
   <uib-accordion>
     <uib-accordion-group>
       <uib-accordion-heading>
@@ -13,26 +48,7 @@
           </button>
       </uib-accordion-heading>
       <form class="form-inline">
-        <div class="form-group">
-          <label for="sortBy"> Sort By : </label>
-          <select name="sortBy" id="sortBy" ng-model="symbolsGridCtrl.sortBy" class="form-control">
-            <option value="symbol" selected>Symbol</option>
-<!--
-            <option value="-quote.per*1.0">Change(Desc)</option>
-            <option value="quote.per*1.0">Change(Asc)</option>
-            <option value="-quote.mPC*1.0">30D Change(Desc)</option>
-            <option value="quote.mPC*1.0">30D Change(Asc)</option>
-            <option value="-quote.yPC*1.0">52W Change(Desc)</option>
-            <option value="quote.yPC*1.0">52W Change(Asc)</option>
--->
 
-            <option value="quote.per">Change(+/-)</option>
-            <option value="quote.mPC">30D Change(+/-)</option>
-            <option value="quote.yPC">52W Change(+/-)</option>
-
-
-          </select>
-        </div>
         <div class="form-group">
           <label for="beta"> Beta :</label>
           <select name="beta" id="beta" ng-model="symbolsGridCtrl.query.level" class="form-control" ng-options="o.value as o.label for o in symbolsGridCtrl.betaFilterOptions">
@@ -54,6 +70,9 @@
       </form>
     </uib-accordion-group>
   </uib-accordion>
+
+
+
   <!-- Gutter3 = reduced padding -->
   <uib-accordion close-others="true">
     <div class="row gutter-3">
@@ -61,7 +80,7 @@
       <!--TD// new row after every four -->
       <!-- correctly reduce padding
       <!--Use a filter to identify selected instead of manipulating the model -->
-      <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder | limitTo:50 | filter:symbolsGridCtrl.query">
+      <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:50 | filter:symbolsGridCtrl.query">
 
         <uib-accordion-group class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-info' : 'panel-default') }}"
           ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)">

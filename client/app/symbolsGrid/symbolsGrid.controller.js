@@ -2,6 +2,7 @@
 
 (function () {
 
+
   class SymbolsGridComponent {
     constructor($log, $interval, $resource, $sce) {
       this.$resource = $resource;
@@ -9,6 +10,7 @@
       this.$log = $log;
       this.filterIsCollapsed = true;
       this.sortBy = 'symbol';
+      this.sortReverse = false;
 
       this.betaFilterOptions = [
         { 'value': undefined, 'label': 'All' },
@@ -71,6 +73,7 @@
 
           if (isFirstCall) {
             this.sortBy = 'quote.per';
+            this.sortReverse = false;
             console.log('first quotes reresh: number of quotes: ' + data.data.length);
           }
 
@@ -94,20 +97,28 @@
 
       this.getSortOrder = (symbol) => {
 
-        if(this.sortBy.match('^quote.')) {
+        if (this.sortBy.match('^quote.')) {
 
           //convert string in dotNotation to object reference
-          let sortOrder = this.sortBy.split('.').reduce((o,i)=>o[i], symbol);
+          let sortOrder = this.sortBy.split('.').reduce((o, i) => o[i], symbol);
 
           return -1.0 * Math.abs(sortOrder);
         }
         else {
           return symbol[this.sortBy];
         }
-      //  return -1.0 * Math.abs(symbol.quote['per']);
+        //  return -1.0 * Math.abs(symbol.quote['per']);
       };
 
+      this.setSortBy = (sortBy) => {
+        this.sortReverse = (this.sortBy == sortBy) ? !this.sortReverse : false;
+        this.sortBy = sortBy;
 
+      };
+
+      this.getReverse = (sortBy) => {
+        return (this.sortBy == sortBy) ? !this.sortReverse : false;
+      };
 
     }
 
