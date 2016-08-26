@@ -111,13 +111,13 @@
       };
 
       this.setSortBy = (sortBy) => {
-        this.sortReverse = (this.sortBy == sortBy) ? !this.sortReverse : false;
+        this.sortReverse = (this.sortBy === sortBy) ? !this.sortReverse : false;
         this.sortBy = sortBy;
 
       };
 
       this.getReverse = (sortBy) => {
-        return (this.sortBy == sortBy) ? !this.sortReverse : false;
+        return (this.sortBy === sortBy) ? !this.sortReverse : false;
       };
 
     }
