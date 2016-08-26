@@ -2,7 +2,11 @@
   <!--  <img ng-src="{{event.imageUrl}}" alt="{{event.name}}"> -->
 
   <h4>{{ symbolsGridCtrl.watchlist.name }} Grid
+    <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate" ng-show="!symbolsGridCtrl.quoteTime"></span>
+    <span ng-show="symbolsGridCtrl.quoteTime">
     <small><small>as on {{ symbolsGridCtrl.quoteTime | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.refreshTime | date : 'HH:mm:ss' : '+0800'}} SGT </small></small>
+
+    </span>
   </h4>
 
 

@@ -56,3 +56,9 @@
 .quote-pchg-d-x {
     color: palevioletred
 }
+
+.glyphicon-refresh-animate {
+    -animation: fa-spin .7s infinite linear;
+    -webkit-animation: fa-spin .7s infinite linear;
+}
+
