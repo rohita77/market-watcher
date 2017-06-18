@@ -67,7 +67,7 @@ export function index(req, res) {
 
   var client = request.createClient('https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/');
 
-  client.get('niftyStockWatch.json', (error, response, body) => {
+  client.get('foSecStockWatch.json', (error, response, body) => {
     if (!error && response.statusCode === 200) {
       body.time = new Date(body.time + ' GMT+0530');
       body.refreshtime = new Date();

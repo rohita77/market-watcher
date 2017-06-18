@@ -66,7 +66,7 @@ function getSymbolsInWatchList(name) {
   var request = require('request');
 
   var options = {
-    url: 'https://www.nseindia.com/content/indices/ind_nifty50list.csv',
+    url: 'https://www.nseindia.com/content/indices/ind_nifty200list.csv',
     headers: {
       'Host': 'www.nseindia.com',
       'Upgrade-Insecure-Requests': 1,
