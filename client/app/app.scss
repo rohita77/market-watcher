@@ -21,6 +21,15 @@ $fa-font-path: "../bower_components/font-awesome/fonts";
   padding: 0.2em 0;
 }
 
+
+table, th, td {
+    border: 0px solid black;
+    padding: 0px;
+}
+table {
+    border-spacing: 0px;
+}
+
 // Component styles are injected through grunt
 /* inject:scss */
 @import 'admin/admin';
@@ -28,4 +37,5 @@ $fa-font-path: "../bower_components/font-awesome/fonts";
 @import 'symbolsGrid/symbolsGrid';
 @import '../components/footer/footer';
 @import '../components/modal/modal';
+@import '../components/quickQuote/quickQuote';
 /* endinject */
