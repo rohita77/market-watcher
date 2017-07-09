@@ -15,7 +15,7 @@ var WatchlistSchema = new mongoose.Schema({
         symbol : String,
         name  : String,
         industry : String,
-        id  : String
+        _id  : String
   }
   ]
 });

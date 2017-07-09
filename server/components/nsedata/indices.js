@@ -20,7 +20,7 @@ export function getSymbolsInWatchList(watchlist) {
   var Converter = require("csvtojson").Converter;
   var converter = new Converter({ constructResult: true }); //for small csv data
 
-  console.log("Getting Symbols for Watchlist: " + JSON.stringify(watchlist.name) + ' from ' + options.url);
+  console.log("Downloading Symbols for Watchlist: " + JSON.stringify(watchlist.name) + ' from ' + options.url);
 
   var symbolsPromise = new Promise((resolve, reject) => {
 
@@ -33,7 +33,7 @@ export function getSymbolsInWatchList(watchlist) {
             name: elem['Company Name']
             , symbol: elem.Symbol
             , industry: elem.Industry
-            , id: elem['ISIN Code']
+            , _id: elem['ISIN Code']
           }
         })
 

@@ -71,7 +71,7 @@ export function index(req, res) {
 // Gets a single Watchlist from the DB
 export function show(req, res) {
 
-  console.log("Watchlist Param is" + req.params.id);
+  console.log(`Watchlist Param is ${req.params.id}`);
   return Watchlist.findById(req.params.id).exec()
     .then(handleEntityNotFound(res))
     .then(respondWithResult(res))
