@@ -7,7 +7,7 @@ import csvtojson from 'csvtojson';
 export function getSymbolsInIndex(downloadKey) {
     let url = 'https://www.nseindia.com/content/indices/ind_' + downloadKey + '.csv';
 
-    const indexCsvMapper = (elem) => ({
+    const indexCsvMapper = elem => ({
             name: elem['Company Name']
             , symbol: elem.Symbol
             , industry: elem.Industry
@@ -16,6 +16,18 @@ export function getSymbolsInIndex(downloadKey) {
 
 
     return getSmallCsv(url, indexCsvMapper);
+}
+
+export function getBoardMeetings(downloadKey) {
+    let url = 'https://nseindia.com/corporates/datafiles/BM_' + downloadKey + '.csv';
+
+    const bmCsvMapper = elem => ({
+             symbol: elem.Symbol
+            , purpose: elem.Purpose
+            , boardMeetingDate: elem.BoardMeetingDate
+        });
+
+    return getSmallCsv(url, bmCsvMapper);
 }
 
 function getSmallCsv(url, csvMapper) {

@@ -11,7 +11,7 @@
 
 import _ from 'lodash';
 import Watchlist from './watchlist.model';
-import indices from '../../components/nsedata/indices';
+import indices from '../../components/nsedata/downloads';
 
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
