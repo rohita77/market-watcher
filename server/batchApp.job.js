@@ -12,12 +12,14 @@ if (env === 'development' || env === 'test') {
 //exports = module.exports = require('./app');
 
 import mongoose from 'mongoose';
+mongoose.plugin(require('./components/lastMod'));
+
 mongoose.Promise = require('bluebird');
- var config = require('./config/environment');
+var config = require('./config/environment');
 
 // Connect to MongoDB
 mongoose.connect(config.mongo.uri, config.mongo.options);
-mongoose.connection.on('error', function(err) {
+mongoose.connection.on('error', function (err) {
   console.error('MongoDB connection error: ' + err);
   process.exit(-1);
 });
@@ -37,6 +39,8 @@ mongoose.connection.on('error', function(err) {
 // Refresh: not successful/empty or not modified
 
 //Refresh Watch List
-require('./api/watchlist/watchlist.job');
-// process.exit(0);
+var watchlistJob = require('./api/watchlist/watchlist.job');
+watchlistJob.run()
+ .then(() => process.exit(0));
+
 //Update Symbols with new watchlist
