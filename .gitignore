@@ -11,3 +11,4 @@ coverage
 **/typings/globals/
 *.log
 *.pass
+*.pass.
