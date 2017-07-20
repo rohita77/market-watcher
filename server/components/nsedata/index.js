@@ -8,11 +8,11 @@ export function getSymbolsInIndex(downloadKey) {
     let url = 'https://www.nseindia.com/content/indices/ind_' + downloadKey + '.csv';
 
     const indexCsvMapper = elem => ({
-            name: elem['Company Name']
-            , symbol: elem.Symbol
-            , industry: elem.Industry
-            , _id: elem['ISIN Code']
-        });
+        name: elem['Company Name']
+        , symbol: elem.Symbol
+        , industry: elem.Industry
+        , _id: elem['ISIN Code']
+    });
 
 
     return getSmallCsv(url, indexCsvMapper);
@@ -22,9 +22,9 @@ export function getBoardMeetings(downloadKey) {
     let url = 'https://nseindia.com/corporates/datafiles/BM_' + downloadKey + '.csv';
 
     const bmCsvMapper = elem => ({
-             symbol: elem.Symbol
+            symbol: elem.Symbol
             , purpose: elem.Purpose
-            , boardMeetingDate: elem.BoardMeetingDate
+            , boardMeetingDate: new Date(elem.BoardMeetingDate + ' GMT+0530')
         });
 
     return getSmallCsv(url, bmCsvMapper);
