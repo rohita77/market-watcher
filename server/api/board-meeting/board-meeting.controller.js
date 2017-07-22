@@ -84,9 +84,12 @@ export function index(req, res) {
 
   if (req.query.watchlists)
     query.watchlists = req.query.watchlists;
+  else
+    query.watchlists = 'NIFTY200'; //Change to part of valid watch list $size > 0 or Regex [*]
 
 
-  let project = { _id: 0, __v: 0, watchlists: 0 };
+
+  let project = { _id: 0, __v: 0};
   let sort = { boardMeetingDate: 1 };
 
   return BoardMeeting.find(query, project).sort(sort).exec()
