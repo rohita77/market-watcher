@@ -13,7 +13,7 @@
 
     let tgtDateString = tgtDate.toLocaleDateString('en-US');
 
-    let eventsData = $resource(`/api/board-meetings/?tgtDate=${tgtDateString}&watchlists=NIFTY200`);
+    let eventsData = $resource(`/api/board-meetings/?tgtDate=${tgtDateString}`);
 
       eventsData.get().$promise
         .then((data) => {

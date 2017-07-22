@@ -29,17 +29,22 @@
       <!--Use a filter to identify selected instead of manipulating the model -->
         <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="event in eventsCtrl.events | orderBy: 'boardMeetingDate' | limitTo:20 ">
 
-            <div class="col-md-4 col-xs-4 col-sm-4">
+            <div class="col-md-3 col-xs-3 col-sm-3">
                     <strong> {{event.symbol | uppercase}} </strong>
             </div>
 
-            <div class="col-md-4 col-xs-4 col-sm-4">
+            <div class="col-md-3 col-xs-3 col-sm-3">
                 <strong> {{event.boardMeetingDate | date : 'dd-MMM': '+0530' }} </strong>
             </div>
 
-            <div class="col-md-4 col-xs-4 col-sm-4">
+            <div class="col-md-3 col-xs-3 col-sm-3">
                 <small><small>{{event.purpose | limitTo:60}}</small></small>
             </div>
+
+            <div class="col-md-3 col-xs-3 col-sm-3">
+                <small><small>{{event.watchlists.toString() | limitTo:60}}</small></small>
+            </div>
+
 
         </div>
 
