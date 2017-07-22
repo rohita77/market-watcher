@@ -33,6 +33,7 @@ table {
 // Component styles are injected through grunt
 /* inject:scss */
 @import 'admin/admin';
+@import 'events/events';
 @import 'main/main';
 @import 'symbolsGrid/symbolsGrid';
 @import '../components/footer/footer';

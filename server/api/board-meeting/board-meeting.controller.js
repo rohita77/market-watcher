@@ -17,7 +17,7 @@ function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
   return function (entity) {
     if (entity) {
-      return res.status(statusCode).json(entity);
+      return res.status(statusCode).json({data : entity});
     }
     return null;
   };
@@ -66,20 +66,30 @@ function handleError(res, statusCode) {
 
 // Gets a list of BoardMeetings
 export function index(req, res) {
-  return BoardMeeting.find().sort({ boardMeetingDate: -1 }).exec()
-    .then(respondWithResult(res))
-    .catch(handleError(res));
-}
 
-// Gets a list of BoardMeetings for tomorrow
-export function forTomorrow(req, res) {
+  let query = {};
 
-  let tgtDate = new Date();
-  tgtDate.setDate(tgtDate.getDate() + 1);
-  let query = { boardMeetingDate: { $lte: tgtDate }};
+  if (req.query.tgtDate) {
+
+    let tgtDateString = req.query.tgtDate;
+    let tgtDateIST = new Date(tgtDateString + ' GMT+0530');
+    if (tgtDateIST.getDay > 4)
+      tgtDateIST.setDate(tgtDateIST.getDate() + 3); //Next Tuesday
+    else
+      tgtDateIST.setDate(tgtDateIST.getDate() + 1); //Tomorrow
+
+    query.boardMeetingDate = { $lte: tgtDateIST };
+
+  }
+
+  if (req.query.watchlists)
+    query.watchlists = req.query.watchlists;
+
+
+  let project = { _id: 0, __v: 0, watchlists: 0 };
   let sort = { boardMeetingDate: 1 };
 
-  return BoardMeeting.find(query).sort(sort).exec()
+  return BoardMeeting.find(query, project).sort(sort).exec()
     .then(respondWithResult(res))
     .catch(handleError(res));
 }

@@ -1,0 +1,49 @@
+<div class="container-fluid">
+    <!--  <img ng-src="{{event.imageUrl}}" alt="{{event.name}}"> -->
+
+    <h4>
+        <!-- Simple dropdown -->
+        <span uib-dropdown on-toggle="toggled(open)">
+      <a href id="simple-dropdown" uib-dropdown-toggle>
+        {{ symbolsGridCtrl.watchlist.name }}
+      </a>
+      <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
+        <li ng-repeat="choice in items">
+          <a href>{{choice}}</a>
+        </li>
+      </ul>
+    </span> Events
+
+    </span>
+    </h4>
+
+
+
+
+
+    <!-- Gutter3 = reduced padding -->
+    <div class="row gutter-2">
+
+        <!--TD// new row after every four -->
+        <!-- correctly reduce padding
+      <!--Use a filter to identify selected instead of manipulating the model -->
+        <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="event in eventsCtrl.events | orderBy: 'boardMeetingDate' | limitTo:20 ">
+
+            <div class="col-md-4 col-xs-4 col-sm-4">
+                    <strong> {{event.symbol | uppercase}} </strong>
+            </div>
+
+            <div class="col-md-4 col-xs-4 col-sm-4">
+                <strong> {{event.boardMeetingDate | date : 'dd-MMM': '+0530' }} </strong>
+            </div>
+
+            <div class="col-md-4 col-xs-4 col-sm-4">
+                <small><small>{{event.purpose | limitTo:60}}</small></small>
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>

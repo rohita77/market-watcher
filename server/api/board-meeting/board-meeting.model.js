@@ -1,12 +1,13 @@
 'use strict';
 
 import mongoose from 'mongoose';
-import {registerEvents} from './board-meeting.events';
+import { registerEvents } from './board-meeting.events';
 
 var BoardMeetingSchema = new mongoose.Schema({
-    symbol: String,
-    boardMeetingDate: Date,
-    purpose: String,
+  symbol: String,
+  boardMeetingDate: Date,
+  purpose: String,
+  watchlists: [String]
 });
 
 registerEvents(BoardMeetingSchema);
