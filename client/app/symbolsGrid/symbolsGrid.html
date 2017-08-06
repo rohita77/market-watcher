@@ -148,8 +148,9 @@
                       {{symbol.quote.per| number:1 }}%
                     </span>
                 </label>
+                <!--             //TD: Move to Directive -->
                   <label class="btn btn-warning disabled"  ng-if="symbol.nextEarnings">
-                    <span class="badge"><small>E4</small></span>
+                    <span class="badge"><small>E{{symbol.daysToEarnings}}</small></span>
                   </label>
                 </div>
               </div>

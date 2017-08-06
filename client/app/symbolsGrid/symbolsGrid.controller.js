@@ -40,6 +40,9 @@
 
             symbol.key = symbol.symbol + ':' + symbol.name;
 
+            //TD: Move to Directive
+            symbol.daysToEarnings = Math.ceil((new Date(symbol.nextEarnings) - new Date())/(1000 * 3600 * 24));
+
             //To fix sorting issue when quotes are missing
             //no match?
           });
