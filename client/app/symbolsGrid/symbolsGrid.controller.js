@@ -12,6 +12,7 @@
       this.sortBy = 'symbol';
       this.sortReverse = false;
 
+      //TD: Not used
       this.betaFilterOptions = [
         { 'value': undefined, 'label': 'All' },
         { 'value': 0.5, 'label': 'less than 0.5' },
@@ -19,20 +20,27 @@
         { 'value': 1.5, 'label': 'greater than 1.5' },
       ];
 
+      //var watchlistsData = this.$resource('/api/watchlists');
+
       //GetSymbols
-      var watchlistData = this.$resource('/api/watchlists/Nifty50');
-      watchlistData.get().$promise
+      let watchlistData = this.$resource('/api/watchlists/NIFTY100');
+
+      let symbolsData = this.$resource('/api/symbols/?watchlists=NIFTY100');
+
+      symbolsData.get().$promise
         .then((data) => {
-          this.watchlist = data;
-          console.log('watchlist: ' + data.name + ' has ' + data.symbols.length + ' symbols');
+          this.watchlist = {
+            name: 'NIFTY100',
+            symbols: data.data
+          };
+
+          console.log(`watchlist: ${this.watchlist.name} has ${this.watchlist.symbols.length} symbols`);
 
           this.watchlist.symbols.forEach(symbol => {
-            /*
-              symbol.key = {};
-              symbol.key.symbol = symbol.symbol;
-              symbol.key.name = symbol.name;
-            */
+
             symbol.key = symbol.symbol + ':' + symbol.name;
+
+            //To fix sorting issue when quotes are missing
             //no match?
           });
 
@@ -88,6 +96,29 @@
                 new RegExp('^' + symbol.symbol + '$'));
             });
             //no match?
+            if (symbol.quote === undefined) {
+              symbol.quote = {
+                'symbol': '',
+                'open': '0',
+                'high': '0',
+                'low': '0',
+                'ltP': '0',
+                'ptsC': '0',
+                'per': '0',
+                'trdVol': '0',
+                'trdVolM': '0',
+                'ntP': '0',
+                'mVal': '0',
+                'wkhi': '0',
+                'wklo': '0',
+                'wkhicm_adj': '0',
+                'wklocm_adj': '0',
+                'xDt': '',
+                'cAct': '-',
+                'yPC': '0',
+                'mPC': '0'
+              };
+            }
           });
 
         }) //based on format
