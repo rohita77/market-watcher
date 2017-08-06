@@ -8,10 +8,10 @@ export function getSymbolsInIndex(downloadKey) {
     let url = 'https://www.nseindia.com/content/indices/ind_' + downloadKey + '.csv';
 
     const indexCsvMapper = elem => ({
-        name: elem['Company Name']
-        , symbol: elem.Symbol
-        , industry: elem.Industry
-        , _id: elem['ISIN Code']
+        name: elem['Company Name'],
+        symbol: elem.Symbol,
+        industry: elem.Industry,
+        _id: elem['ISIN Code']
     });
 
 
@@ -22,10 +22,10 @@ export function getBoardMeetings(downloadKey) {
     let url = 'https://nseindia.com/corporates/datafiles/BM_' + downloadKey + '.csv';
 
     const bmCsvMapper = elem => ({
-            symbol: elem.Symbol
-            , purpose: elem.Purpose
-            , boardMeetingDate: new Date(elem.BoardMeetingDate + ' GMT+0530')
-        });
+        symbol: elem.Symbol,
+        purpose: elem.Purpose,
+        boardMeetingDate: new Date(elem.BoardMeetingDate + ' GMT+0530')
+    });
 
     return getSmallCsv(url, bmCsvMapper);
 }
@@ -51,8 +51,8 @@ function getSmallCsv(url, csvMapper) {
     return new Promise((resolve, reject) => {
 
         //end_parsed will be emitted once parsing finished
-        csvConverter.on("end_parsed"
-            , jsonArray => resolve(jsonArray.map(csvMapper))
+        csvConverter.on("end_parsed",
+         jsonArray => resolve(jsonArray.map(csvMapper))
             // console.log('Found LT:' + jsonArray.find(symbol => { return symbol.symbol.match('\^LT$') }).name);
         );
 

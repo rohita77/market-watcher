@@ -6,7 +6,6 @@ var controller = require('./board-meeting.controller');
 var router = express.Router();
 
 router.get('/', controller.index);
-router.get('/for-tomorrow', controller.forTomorrow);
 router.get('/:id', controller.show);
 router.post('/', controller.create);
 router.put('/:id', controller.upsert);
