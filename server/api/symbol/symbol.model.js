@@ -1,6 +1,7 @@
 'use strict';
 
 import mongoose from 'mongoose';
+import { registerEvents } from './symbol.events';
 
 var SymbolSchema = new mongoose.Schema({
   _id: String,
@@ -11,10 +12,11 @@ var SymbolSchema = new mongoose.Schema({
   watchlists: [String],
   nextEarnings: Date,
   forthComingBoardMeetings: [{
-    boardMeetingDate : Date,
-    purposes : [String]
+    boardMeetingDate: Date,
+    purposes: [String]
   }]
 
 });
 
+registerEvents(SymbolSchema);
 export default mongoose.model('Symbol', SymbolSchema);

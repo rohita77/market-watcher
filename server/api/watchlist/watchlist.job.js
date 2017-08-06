@@ -11,7 +11,7 @@ import Watchlist from './watchlist.model';
 
 //TD: Refactor and move to "models" or "new api"
 //import Model and save to Mongo
-import Symbol from './symbol.model';
+import Symbol from './../symbol/symbol.model';
 
 
 //TD: Refactor and move to "models" or "new api"
