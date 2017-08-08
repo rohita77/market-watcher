@@ -274,17 +274,17 @@
 
           <div class="row gutter-1">
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Vol(L) : </small></small>
+              <small><small>Prev Earnings : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{1 * symbol.quote.trdVol.replace(',','') | number:1}}
+              <small>{{symbol.previousEarnings | date : 'EEE,dd-MMM-yy' : '+0530'}}</small>
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>Next Earnings: </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              {{symbol.nextEarnings | date : 'dd-MMM-yy' : '+0530'}}
+              <small>{{symbol.nextEarnings | date : 'EEE,dd-MMM-yy' : '+0530'}}</small>
             </div>
 
           </div>

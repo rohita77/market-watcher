@@ -13,12 +13,12 @@ var limit = {};
 /* Next Earning Date */
 var tgtEarningDate = new Date();
 
-query.boardMeetingDate = {$gte : tgtEarningDate};
+query.boardMeetingDate = {$lte : tgtEarningDate};
 query.purpose = /^Results/;
-sort.boardMeetingDate = 1;
+sort.boardMeetingDate = -1;
 sort.purpose = 1;
 
-query.symbol = /^HINDAL/;
+query.symbol = /^YESBANK/;
 
 var  arrRes= db.boardmeetings.find(query).sort(sort).limit(1);
 print(JSON.stringify(arrRes.toArray()));

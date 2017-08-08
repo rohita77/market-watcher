@@ -10,6 +10,7 @@ var SymbolSchema = new mongoose.Schema({
   name: String,
   industry: String,
   watchlists: [String],
+  previousEarnings: Date,
   nextEarnings: Date,
   forthComingBoardMeetings: [{
     boardMeetingDate: Date,

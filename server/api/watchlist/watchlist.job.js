@@ -22,7 +22,7 @@ export function run() {
     console.log("Watch List Job Fired Time is :" + new Date);
     return refreshWatchlists()
         .then(() => console.log("Finished Refreshing Watchlists: " + new Date))
-        .then(() => refreshBoardMeetings())
+        .then(() => refreshAllBoardMeetings())
         .then(() => console.log("Finished Refreshing Board Meetings for symbols " + new Date))
         .then(() => updateSymbolsFromWatchlists())
         .then(() => console.log("Finished Updating Symbols for Watchlists: " + new Date))
@@ -111,7 +111,7 @@ function updateEachSymbolFromWatchlists(symbols) {
     )
 }
 
-function populateNextEarnings(symbolDoc) {
+function populateEarnings(sequence,symbolDoc) {
     /* Next Earning Date */
 
     let query = {};
@@ -119,21 +119,29 @@ function populateNextEarnings(symbolDoc) {
 
 
     let tgtEarningDate = new Date();
-    tgtEarningDate.setDate(tgtEarningDate.getDate() - 1); //TD: Timezone
+    tgtEarningDate.setDate(tgtEarningDate.getDate() - 1);
 
-    query.boardMeetingDate = { $gte: tgtEarningDate };
+    query.boardMeetingDate = { };
+
+    let op = (sequence === 'previousEarnings' )? '$lte' : '$gt';
+
+    query.boardMeetingDate[op] = tgtEarningDate;
     query.purpose = /^Results/;
-    sort.boardMeetingDate = 1;
-    sort.purpose = 1;
+
+    let sortOrder = (sequence === 'previousEarnings' )? -1 : 1;
+    sort.boardMeetingDate = sortOrder * 1; // Latest or Next
+    sort.purpose = 1; // Alway 'Results' before 'Results*'
 
     query.symbol = symbolDoc.symbol;
 
     return boardMeeting.find(query).sort(sort).limit(1).exec()
         .then(bM => {
-            symbolDoc.nextEarnings = bM[0] ? bM[0].boardMeetingDate : null;
+            symbolDoc[sequence] = bM[0] ? bM[0].boardMeetingDate : null;
             return symbolDoc;
         });
 }
+
+
 
 function updateSymbol(symbolDoc) {
 
@@ -141,8 +149,10 @@ function updateSymbol(symbolDoc) {
         .exec()
         //If symbol does not exist in DB, create Symbol Model from symbol in watchlist
         .then(rSymbol => rSymbol ? rSymbol : new Symbol(symbolDoc))
+        //Update previous Earnings Date
+        .then(pSymbol => populateEarnings('previousEarnings',pSymbol))
         //Update next Earnings Date
-        .then(eSymbol => populateNextEarnings(eSymbol))
+        .then(nSymbol => populateEarnings('nextEarnings',nSymbol))
         //Update new/existing symbol model using symbol from watchlist
         .then(mSymbol => {
             return _.merge(mSymbol, symbolDoc)
@@ -161,18 +171,34 @@ function updateBoardMeetingsWithWatchlist(symbolDoc) {
 
 }
 //TD:
-function refreshBoardMeetings() {
-    return boardMeeting.remove({}).exec() //TD: Remove only Future
-        .then(() => downloads.getFCBoardMeetings())
+function refreshAllBoardMeetings() {
+    return Promise.all([
+        refreshBoardMeetingsFor('past'),
+        refreshBoardMeetingsFor('forthcoming')
+    ])
+}
+
+function refreshBoardMeetingsFor(timeframe) {
+
+    let tgtBoardMeetingDate = new Date();
+    tgtBoardMeetingDate.setDate(tgtBoardMeetingDate.getDate() - 1); //TD: Timezone
+
+    let query = {};
+    query.boardMeetingDate = {};
+
+    let op = (timeframe === 'past' )? '$lte' : '$gt';
+    let download = (timeframe === 'past' )? downloads.getBoardMeetingsForLast3Months : downloads.getFCBoardMeetings;
+
+    query.boardMeetingDate[op] = tgtBoardMeetingDate;
+
+    return boardMeeting.remove(query).exec()
+        .then(() => download())
         .then((bmArr) => {
-            console.log(`Retrieved ${bmArr.length} forthcoming meetings`)
-            console.log(`Inserting forthcoming meetings`);
+            console.log(`Retrieved ${bmArr.length} ${timeframe} meetings`)
             return boardMeeting.insertMany(bmArr);
         })
         .then((docs, e) => {
-            console.log(`Board meeting insert errors: ${e}`);
-            console.log(`Board meetings inserted: ${docs.length}`);
-
+            console.log(`Board meeting: ${docs.length} docs inserted with ${e} errors`);
         })
     //            .then(bmArr => reduceBoardMeetingsArr(bmArr))
     //            .then(bmArr => console.log(bmArr))
@@ -184,7 +210,9 @@ function refreshBoardMeetings() {
     */
 
 
+
 }
+
 
 //TD: Not used
 function reduceBoardMeetingsArr(bmArr) {
