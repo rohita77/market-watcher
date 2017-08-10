@@ -19,13 +19,13 @@ import Symbol from './../symbol/symbol.model';
 import boardMeeting from '../../api/board-meeting/board-meeting.model';
 
 export function run() {
-    console.log("Watch List Job Fired Time is :" + new Date);
+    console.log("Watch List Job Fired Time is :" + new Date());
     return refreshWatchlists()
-        .then(() => console.log("Finished Refreshing Watchlists: " + new Date))
+        .then(() => console.log("Finished Refreshing Watchlists: " + new Date()))
         .then(() => refreshAllBoardMeetings())
-        .then(() => console.log("Finished Refreshing Board Meetings for symbols " + new Date))
+        .then(() => console.log("Finished Refreshing Board Meetings for symbols " + new Date()))
         .then(() => updateSymbolsFromWatchlists())
-        .then(() => console.log("Finished Updating Symbols for Watchlists: " + new Date))
+        .then(() => console.log("Finished Updating Symbols for Watchlists: " + new Date()))
         .then(() => Symbol.find({}).count().exec().then((c) => {
             console.log(`After Job DB has ${JSON.stringify(c)} symbols`);
         }))
@@ -65,29 +65,28 @@ function refreshEachWatchlist(watchlists) {
 function updateSymbolsFromWatchlists() {
     //Transpose to get unique list of symbols and associated watchlists
     let pipleline = [
-        { $unwind: "$symbols" }
-        , {
+        { $unwind: "$symbols" },
+         {
             $group: {
-                '_id': "$symbols"
+                '_id': "$symbols",
 
-                , "watchlists": {
+                "watchlists": {
                     "$addToSet": "$_id"
                 }
             }
-        }
-        , {
+        },
+         {
             $project: {
-                "_id": 0
-                , "_id": "$_id._id"
-                , symbol: "$_id.symbol"
-                , name: "$_id.name"
-                , industry: "$_id.industry"
-                , market: "$_id.market"
-                , watchlists: 1
+                "_id": "$_id._id",
+                symbol: "$_id.symbol",
+                name: "$_id.name",
+                industry: "$_id.industry",
+                market: "$_id.market",
+                watchlists: 1
             }
         }];
 
-    console.log("Firing Symbol saves at " + new Date);
+    console.log("Firing Symbol saves at " + new Date());
     return Watchlist.aggregate(pipleline)
         //    .limit(2)
         .exec()
@@ -111,7 +110,7 @@ function updateEachSymbolFromWatchlists(symbols) {
     )
 }
 
-function populateEarnings(sequence,symbolDoc) {
+function populateEarnings(sequence, symbolDoc) {
     /* Next Earning Date */
 
     let query = {};
@@ -119,16 +118,16 @@ function populateEarnings(sequence,symbolDoc) {
 
 
     let tgtEarningDate = new Date();
-    tgtEarningDate.setDate(tgtEarningDate.getDate() - 1);
+    tgtEarningDate.setDate(tgtEarningDate.getDate() - 1); // Trime Date
 
-    query.boardMeetingDate = { };
+    query.boardMeetingDate = {};
 
-    let op = (sequence === 'previousEarnings' )? '$lte' : '$gt';
+    let op = (sequence === 'previousEarnings') ? '$lte' : '$gt';
 
     query.boardMeetingDate[op] = tgtEarningDate;
     query.purpose = /^Results/;
 
-    let sortOrder = (sequence === 'previousEarnings' )? -1 : 1;
+    let sortOrder = (sequence === 'previousEarnings') ? -1 : 1;
     sort.boardMeetingDate = sortOrder * 1; // Latest or Next
     sort.purpose = 1; // Alway 'Results' before 'Results*'
 
@@ -136,7 +135,7 @@ function populateEarnings(sequence,symbolDoc) {
 
     return boardMeeting.find(query).sort(sort).limit(1).exec()
         .then(bM => {
-            symbolDoc[sequence] = bM[0] ? bM[0].boardMeetingDate : null;
+            symbolDoc[sequence] = bM[0] ? bM[0].boardMeetingDate : symbolDoc[sequence]; //Retain Previous value if new one is not there
             return symbolDoc;
         });
 }
@@ -150,9 +149,24 @@ function updateSymbol(symbolDoc) {
         //If symbol does not exist in DB, create Symbol Model from symbol in watchlist
         .then(rSymbol => rSymbol ? rSymbol : new Symbol(symbolDoc))
         //Update previous Earnings Date
-        .then(pSymbol => populateEarnings('previousEarnings',pSymbol))
+        .then(pSymbol => populateEarnings('previousEarnings', pSymbol))
         //Update next Earnings Date
-        .then(nSymbol => populateEarnings('nextEarnings',nSymbol))
+        .then(nSymbol => populateEarnings('nextEarnings', nSymbol))
+
+        //project earnings
+        .then(oSymbol => {
+            //Earnings recently anounced
+            if (oSymbol.nextEarnings < new Date()) { // Trim to the date only and compare
+                oSymbol.previousEarnings = oSymbol.nextEarnings;
+                oSymbol.nextEarnings = null;
+            }
+
+            let ms = 90 * 24 * 60 * 60 * 1000; //90 Days or 3 quarters?
+            oSymbol.projectedEarnings = (oSymbol.nextEarnings === null) ? oSymbol.nextEarnings + 90 : null;
+
+            return oSymbol;
+
+        })
         //Update new/existing symbol model using symbol from watchlist
         .then(mSymbol => {
             return _.merge(mSymbol, symbolDoc)
@@ -166,7 +180,7 @@ function updateSymbol(symbolDoc) {
 function updateBoardMeetingsWithWatchlist(symbolDoc) {
     return boardMeeting.updateMany(
         { 'symbol': symbolDoc.symbol },
-        { 'watchlists': symbolDoc.watchlists },
+        { 'watchlists': symbolDoc.watchlists }
     ).exec()
 
 }
@@ -181,13 +195,13 @@ function refreshAllBoardMeetings() {
 function refreshBoardMeetingsFor(timeframe) {
 
     let tgtBoardMeetingDate = new Date();
-    tgtBoardMeetingDate.setDate(tgtBoardMeetingDate.getDate() - 1); //TD: Timezone
+    tgtBoardMeetingDate.setDate(tgtBoardMeetingDate.getDate() - 1); //TD: Timezone //TD:Trim Date?
 
     let query = {};
     query.boardMeetingDate = {};
 
-    let op = (timeframe === 'past' )? '$lte' : '$gt';
-    let download = (timeframe === 'past' )? downloads.getBoardMeetingsForLast3Months : downloads.getFCBoardMeetings;
+    let op = (timeframe === 'past') ? '$lte' : '$gt';
+    let download = (timeframe === 'past') ? downloads.getBoardMeetingsForLast3Months : downloads.getFCBoardMeetings;
 
     query.boardMeetingDate[op] = tgtBoardMeetingDate;
 
@@ -241,10 +255,7 @@ function reduceBoardMeetingsArr(bmArr) {
             facc.purpose.push(rCV.purpose);
 
         return acc;
-
-    }
-
-        , []);
+    }, []);
 }
 
 
