@@ -23,7 +23,7 @@
       //var watchlistsData = this.$resource('/api/watchlists');
 
       //GetSymbols
-      let watchlistData = this.$resource('/api/watchlists/NIFTY100');
+      //let watchlistData = this.$resource('/api/watchlists/NIFTY100');
 
       let symbolsData = this.$resource('/api/symbols/?watchlists=NIFTY100');
 
@@ -40,8 +40,11 @@
 
             symbol.key = symbol.symbol + ':' + symbol.name;
 
-            //TD: Move to Directive
-            symbol.daysToEarnings = Math.ceil((new Date(symbol.nextEarnings) - new Date())/(1000 * 3600 * 24));
+            //Move to Server and use moment
+            //symbol.daysToEarnings = moment(symbol.projectedEarnings).diff(moment(), 'days');
+            let MsInADay = 24 * 60 * 60 * 1000;
+            symbol.daysToEarnings = Math.ceil((new Date(symbol.projectedEarnings) - (new Date()))/MsInADay);
+             symbol.daysToEarnings = (symbol.daysToEarnings <=0 ) ? undefined : symbol.daysToEarnings;
 
             //To fix sorting issue when quotes are missing
             //no match?
