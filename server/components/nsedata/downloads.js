@@ -17,6 +17,6 @@ export function getFCBoardMeetings() {
 
 export function getBoardMeetingsForLast3Months() {
 
-  return NSEDataAdapter.getBoardMeetings('Last_12_Months'); //To deal with boundary value past earningg
+  return NSEDataAdapter.getBoardMeetings('Last_3_Months'); //12 Months? To deal with boundary value past earningg
 
 }
