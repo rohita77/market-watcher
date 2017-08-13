@@ -10,14 +10,14 @@ var SymbolSchema = new mongoose.Schema({
   name: String,
   industry: String,
   watchlists: [String],
-  previousEarnings: Date,
+  previousEarnings: {type: Date, default:null},
   nextEarnings: Date,
   projectedEarnings: Date,
   forthComingBoardMeetings: [{
     boardMeetingDate: Date,
     purposes: [String]
   }],
-  frontMonthlotSize: {type : Number, default : 0},
+  frontMonthLotSize: {type : Number, default : 0},
   frontMonthMarginPercent: {type : Number, default : 0.15},
   NTMCallROCPercent: {type : Number, default : 0.05},
   NTMPutROCPercent: {type : Number, default : 0.05},
