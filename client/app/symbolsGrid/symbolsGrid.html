@@ -148,12 +148,11 @@
                       {{symbol.quote.per| number:1 }}%
                     </span>
                 </label>
-                <!--             //TD: Move to Directive -->
-                  <label class="btn btn-warning disabled"  ng-show="symbol.daysToEarnings < 30">
+                  <!--             //TD: Move to Directive -->
+                  <label class="btn btn-warning disabled" ng-show="symbol.daysToEarnings < 30">
                     <span class="badge">
                       <small>
-                        E{{symbol.daysToEarnings}}
-                      <span ng-if="!symbol.nextEarnings">?</span>
+                        E{{symbol.daysToEarnings + ((!symbol.nextEarnings)?'?':null) }}
                       </small></span>
                   </label>
                 </div>
@@ -288,18 +287,18 @@
               <small><small>Next Earnings: </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              <small>
-                <span ng-if="symbol.nextEarnings">
-                  {{symbol.nextEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}
-                </span>
-                <span ng-if="!symbol.nextEarnings">
+              <span ng-if="symbol.nextEarnings">
+                <small>
+                    {{symbol.nextEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}
+                </small>
+              </span>
+              <span ng-if="!symbol.nextEarnings">
                   {{symbol.projectedEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}?
-                </span>
-              </small>
+              </span>
             </div>
 
           </div>
-<!--
+          <!--
          <div class="row gutter-1">
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>Projected Earnings: </small></small>
@@ -321,7 +320,7 @@
 -->
           <div class="row gutter-1">
 
-           <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
               <small><small>Lot Size : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
@@ -332,7 +331,7 @@
               <small><small>Margin: </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-             {{symbol.frontMonthMarginPercent * 100 | number : 1}}%
+              {{symbol.frontMonthMarginPercent * 100 | number : 1}}%
             </div>
 
           </div>
@@ -350,7 +349,7 @@
               <small><small>Put ROC: </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-             {{symbol.NTMPutROCPercent * 100 | number : 1}}%
+              {{symbol.NTMPutROCPercent * 100 | number : 1}}%
             </div>
 
           </div>
@@ -368,7 +367,7 @@
               <small><small>Put BE: </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-             {{symbol.putBreakEven | number : 1}}%
+              {{symbol.putBreakEven | number : 1}}%
             </div>
 
 
