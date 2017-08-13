@@ -4,6 +4,7 @@
 import _ from 'lodash';
 //import downloads from '../../components/nsedata/downloads'; //TD:
 var downloads = require('../../components/nsedata/downloads');
+var moment = require('moment');
 
 //import Model and save to Mongo
 import Watchlist from './watchlist.model';
@@ -66,7 +67,7 @@ function updateSymbolsFromWatchlists() {
     //Transpose to get unique list of symbols and associated watchlists
     let pipleline = [
         { $unwind: "$symbols" },
-         {
+        {
             $group: {
                 '_id': "$symbols",
 
@@ -75,7 +76,7 @@ function updateSymbolsFromWatchlists() {
                 }
             }
         },
-         {
+        {
             $project: {
                 "_id": "$_id._id",
                 symbol: "$_id.symbol",
@@ -116,13 +117,15 @@ function populateEarnings(sequence, symbolDoc) {
     let query = {};
     let sort = {};
 
+    //let tgtEarningDate = new Date();
+    //tgtEarningDate.setDate(tgtEarningDate.getDate() - 1); // Trime Date
 
-    let tgtEarningDate = new Date();
-    tgtEarningDate.setDate(tgtEarningDate.getDate() - 1); // Trime Date
+    let tgtEarningDate = moment().clone().startOf('day').toDate();
+    //console.log(`${sequence} for ${symbolDoc.symbol} from ${tgtEarningDate}`);
 
     query.boardMeetingDate = {};
 
-    let op = (sequence === 'previousEarnings') ? '$lte' : '$gt';
+    let op = (sequence === 'previousEarnings') ? '$lt' : '$gte';
 
     query.boardMeetingDate[op] = tgtEarningDate;
     query.purpose = /^Results/;
@@ -140,8 +143,6 @@ function populateEarnings(sequence, symbolDoc) {
         });
 }
 
-
-
 function updateSymbol(symbolDoc) {
 
     return Symbol.findById(symbolDoc._id)
@@ -156,13 +157,16 @@ function updateSymbol(symbolDoc) {
         //project earnings
         .then(oSymbol => {
             //Earnings recently anounced
-            if (oSymbol.nextEarnings < new Date()) { // Trim to the date only and compare
+            if (oSymbol.nextEarnings && (oSymbol.nextEarnings < new Date())) { // Trim to the date only and compare
                 oSymbol.previousEarnings = oSymbol.nextEarnings;
                 oSymbol.nextEarnings = null;
             }
 
-            let ms = 90 * 24 * 60 * 60 * 1000; //90 Days or 3 quarters?
-            oSymbol.projectedEarnings = (oSymbol.nextEarnings === null) ? oSymbol.nextEarnings + 90 : null;
+            let quarterFromPreviousEarnings = moment(oSymbol.previousEarnings).clone().add(1, 'quarters')
+
+            oSymbol.projectedEarnings = (oSymbol.nextEarnings === null) ? quarterFromPreviousEarnings.toDate() : oSymbol.nextEarnings;
+
+            //TD: check if weekday?
 
             return oSymbol;
 
@@ -194,13 +198,16 @@ function refreshAllBoardMeetings() {
 
 function refreshBoardMeetingsFor(timeframe) {
 
-    let tgtBoardMeetingDate = new Date();
-    tgtBoardMeetingDate.setDate(tgtBoardMeetingDate.getDate() - 1); //TD: Timezone //TD:Trim Date?
+    //let tgtBoardMeetingDate = new Date();
+    //tgtBoardMeetingDate.setDate(tgtBoardMeetingDate.getDate() - 1); //TD: Timezone //TD:Trim Date?
+
+    let tgtBoardMeetingDate = new Date(moment().clone().startOf('day'));
+    console.log(`${timeframe} meeting from ${tgtBoardMeetingDate}`);
 
     let query = {};
     query.boardMeetingDate = {};
 
-    let op = (timeframe === 'past') ? '$lte' : '$gt';
+    let op = (timeframe === 'past') ? '$lt' : '$gte';
     let download = (timeframe === 'past') ? downloads.getBoardMeetingsForLast3Months : downloads.getFCBoardMeetings;
 
     query.boardMeetingDate[op] = tgtBoardMeetingDate;
@@ -212,7 +219,7 @@ function refreshBoardMeetingsFor(timeframe) {
             return boardMeeting.insertMany(bmArr);
         })
         .then((docs, e) => {
-            console.log(`Board meeting: ${docs.length} docs inserted with ${e} errors`);
+            console.log(`Inserted ${docs.length} ${timeframe} meetings with ${e} errors`);
         })
     //            .then(bmArr => reduceBoardMeetingsArr(bmArr))
     //            .then(bmArr => console.log(bmArr))
