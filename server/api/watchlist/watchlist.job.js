@@ -4,34 +4,40 @@
 import _ from 'lodash';
 //import downloads from '../../components/nsedata/downloads'; //TD:
 var downloads = require('../../components/nsedata/downloads');
+var NSEDataAdapter = require('../../components/nsedata/index'); //TD Refactor
 var moment = require('moment');
 
 //import Model and save to Mongo
 import Watchlist from './watchlist.model';
-//import controller from './watchlist.controller';
 
-//TD: Refactor and move to "models" or "new api"
-//import Model and save to Mongo
 import Symbol from './../symbol/symbol.model';
 
-
-//TD: Refactor and move to "models" or "new api"
-//import Model and save to Mongo
 import boardMeeting from '../../api/board-meeting/board-meeting.model';
+
+import fnoMktLot from '../../components/nsedata/model/fno-mkt-lot.model';
 
 export function run() {
     console.log("Watch List Job Fired Time is :" + new Date());
     return refreshWatchlists()
-        .then(() => console.log("Finished Refreshing Watchlists: " + new Date()))
+        .then(() => log(`Finished Refreshing Watchlists`))
         .then(() => refreshAllBoardMeetings())
-        .then(() => console.log("Finished Refreshing Board Meetings for symbols " + new Date()))
+        .then(() => log(`Finished Refreshing Board Meetings for symbols`))
+        .then(() => refreshFnoLotSize())
+        .then(() => log(`Finished Refreshing FnO Lot Sizes`))
         .then(() => updateSymbolsFromWatchlists())
-        .then(() => console.log("Finished Updating Symbols for Watchlists: " + new Date()))
+        .then(() => log(`Finished Updating Symbols for Watchlists`))
         .then(() => Symbol.find({}).count().exec().then((c) => {
-            console.log(`After Job DB has ${JSON.stringify(c)} symbols`);
+            log(`After Job DB has ${JSON.stringify(c)} symbols`);
         }))
 }
 
+function now() {
+    return moment().format('HH:mm:ss Z');
+}
+
+function log(message) {
+    console.log(`${now()} ${message}`);
+}
 
 function refreshWatchlists() {
     //Iterate through 'watchlists' and get symbols
@@ -49,13 +55,13 @@ function refreshEachWatchlist(watchlists) {
             return downloads.getSymbolsInWatchList(watchlist)
                 //save the symbols in the watchlist once they are downloaded
                 .then(symbols => {
-                    console.log(`Fetched Watchlist ${watchlist.name} / ${watchlist.downloadKey} with ${symbols.length} symbols`);
+                    log(`Fetched Watchlist ${watchlist.name} / ${watchlist.downloadKey} with ${symbols.length} symbols`);
                     watchlist.symbols = symbols;
                     return watchlist.save();
                 })
                 //resolve the promise for the watchlist once its saved
                 .then((e, r) => {
-                    console.log(`Saved Watchlist ${watchlist.name} / ${watchlist.downloadKey} with ${e.symbols.length} symbols `);
+                    log(`Saved Watchlist ${watchlist.name} / ${watchlist.downloadKey} with ${e.symbols.length} symbols `);
                 });
 
         }));
@@ -87,7 +93,7 @@ function updateSymbolsFromWatchlists() {
             }
         }];
 
-    console.log("Firing Symbol saves at " + new Date());
+    log(`Firing Symbol saves`);
     return Watchlist.aggregate(pipleline)
         //    .limit(2)
         .exec()
@@ -121,7 +127,7 @@ function populateEarnings(sequence, symbolDoc) {
     //tgtEarningDate.setDate(tgtEarningDate.getDate() - 1); // Trime Date
 
     let tgtEarningDate = moment().clone().startOf('day').toDate();
-    //console.log(`${sequence} for ${symbolDoc.symbol} from ${tgtEarningDate}`);
+    //log(`${sequence} for ${symbolDoc.symbol} from ${tgtEarningDate}`);
 
     query.boardMeetingDate = {};
 
@@ -139,42 +145,77 @@ function populateEarnings(sequence, symbolDoc) {
     return boardMeeting.find(query).sort(sort).limit(1).exec()
         .then(bM => {
             symbolDoc[sequence] = bM[0] ? bM[0].boardMeetingDate : symbolDoc[sequence]; //Retain Previous value if new one is not there
+            if (symbolDoc.symbol === "HINDALCO")
+                log(`${sequence} for ${symbolDoc.symbol} is ${symbolDoc[sequence]}`);
             return symbolDoc;
         });
 }
+
+
+function populateFnoMktLot(symbolDoc) {
+    /* Next Earning Date */
+
+    let query = {};
+
+    query.symbol = symbolDoc.symbol;
+
+    return fnoMktLot.findOne(query).exec()
+        .then(fML => {
+            if (fML) {
+
+                let currentDate = moment().clone().utcOffset("+05:30")
+                let nextTradingDate = NSEDataAdapter.getNextTradingDate(currentDate)
+                let frontMonth = nextTradingDate.format("MMM-YY");
+
+                symbolDoc.frontMonthLotSize = fML.mktlot[frontMonth.toUpperCase()]; //TD: get Calendar Month for Front Month
+
+            }
+
+            if (symbolDoc.symbol === "HINDALCO")
+                log(`Lot Size for ${symbolDoc.symbol} is ${symbolDoc.frontMonthLotSize}`);
+            return symbolDoc;
+        });
+}
+
+
 
 function updateSymbol(symbolDoc) {
 
     return Symbol.findById(symbolDoc._id)
         .exec()
         //If symbol does not exist in DB, create Symbol Model from symbol in watchlist
-        .then(rSymbol => rSymbol ? rSymbol : new Symbol(symbolDoc))
+        .then(aSymbol => aSymbol ? aSymbol : new Symbol(symbolDoc))
         //Update previous Earnings Date
         .then(pSymbol => populateEarnings('previousEarnings', pSymbol))
         //Update next Earnings Date
         .then(nSymbol => populateEarnings('nextEarnings', nSymbol))
 
         //project earnings
-        .then(oSymbol => {
+        .then(eSymbol => {
             //Earnings recently anounced
-            if (oSymbol.nextEarnings && (oSymbol.nextEarnings < new Date())) { // Trim to the date only and compare
-                oSymbol.previousEarnings = oSymbol.nextEarnings;
-                oSymbol.nextEarnings = null;
+            if (eSymbol.nextEarnings && (eSymbol.nextEarnings < new Date())) { //TD: Trim to the date only and compare
+                eSymbol.previousEarnings = eSymbol.nextEarnings;
+                eSymbol.nextEarnings = null;
+                //log(`previousEarnings for ${eSymbol.symbol} is ${eSymbol.previousEarnings}`);
+                //log(`nextEarnings for ${eSymbol.symbol} is ${eSymbol.nextEarnings}`);
             }
 
-            let quarterFromPreviousEarnings = moment(oSymbol.previousEarnings).clone().add(1, 'quarters')
+            let quarterFromPreviousEarnings = moment(eSymbol.previousEarnings).clone().add(1, 'quarters')
 
-            oSymbol.projectedEarnings = (oSymbol.nextEarnings === null) ? quarterFromPreviousEarnings.toDate() : oSymbol.nextEarnings;
+            eSymbol.projectedEarnings = (eSymbol.nextEarnings === null) ? quarterFromPreviousEarnings.toDate() : eSymbol.nextEarnings;
 
             //TD: check if weekday?
 
-            return oSymbol;
+            return eSymbol;
 
         })
+        //Update Market Lots
+        .then(fSymbol => populateFnoMktLot(fSymbol))
+
         //Update new/existing symbol model using symbol from watchlist
-        .then(mSymbol => {
-            return _.merge(mSymbol, symbolDoc)
-                .save((e, r) => e ? console.log(`error: ${JSON.stringify(e)}`) : null
+        .then(zSymbol => {
+            return _.merge(zSymbol, symbolDoc)
+                .save((e, r) => e ? log(`error: ${JSON.stringify(e)}`) : null
                 )
         })
 
@@ -196,13 +237,29 @@ function refreshAllBoardMeetings() {
     ])
 }
 
+function refreshFnoLotSize() {
+
+    let download = downloads.getFnOLotSizes
+
+    return fnoMktLot.remove({}).exec()
+        .then(() => download())
+        .then((bmArr) => {
+            log(`Retrieved ${bmArr.length} lot sizes`)
+            return fnoMktLot.insertMany(bmArr);
+        })
+        .then((docs, e) => {
+            log(`Inserted ${docs.length} lot sizes ${e} errors`);
+        })
+
+}
+
 function refreshBoardMeetingsFor(timeframe) {
 
     //let tgtBoardMeetingDate = new Date();
     //tgtBoardMeetingDate.setDate(tgtBoardMeetingDate.getDate() - 1); //TD: Timezone //TD:Trim Date?
 
     let tgtBoardMeetingDate = new Date(moment().clone().startOf('day'));
-    console.log(`${timeframe} meeting from ${tgtBoardMeetingDate}`);
+    log(`${timeframe} meeting from ${tgtBoardMeetingDate}`);
 
     let query = {};
     query.boardMeetingDate = {};
@@ -215,11 +272,11 @@ function refreshBoardMeetingsFor(timeframe) {
     return boardMeeting.remove(query).exec()
         .then(() => download())
         .then((bmArr) => {
-            console.log(`Retrieved ${bmArr.length} ${timeframe} meetings`)
+            log(`Retrieved ${bmArr.length} ${timeframe} meetings`)
             return boardMeeting.insertMany(bmArr);
         })
         .then((docs, e) => {
-            console.log(`Inserted ${docs.length} ${timeframe} meetings with ${e} errors`);
+            log(`Inserted ${docs.length} ${timeframe} meetings with ${e} errors`);
         })
     //            .then(bmArr => reduceBoardMeetingsArr(bmArr))
     //            .then(bmArr => console.log(bmArr))
