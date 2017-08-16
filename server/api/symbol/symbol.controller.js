@@ -13,22 +13,36 @@
 import jsonpatch from 'fast-json-patch';
 import Symbol from './symbol.model';
 
+import moment from 'moment';
+
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
-  return function(entity) {
-    if(entity) {
-      return res.status(statusCode).json({data : entity});
+  return function (entity) {
+    if (entity) {
+      /*
+            return Promise.resolve(
+              entity.map(e => {
+                e.daysToEarnings = moment(e.projectedEarnings).diff(moment(), 'days');
+                return e
+              })).then(newEntity => {
+        */
+      return res.status(statusCode).json({ data: entity });
+      //   }
+
+      // )
+
+      //TD: Move to Directive
     }
     return null;
   };
 }
 
 function patchUpdates(patches) {
-  return function(entity) {
+  return function (entity) {
     try {
       // eslint-disable-next-line prefer-reflect
       jsonpatch.apply(entity, patches, /*validate*/ true);
-    } catch(err) {
+    } catch (err) {
       return Promise.reject(err);
     }
 
@@ -37,8 +51,8 @@ function patchUpdates(patches) {
 }
 
 function removeEntity(res) {
-  return function(entity) {
-    if(entity) {
+  return function (entity) {
+    if (entity) {
       return entity.remove()
         .then(() => {
           res.status(204).end();
@@ -48,8 +62,8 @@ function removeEntity(res) {
 }
 
 function handleEntityNotFound(res) {
-  return function(entity) {
-    if(!entity) {
+  return function (entity) {
+    if (!entity) {
       res.status(404).end();
       return null;
     }
@@ -59,7 +73,7 @@ function handleEntityNotFound(res) {
 
 function handleError(res, statusCode) {
   statusCode = statusCode || 500;
-  return function(err) {
+  return function (err) {
     res.status(statusCode).send(err);
   };
 }
@@ -68,7 +82,7 @@ function handleError(res, statusCode) {
 export function index(req, res) {
 
   let query = {};
-  query.watchlists =req.query.watchlists;
+  query.watchlists = req.query.watchlists;
   //TD: query.watchlists.$in = req.query.watchlists;
   return Symbol.find(query).exec()
     .then(respondWithResult(res))
@@ -92,10 +106,10 @@ export function create(req, res) {
 
 // Upserts the given Symbol in the DB at the specified ID
 export function upsert(req, res) {
-  if(req.body._id) {
+  if (req.body._id) {
     Reflect.deleteProperty(req.body, '_id');
   }
-  return Symbol.findOneAndUpdate({_id: req.params.id}, req.body, {new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true}).exec()
+  return Symbol.findOneAndUpdate({ _id: req.params.id }, req.body, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }).exec()
 
     .then(respondWithResult(res))
     .catch(handleError(res));
@@ -103,7 +117,7 @@ export function upsert(req, res) {
 
 // Updates an existing Symbol in the DB
 export function patch(req, res) {
-  if(req.body._id) {
+  if (req.body._id) {
     Reflect.deleteProperty(req.body, '_id');
   }
   return Symbol.findById(req.params.id).exec()

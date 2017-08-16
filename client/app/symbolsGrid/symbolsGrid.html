@@ -280,21 +280,17 @@
               <small><small>Prev Earnings : </small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              <small>{{symbol.previousEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}</small>
+              <small>
+                {{symbol.previousEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}</small>
             </div>
 
             <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Next Earnings: </small></small>
+              <small><small>{{symbol.nextEarnings?'Next Earnings: ' : 'Proj. Earnings: '}}</small></small>
             </div>
             <div class="col-md-3 col-xs-3 col-sm-3">
-              <span ng-if="symbol.nextEarnings">
                 <small>
-                    {{symbol.nextEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}
+                    {{symbol.nextEarnings?symbol.nextEarnings:symbol.projectedEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}
                 </small>
-              </span>
-              <span ng-if="!symbol.nextEarnings">
-                  {{symbol.projectedEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}?
-              </span>
             </div>
 
           </div>
