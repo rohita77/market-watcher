@@ -1,9 +1,0 @@
-{
-  "name": "nse-data-adapter",
-  "version": "0.0.1",
-  "description": "Adapter to Convert NSE Data to JSON",
-  "main": "index.js",
-  "dependencies": {
-    "web-scrap-tools": "file:modules\\web-scrap-tools"
-  }
-}

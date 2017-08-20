@@ -34,8 +34,7 @@
     "serve-favicon": "^2.3.0",
     "socket.io": "^1.3.5",
     "socket.io-client": "^1.3.5",
-    "socketio-jwt": "^4.2.0",
-    "nse-data-adapter": "file:./server/components/nse-data-adapter"
+    "socketio-jwt": "^4.2.0"
   },
   "devDependencies": {
     "autoprefixer": "^6.0.0",
