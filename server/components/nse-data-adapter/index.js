@@ -99,4 +99,4 @@ export function getNextTradingDate(currentTradingDate = moment().clone().utcOffs
 }
 
 
-export let getStockOptionChain2 = optionChain.getStockOptionChain;
+export let getStockOptionChain = optionChain.getStockOptionChain;

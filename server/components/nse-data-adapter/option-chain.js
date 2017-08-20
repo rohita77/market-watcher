@@ -31,7 +31,8 @@ export function getStockOptionChain(symbol, expiryDate) {
         }))
     }
 
-    return webScrapTools.getSmallHTML(url, optionChainHtmlToJSONTransformer);
+    return webScrapTools.getSmallHTML(url)
+        .then($ => optionChainHtmlToJSONTransformer($));
 }
 
 

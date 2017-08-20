@@ -59,11 +59,7 @@ export function getSmallHTML(url, htmlToJSONTransformer) {
         transform: body => cheerio.load(body)
     };
 
-    return Promise.resolve(
-        requestPromise(options)
-            .then($ => htmlToJSONTransformer($))
-    )
-
+    return requestPromise(options)
 }
 
 export let parseTagAsText = ($, td) => $(td).text().trim();
