@@ -1,7 +1,5 @@
 'use strict'
 
-//var optionChainTools = require('./components/nse-data-adapter/index');
-
 import moment from 'moment';
 
 // Set default node environment to development
@@ -36,10 +34,3 @@ FnOMktLot.getFnOMktLot('HINDALCO', expiryMonth)
     (r) =>
         console.log(`Market lot is ${JSON.stringify(r)}`)
     )
-
-
-/*optionChainTools.getStockOptionChain('RELIANCE', '31AUG2017')
-    .then((optionChainData) => console.log(optionChainData))
-
-*/
-
