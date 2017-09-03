@@ -8,6 +8,38 @@ import csvtojson from 'csvtojson';
 
 import moment from 'moment';
 
+export function getSmallJSON(url) {
+
+    const headers = {
+        'Host': 'www.nseindia.com',
+        'Upgrade-Insecure-Requests': 1,
+        'User-Agent': 'Mozilla/5.0(Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36(KHTML, like Gecko) Chrome/46.0.2490.76 Mobile Safari/537.36',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        //'Accept-Encoding': 'gzip, deflate, sdch, br',
+        'Accept-Language': 'en-US,en;q=0.8,vi;q=0.6'
+    };
+
+
+    let options = {
+        uri: url,
+        headers: headers,
+        json: true
+    };
+
+/*
+    var options = {
+        uri: url,
+        headers: {
+            'User-Agent': 'Request-Promise'
+        },
+        json: true // Automatically parses the JSON string in the response
+    };
+*/
+
+    return requestPromise(options)
+}
+
+
 export function getSmallCsv(url, csvMapper) {
     const headers = {
         'Host': 'www.nseindia.com',
