@@ -31,3 +31,14 @@ Run `grunt build` for building and `grunt serve` for preview.
 ## Testing
 
 Running `npm test` will run the unit tests with karma.
+
+## Upgrading
+Dependancies
+Dev-Dependancies
+NPM Version
+Node Vesrion
+Typings
+ES Lint
+Generator
+Visual Studio
+Gulp Workflow
