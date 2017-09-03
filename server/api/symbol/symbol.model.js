@@ -18,12 +18,15 @@ var SymbolSchema = new mongoose.Schema({
     purposes: [String]
   }],
   frontMonthLotSize: {type : Number, default : 0},
-  frontMonthMarginPercent: {type : Number, default : 0.15},
-  NTMCallROCPercent: {type : Number, default : 0.05},
-  NTMPutROCPercent: {type : Number, default : 0.05},
-  callBreakEven: {type : Number, default : 0.00},
-  putBreakEven: {type : Number, default : 0.00}
+  frontMonthMarginPercent: {type : Number, default : 0.15}, //TD
 });
+
+let rnd = (v,n=2) => math.round(v, n);
 
 registerEvents(SymbolSchema);
 export default mongoose.model('Symbol', SymbolSchema);
+
+//*
+
+
+//*/
