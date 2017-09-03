@@ -1,5 +1,7 @@
 'use strict';
 
+import moment from 'moment';
+
 // Set default node environment to development
 var env = process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
@@ -24,6 +26,22 @@ mongoose.connection.on('error', function (err) {
   process.exit(-1);
 });
 
+//Move to DB
+const jobSchedules = [
+  {
+    jobName: 'refreshWatchlist',
+    jobModule: './api/watchlist/watchlist.job',
+    jobStartHour: 17,
+    jobEndHour: 20
+  },
+  {
+    //https://www.nseindia.com/products/content/derivatives/equities/mrkt_timing_holidays.htm
+    jobName: 'refreshQuotesForFnOStocks',
+    jobModule: './api/quote/quote.job',
+    jobStartHour: 9,                    //9.15
+    jobEndHour: 17                      //15.30, 16.15(excercise)
+  }
+]
 
 // Setup server
 //var app = express();
@@ -39,8 +57,32 @@ mongoose.connection.on('error', function (err) {
 // Refresh: not successful/empty or not modified
 
 //Refresh Watch List
-var watchlistJob = require('./api/watchlist/watchlist.job');
-watchlistJob.run()
- .then(() => process.exit(0));
 
-//Update Symbols with new watchlist
+let targetJobName = process.argv[2] || 'refreshWatchlist';
+let runSchedule = process.argv[3] || 'regular';
+
+targetJobName = new RegExp('^' + targetJobName + '$');
+
+let jobSchedule = jobSchedules.find(
+  js => js.jobName.match(targetJobName)
+);
+
+var job = require(jobSchedule.jobModule);
+
+
+let jobRunHour = moment().utcOffset("+05:30").hour();
+let jobRunWeekDay = moment().utcOffset("+05:30").isoWeekday();
+
+let runNotInRegularJobSchedule = (!((jobRunHour >= jobSchedule.jobStartHour) && (jobRunHour <= jobSchedule.jobEndHour) &&(jobRunWeekDay <= 5)));
+
+if (runNotInRegularJobSchedule && (runSchedule === 'regular')) {
+  console.log(`Exiting as Job ${jobSchedule.jobName} run is outside market hours:(${jobRunHour}) or weekdays:(${jobRunWeekDay}))`);
+  process.exit(0)
+}
+else
+    console.log(`Initiating Job ${jobSchedule.jobName} at hour:(${jobRunHour}) and weekday:(${jobRunWeekDay})) as per ${runSchedule} schedule`);
+
+
+job.run()
+.then(() => process.exit(0));
+
