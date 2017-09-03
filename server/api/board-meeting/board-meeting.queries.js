@@ -10,15 +10,22 @@ var sort = {};
 var limit = {};
 
 
-/* Next Earning Date */
-var tgtEarningDate = new Date();
 
+/* Next Earning Date */
+var tgtEarningDate;
+ tgtEarningDate = ((new Date()));
+
+print(JSON.stringify(tgtEarningDate));
+//tgtEarningDate.setDate(tgtEarningDate.getDate() - 1);
+print(JSON.stringify(new Date(tgtEarningDate.toLocaleDateString())));
+
+//query.boardMeetingDate = {$lte : tgtEarningDate};
 query.boardMeetingDate = {$lte : tgtEarningDate};
 query.purpose = /^Results/;
 sort.boardMeetingDate = -1;
 sort.purpose = 1;
 
-query.symbol = /^YESBANK/;
+query.symbol = /^HINDALCO/;
 
 var  arrRes= db.boardmeetings.find(query).sort(sort).limit(1);
 print(JSON.stringify(arrRes.toArray()));
