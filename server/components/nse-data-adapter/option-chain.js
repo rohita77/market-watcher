@@ -16,16 +16,20 @@ export function getStockOptionChain(symbol, expiryDate) {
                 tdArr.map((i, td) => webScrapTools.parseTagAsAsNumber($, td))
             );
 
-            let strikePrice, call, put, rest;
+            let strikePrice, call={}, put={}, rest,quote,bidAsk;
 
-            [call, rest] = getOptionJSON(optionArr);
-            strikePrice = rest[0];
-            [put, rest] = getOptionJSON(rest.reverse());
+            [call.quote, rest] = getQuoteJSON(optionArr);
+            [call.bidAsk, rest] = getBidAskJSON(rest);
+
+            [strikePrice,...rest] = rest;
+
+            [put.bidAsk, rest] = getBidAskJSON(rest);
+            [put.quote, rest] = getQuoteJSON(rest.reverse());
 
             return {
                 strikePrice: strikePrice,
-                call: call,
-                put: put
+                call: Object.assign(call.quote,call.bidAsk),
+                put: Object.assign(put.quote,put.bidAsk)
             }
 
         }))
@@ -37,10 +41,21 @@ export function getStockOptionChain(symbol, expiryDate) {
 
 
 
-let getOptionJSON = (optionArr) => {
+let getQuoteJSON = (optionArr) => {
     let x, o = {}, rest;
     (
-        [x, o.oi, o.chngInOI, o.volume, o.iv, o.ltp, o.netChng, o.bidQty, o.bidPrice, o.askPrice, o.askQty, ...rest] = optionArr
+        [x, o.oi, o.chngInOI, o.volume, o.iv, o.ltp, o.netChng,...rest] = optionArr
+
+    )
+
+    return [o, rest];
+}
+
+
+let getBidAskJSON = (optionArr) => {
+    let x, o = {}, rest;
+    (
+        [o.bidQty, o.bidPrice, o.askPrice, o.askQty, ...rest] = optionArr
 
     )
 
