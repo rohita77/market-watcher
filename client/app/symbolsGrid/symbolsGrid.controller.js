@@ -82,13 +82,13 @@
       quoteData.get().$promise
         .then((data) => {
           //      this.quotes = data;
-          this.quoteTime = data.time;
-          this.refreshTime = data.refreshtime;
+          this.quoteTime = data.quoteTime;
+          this.refreshTime = data.refreshTime;
 
           if (isFirstCall) {
             this.sortBy = 'quote.per';
             this.sortReverse = false;
-            console.log('first quotes reresh: number of quotes: ' + data.data.length);
+            console.log('first quotes reresh: number of quotes: ' + data.quotes.length);
           }
 
           //Start error for sort/match
@@ -97,7 +97,7 @@
           //       }
 
           this.watchlist.symbols.forEach(symbol => {
-            symbol.quote = data.data.find(quote => {
+            symbol.quote = data.quotes.find(quote => {
               return quote.symbol.match(
                 new RegExp('^' + symbol.symbol + '$'));
             });
