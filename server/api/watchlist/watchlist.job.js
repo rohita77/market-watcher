@@ -3,8 +3,8 @@
 'use strict';
 import _ from 'lodash';
 //import downloads from '../../components/nsedata/downloads'; //TD:
-var downloads = require('../../components/nsedata/downloads');
-var NSEDataAdapter = require('../../components/nsedata/index'); //TD Refactor
+var downloads = require('../../components/nse-data-adapter/downloads');
+var NSEDataAdapter = require('../../components/nse-data-adapter/index'); //TD Refactor
 var moment = require('moment');
 
 //import Model and save to Mongo
@@ -14,7 +14,7 @@ import Symbol from './../symbol/symbol.model';
 
 import boardMeeting from '../../api/board-meeting/board-meeting.model';
 
-import fnoMktLot from '../../components/nsedata/model/fno-mkt-lot.model';
+import FnOMktLot from '../../components/nse-data-adapter/models/fno-mkt-lot.model';
 
 export function run() {
     console.log("Watch List Job Fired Time is :" + new Date());
@@ -22,7 +22,7 @@ export function run() {
         .then(() => log(`Finished Refreshing Watchlists`))
         .then(() => refreshAllBoardMeetings())
         .then(() => log(`Finished Refreshing Board Meetings for symbols`))
-        .then(() => refreshFnoLotSize())
+        .then(() => refreshFnOLotSize())
         .then(() => log(`Finished Refreshing FnO Lot Sizes`))
         .then(() => updateSymbolsFromWatchlists())
         .then(() => log(`Finished Updating Symbols for Watchlists`))
@@ -51,7 +51,7 @@ function refreshEachWatchlist(watchlists) {
     return Promise.all(
         watchlists.map(watchlist => {
 
-            //Promise for each watchlist that is resolved when the symbols are tretrieved and saved
+            //Promise for each watchlist that is resolved when the symbols are retrieved and saved
             return downloads.getSymbolsInWatchList(watchlist)
                 //save the symbols in the watchlist once they are downloaded
                 .then(symbols => {
@@ -152,20 +152,19 @@ function populateEarnings(sequence, symbolDoc) {
 }
 
 
-function populateFnoMktLot(symbolDoc) {
+function populateFnOMktLot(symbolDoc) {
     /* Next Earning Date */
 
     let query = {};
 
     query.symbol = symbolDoc.symbol;
 
-    return fnoMktLot.findOne(query).exec()
+    return FnOMktLot.findOne(query).exec()
         .then(fML => {
             if (fML) {
 
-                let currentDate = moment().clone().utcOffset("+05:30")
-                let nextTradingDate = NSEDataAdapter.getNextTradingDate(currentDate)
-                let frontMonth = nextTradingDate.format("MMM-YY");
+                let currentDate = moment().clone().utcOffset("+05:30");
+                let frontMonth = NSEDataAdapter.getNextTradingDate(currentDate).format("MMM-YY");
 
                 symbolDoc.frontMonthLotSize = fML.mktlot[frontMonth.toUpperCase()]; //TD: get Calendar Month for Front Month
 
@@ -210,7 +209,7 @@ function updateSymbol(symbolDoc) {
 
         })
         //Update Market Lots
-        .then(fSymbol => populateFnoMktLot(fSymbol))
+        .then(fSymbol => populateFnOMktLot(fSymbol))
 
         //Update new/existing symbol model using symbol from watchlist
         .then(zSymbol => {
@@ -237,15 +236,15 @@ function refreshAllBoardMeetings() {
     ])
 }
 
-function refreshFnoLotSize() {
+function refreshFnOLotSize() {
 
     let download = downloads.getFnOLotSizes
 
-    return fnoMktLot.remove({}).exec()
+    return FnOMktLot.remove({}).exec()
         .then(() => download())
         .then((bmArr) => {
             log(`Retrieved ${bmArr.length} lot sizes`)
-            return fnoMktLot.insertMany(bmArr);
+            return FnOMktLot.insertMany(bmArr);
         })
         .then((docs, e) => {
             log(`Inserted ${docs.length} lot sizes ${e} errors`);
@@ -286,8 +285,6 @@ function refreshBoardMeetingsFor(timeframe) {
                 .then(refreshEachWatchlist())
                 .then(() => resolve())
     */
-
-
 
 }
 
