@@ -26,7 +26,7 @@ mongoose.connection.on('error', function (err) {
   process.exit(-1);
 });
 
-//Move to DB
+//Move to Config
 const jobSchedules = [
   {
     jobName: 'refreshWatchlist',
