@@ -3,7 +3,7 @@
 function moveSizeFilter() {
   return function (input, thresholds) {
 
-    if (isNaN(input) ) {
+  if (isNaN(+input) ) {
       throw new Error('Input should be a numeric value');
     }
 
