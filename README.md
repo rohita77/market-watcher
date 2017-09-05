@@ -36,7 +36,7 @@ Running `npm test` will run the unit tests with karma.
 Dependancies
 Dev-Dependancies
 NPM Version
-Node Vesrion
+Node Version
 Typings
 ES Lint
 Generator

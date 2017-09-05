@@ -6,7 +6,7 @@ module.exports = {
 
   // MongoDB connection options
   mongo: {
-    uri: 'mongodb://localhost/marketwatcher-dev'
+    uri: 'mongodb://localhost/marketwatcher' //-dev'
   },
 
   // Seed database on startup
