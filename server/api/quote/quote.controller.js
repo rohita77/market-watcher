@@ -19,7 +19,7 @@ function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
   return function (entity) {
     if (entity) {
-      res.status(statusCode).json(entity);
+      res.status(statusCode).json(entity[0]);
     }
   };
 }
@@ -65,23 +65,9 @@ function handleError(res, statusCode) {
 // Gets a list of Quotes
 export function index(req, res) {
 
-  var client = request.createClient('https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/');
-
-  client.get('foSecStockWatch.json', (error, response, body) => {
-    if (!error && response.statusCode === 200) {
-      body.time = new Date(body.time + ' GMT+0530');
-      body.refreshtime = new Date();
-      console.log('Number of Quotes: ' + body.data.length + " as of " + body.time.toLocaleTimeString("en-US", {timeZone:"Asia/Calcutta", timeZoneName:"short"})  + " retrieved at "  + body.refreshtime.toLocaleTimeString("en-US", {timeZone:"Asia/Singapore", timeZoneName:"short"}) );
-      return res.json(body);
-    }
-/*
-  return Quote.find().exec()
+  return Quote.find({},{},{virtuals: true}).sort({refreshTime:-1}).limit(1).exec()
     .then(respondWithResult(res))
     .catch(handleError(res));
-*/
-
-});
-
 }
 
 // Gets a single Quote from the DB
