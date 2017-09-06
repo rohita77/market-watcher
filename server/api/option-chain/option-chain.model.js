@@ -30,7 +30,7 @@ OptionSchema.pre('save', function (next) {
   this.midPrice = rnd((this.bidPrice + this.askPrice) / 2);
   this.bidAskSpread = rnd((this.askPrice - this.bidPrice));
   this.percentSpread = rnd((this.bidAskSpread / this.askPrice) * 100);
-  this.percentchngInOI = rnd((this.chngInOI / (this.chngInOI + this.oi)) * 100);
+  this.percentchngInOI = rnd((this.chngInOI / (this.oi - this.chngInOI )) * 100);
 
   next()
 })
