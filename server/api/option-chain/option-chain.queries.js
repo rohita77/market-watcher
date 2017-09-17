@@ -126,7 +126,7 @@ export function getPiplelineForOCSubset(passedSymbol, ltP) {
                 cond: {
                     $and: [
                         { $lte: ["$$strike.strikePrice", "$expectedLow"] },
-                        { $and: [{ $gte: ["$$strike.put.volume", 0] }, { $gte: ["$$strike.put.oi", 0] }] },
+                        { $and: [{ $gte: ["$$strike.put.volume", 1] }, { $gte: ["$$strike.put.oi", 1] }] },
                     ]
                 }
             }
