@@ -26,11 +26,12 @@ var OptionSchema = new mongoose.Schema({
 
 })
 
+//TD: Null Option if there is no oi or volume ?
 OptionSchema.pre('save', function (next) {
   this.midPrice = rnd((this.bidPrice + this.askPrice) / 2);
   this.bidAskSpread = rnd((this.askPrice - this.bidPrice));
   this.percentSpread = rnd((this.bidAskSpread / this.askPrice) * 100);
-  this.percentchngInOI = rnd((this.chngInOI / (this.oi - this.chngInOI )) * 100);
+  this.percentchngInOI = rnd((this.chngInOI / (this.oi - this.chngInOI)) * 100);
 
   next()
 })
@@ -38,7 +39,7 @@ OptionSchema.pre('save', function (next) {
 var OptionChainSchema = new mongoose.Schema({
   symbol: String,           //TD: Sub docs expiry date, strike price, option
   expiryDate: String,
-  quoteId : { type: mongoose.Schema.Types.ObjectId, ref: 'Quote' },
+  quoteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quote' },
   strikes: [{
     strikePrice: { type: Number, default: 0.00 },
     call: OptionSchema,
@@ -46,13 +47,23 @@ var OptionChainSchema = new mongoose.Schema({
   }]
 });
 
+//TD: Get Rid of options wih no OI or volume
 OptionChainSchema.pre('save', function (next) {
-  this.strikes.forEach(function (strike) {
+
+  this.strikes =
+  this.strikes.map(function (strike) {
     strike.call.breakEven = rnd(strike.strikePrice + strike.call.midPrice);
     strike.put.breakEven = rnd(strike.strikePrice - strike.put.midPrice);
+
+//    Save only options with any oi and volume
+   if ((strike.call.oi > 0 && strike.call.volume > 0) || (strike.put.oi > 0  && strike.put.volume > 0))
+   return strike;
+   else
+     return;
+
   }, this);
 
-  next()
+  next();
 })
 
 /*OptionChainSchema.post('save', function (doc) {
