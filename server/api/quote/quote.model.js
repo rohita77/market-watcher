@@ -70,6 +70,8 @@ let rnd = (v, n = 2) => math.round(v, n);
 
 export default mongoose.model('Quote', QuotesSchema);
 
+//Index on reresh time or last mod or quot time/
+//If quote time is duplicate then skip
 
 /*
 db.quotes.findOne({})
@@ -121,5 +123,31 @@ db.quotes.aggregate([
   }
 ]
 ).pretty();
+
+*/
+/*
+var project = {"_id":"false","quotes.symbol":"true","quotes.expectedHighPercent":"true"};
+
+var query = {
+  "quotes": {
+    "$not": {
+      "$elemMatch": {
+        "expectedHighPercent": { "$gt": 0 }
+      }
+    }
+  }
+};
+
+
+var query = {
+        "quotes.expectedHighPercent" :  {
+          "$not": {
+               "$gt": "0" }
+    }
+};
+
+//db.quotes.findOne({'quotes.expectedHighPercent' : {$not : {$ne :0}}} ,project);
+
+db.quotes.findOne(query ,project);
 
 */
