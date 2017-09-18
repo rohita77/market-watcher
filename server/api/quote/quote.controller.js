@@ -65,7 +65,7 @@ function handleError(res, statusCode) {
 // Gets a list of Quotes
 export function index(req, res) {
 
-  return Quote.find({},{}).sort({quoteTime:-1}).limit(1).exec()
+  return Quote.find({},{}).sort({quoteTime:-1,lastMod: -1}).limit(1).exec()
     .then(respondWithResult(res))
     .catch(handleError(res));
 }
