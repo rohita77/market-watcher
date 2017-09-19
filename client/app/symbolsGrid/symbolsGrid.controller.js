@@ -38,7 +38,8 @@
 
           this.watchlist.symbols.forEach(symbol => {
 
-            symbol.key = symbol.symbol + ':' + symbol.name;
+            // symbol.key = symbol.symbol + ':' + symbol.name;
+            symbol.key = [symbol.symbol, symbol.name, symbol.industry];
 
             //Move to Server and use moment
             //symbol.daysToEarnings = moment(symbol.projectedEarnings).diff(moment(), 'days');
