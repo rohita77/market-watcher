@@ -1,5 +1,5 @@
 // Place your settings in this file to overwrite default and user settings.
-{"files.autoSave": "off",
+{"files.autoSave": "afterDelay",
 "files.autoSaveDelay": 1000,
 "files.trimTrailingWhitespace": true,
 "editor.wrappingColumn": 120,
