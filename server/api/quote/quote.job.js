@@ -29,11 +29,8 @@ export function run() {
         })
         .then((quotesJSON) => {
             log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id}`)
-            return Quote.findById(quotesJSON._id).exec()
-                .then((q) => {
-                    q.quotes = quotesJSON.quotes;
-                    return q.save();
-                })
+            return quotesJSON.save();
+
         })
         .then((saved) => {
             log(`Saved quotes and with timestamp is:${JSON.stringify(saved.lastMod)}`);
@@ -55,13 +52,26 @@ function refreshStockQuotes() {
         //save the quotes in the DB once they are downloaded
         .then(quotesJSON => {
             log(`Fetched Quotes for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime}`);
-            return Quote.create(quotesJSON);
+            return Quote.findById(quotesJSON.quoteTime).exec()
+                .then((q) => {
+                    if (q) {
+                        log(`Quotes already exists for : ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime}`);
+                        return q;
+                    }
+                    else {
+                        quotesJSON._id = quotesJSON.quoteTime;
+                        return Quote.create(quotesJSON)
+                            .then((quotesJSON) => {
+                                log(`Inserted Quotes for index: ${quotesJSON.index} / with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime}`);
+                                return quotesJSON
+                            });
+
+                    }
+
+                })
+
         })
-        //resolve the promise for the insert
-        .then((quotesJSON) => {
-            log(`Inserted Quotes for index: ${quotesJSON.index} / with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime}`);
-            return quotesJSON
-        });
+    //resolve the promise for the insert
 
 
 }
@@ -72,9 +82,9 @@ function refreshOptionChains(quotesJSON) {
     //Promise for each stockQuote that is resolved when the Option Chain is retrieved and saved
     return Promise.all(
         quotesJSON.quotes.map(stockQuote => {
-        //avgtrdVol: 40 lacs and avgTurnOver = 100 for 212 symbols for 6 trading hours
-            if ((stockQuote.trdVol > (5*hoursFromOpen)) || (stockQuote.ntP > (15*hoursFromOpen))) { //TD Previous days value and from config
-        //    if ((stockQuote.symbol == 'RELIANCE') || (stockQuote.symbol == 'HINDALCO')) {
+            //avgtrdVol: 40 lacs and avgTurnOver = 100 for 212 symbols for 6 trading hours
+            if ((stockQuote.trdVol > (5 * hoursFromOpen)) || (stockQuote.ntP > (15 * hoursFromOpen))) { //TD Previous days value and from config
+                //    if ((stockQuote.symbol == 'RELIANCE') || (stockQuote.symbol == 'HINDALCO')) {
 
                 return refreshOptionChain(stockQuote)
                     .then((oc) => getExpectedMoveForQuote(stockQuote))

@@ -50,6 +50,7 @@ QuoteDataSchema.pre('save', function (next) {
 })
 
 var QuotesSchema = new mongoose.Schema({
+  _id : Date,
   index: String,
   quoteTime: { type: Date, default: null },
   refreshTime: { type: Date, default: null },
