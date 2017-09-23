@@ -125,13 +125,20 @@
                 'yPC': '0',
                 'mPC': '0'
               };
-            }
+            };
+
+          symbol.quote.ROC = Math.max(+symbol.quote.expectedHighCallROCPercent,+symbol.quote.expectedLowPutROCPercent);
+          // console.log(symbol.symbol + ':' + symbol.quote.ROC )
+          symbol.quote.ROC = isNaN(+symbol.quote.ROC) ? 0 : +symbol.quote.ROC;
+          // console.log(symbol.symbol + ':' + symbol.quote.ROC )
+
           });
 
         }) //based on format
         .catch((data, status, headers, config) => {
           this.$log.warn(data, status, headers, config);
         });
+
 
       this.getSortOrder = (symbol) => {
 

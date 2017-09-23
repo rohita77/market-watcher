@@ -60,7 +60,14 @@
 
 
         <li class="divider"></li>
-        <li role="menuitem"><a href="#">Separated link</a></li>
+
+        <li role="menuitem">
+          <a ng-click="symbolsGridCtrl.setSortBy('quote.ROC')" href="">
+            <span class="glyphicon" ng-class="(symbolsGridCtrl.getReverse('quote.ROC'))?'glyphicon-sort-by-attributes':'glyphicon-sort-by-attributes-alt'"></span> ROC%
+          </a>
+        </li>
+
+
       </ul>
     </div>
 
@@ -83,7 +90,7 @@
           <li class="divider"></li>
           <!--
             <li role="menuitem"><a href="#">Separated link</a></li>
-            -->```1
+            -->
         </form>
       </ul>
     </div>
@@ -127,6 +134,7 @@
       <!--TD// new row after every four -->
       <!-- correctly reduce padding
       <!--Use a filter to identify selected instead of manipulating the model -->
+
       <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:200 | filter:symbolsGridCtrl.query">
 
 
