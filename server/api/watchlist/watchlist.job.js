@@ -16,6 +16,12 @@ import boardMeeting from '../../api/board-meeting/board-meeting.model';
 
 import FnOMktLot from '../../components/nse-data-adapter/models/fno-mkt-lot.model';
 
+//import Model and save to Mongo
+import Quote from '../../api/quote/quote.model';
+import OptionChain from '../../api/option-chain/option-chain.model';
+
+;
+
 export function run() {
     console.log("Watch List Job Fired Time is :" + new Date());
     return refreshWatchlists()
@@ -26,10 +32,14 @@ export function run() {
         .then(() => log(`Finished Refreshing FnO Lot Sizes`))
         .then(() => updateSymbolsFromWatchlists())
         .then(() => log(`Finished Updating Symbols for Watchlists`))
+        .then(() => OptionChain.remove({}))
+        .then(() => log(`Removed Option Chains`))
         .then(() => Symbol.find({}).count().exec().then((c) => {
             log(`After Job DB has ${JSON.stringify(c)} symbols`);
         }))
 }
+
+
 
 function now() {
     return moment().format('HH:mm:ss Z');
