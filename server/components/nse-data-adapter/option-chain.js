@@ -4,6 +4,9 @@ var webScrapTools =require('./modules/web-scrap-tools');
 export function getStockOptionChain(symbol, expiryDate) {
     let url = `https://nse-india.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?instrument=OPTSTK&symbol=${symbol}&date=${expiryDate}`;
 
+    //TD : As on Sep 22, 2017 15:30:29 IST //*[@id="wrapper_btm"]/table[1]/tbody/tr/td[2]/div/span[2]/text()
+    //#wrapper_btm > table:nth-child(3) > tbody > tr > td:nth-child(2) > div > span:nth-child(2)
+
     const optionChainHtmlToJSONTransformer = $ => {
 
         let trArr = $('#octable > tbody > tr');
