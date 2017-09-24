@@ -44,8 +44,8 @@
             //Move to Server and use moment
             //symbol.daysToEarnings = moment(symbol.projectedEarnings).diff(moment(), 'days');
             let MsInADay = 24 * 60 * 60 * 1000;
-            symbol.daysToEarnings = Math.ceil((new Date(symbol.projectedEarnings) - (new Date()))/MsInADay);
-             symbol.daysToEarnings = (symbol.daysToEarnings <=0 ) ? undefined : symbol.daysToEarnings;
+            symbol.daysToEarnings = Math.ceil((new Date(symbol.projectedEarnings) - (new Date())) / MsInADay);
+            symbol.daysToEarnings = (symbol.daysToEarnings <= 0) ? undefined : symbol.daysToEarnings;
 
             //To fix sorting issue when quotes are missing
             //no match?
@@ -127,11 +127,18 @@
               };
             };
 
-          symbol.quote.ROC = Math.max(+symbol.quote.expectedHighCallROCPercent,+symbol.quote.expectedLowPutROCPercent);
-          // console.log(symbol.symbol + ':' + symbol.quote.ROC )
-          symbol.quote.ROC = isNaN(+symbol.quote.ROC) ? 0 : +symbol.quote.ROC;
-          // console.log(symbol.symbol + ':' + symbol.quote.ROC )
+            let callROC = 0, putROC = 0;
 
+            if (+symbol.quote.expectedHighPercent > 0 && symbol.quote.expectedHighOptions) {
+              callROC = (+symbol.quote.expectedHighOptions.call.percentSpread < 11) ? +symbol.quote.expectedHighCallROCPercent||0 : 0;
+            }
+
+            if (+symbol.quote.expectedLowPercent > 0 && symbol.quote.expectedLowOptions) {
+              putROC = (+symbol.quote.expectedLowOptions.put.percentSpread  < 11) ? +symbol.quote.expectedLowPutROCPercent || 0 : 0;
+            }
+
+            // console.log(symbol.symbol + ':' + symbol.quote.ROC + ':C: ' + callROC  + ':P: ' + putROC  );
+            symbol.quote.ROC = Math.max(+callROC || 0, +putROC || 0);
           });
 
         }) //based on format
