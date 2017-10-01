@@ -83,19 +83,6 @@
               //no match?
               if (symbol.quote === undefined) symbol.quote = { };
 
-              //TD: Move to server
-              let callROC = 0, putROC = 0;
-
-              if (+symbol.quote.expectedHighPercent > 0 && symbol.quote.expectedHighOptions) {
-                callROC = (+symbol.quote.expectedHighOptions.call.percentSpread < 11) ? +symbol.quote.expectedHighCallROCPercent||0 : 0;
-              }
-
-              if (+symbol.quote.expectedLowPercent > 0 && symbol.quote.expectedLowOptions) {
-                putROC = (+symbol.quote.expectedLowOptions.put.percentSpread  < 11) ? +symbol.quote.expectedLowPutROCPercent || 0 : 0;
-              }
-
-              symbol.quote.ROC = Math.max(+callROC || 0, +putROC || 0);
-
             });
 
         }) //based on format

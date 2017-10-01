@@ -23,16 +23,17 @@ var QuoteDataSchema = new mongoose.Schema({
   cAct: { type: String, default: null },
   yPC: { type: Number, set: toNumber, default: 0.00 },
   mPC: { type: Number, set: toNumber, default: 0.00 },
-  expectedHigh: { type: Number},
-  expectedLow: { type: Number},
-  expectedHighPercent: { type: Number},
-  expectedLowPercent: { type: Number},
-  expectedHighCallROCPercent: { type: Number},
-  expectedLowPutROCPercent: { type: Number},
+  expectedHigh: { type: Number },
+  expectedLow: { type: Number },
+  expectedHighPercent: { type: Number },
+  expectedLowPercent: { type: Number },
+  expectedHighCallROCPercent: { type: Number },
+  expectedLowPutROCPercent: { type: Number },
   expectedHighOptions: {},
   expectedLowOptions: {},
   frontMonthLotSize: { type: Number, default: 0 }, //TD
   frontMonthMarginPercent: { type: Number, default: 0.15 }, //TD
+  maxROC: { type: Number, default: 0 }, //TD
 }
 );
 
@@ -47,10 +48,24 @@ QuoteDataSchema.pre('save', function (next) {
     this.expectedLowPutROCPercent = ((this.expectedLowOptions.put.midPrice * 100) / (this.frontMonthMarginPercent * this.ltP));
   next()
 
+  //Max ROC for ranking and analytics
+  let callROC = 0, putROC = 0;
+
+  if (+this.expectedHighPercent > 0 && this.expectedHighOptions) {
+    callROC = (+this.expectedHighOptions.call.percentSpread < 11) ? +this.expectedHighCallROCPercent || 0 : 0;
+  }
+
+  if (+this.expectedLowPercent > 0 && this.expectedLowOptions) {
+    putROC = (+this.expectedLowOptions.put.percentSpread < 11) ? +this.expectedLowPutROCPercent || 0 : 0;
+  }
+
+  this.maxROC = Math.max(+callROC || 0, +putROC || 0);
+
+
 })
 
 var QuotesSchema = new mongoose.Schema({
-  _id : Date,
+  _id: Date,
   index: String,
   quoteTime: { type: Date, default: null },
   refreshTime: { type: Date, default: null },

@@ -62,8 +62,8 @@
         <li class="divider"></li>
 
         <li role="menuitem">
-          <a ng-click="symbolsGridCtrl.setSortBy('quote.ROC')" href="">
-            <span class="glyphicon" ng-class="(symbolsGridCtrl.getReverse('quote.ROC'))?'glyphicon-sort-by-attributes':'glyphicon-sort-by-attributes-alt'"></span> ROC%
+          <a ng-click="symbolsGridCtrl.setSortBy('quote.maxROC')" href="">
+            <span class="glyphicon" ng-class="(symbolsGridCtrl.getReverse('quote.maxROC'))?'glyphicon-sort-by-attributes':'glyphicon-sort-by-attributes-alt'"></span> ROC%
           </a>
         </li>
 
@@ -88,43 +88,22 @@
           </li>
 
           <li class="divider"></li>
-          <!--
-            <li role="menuitem"><a href="#">Separated link</a></li>
-            -->
+
+          <li role="menuitem">
+            <input id="incEarnings" name="incEarnings" type="checkbox" ng-model="symbolsGridCtrl.incEarnings"> Include Earnings
+          </li>
+
+          <li role="menuitem">
+            <input id="earningsOnly" name="earningsOnly" type="checkbox" ng-model="symbolsGridCtrl.earningsOnly"> Earnings
+            Only
+          </li>
+
         </form>
       </ul>
     </div>
   </div>
 
   <br>
-
-
-
-  <uib-accordion ng-show="false">
-    <uib-accordion-group>
-      <uib-accordion-heading>
-        <button type="button" class="btn btn-info" aria-label="Left Align">
-            <span class="glyphicon glyphicon-filter" aria-hidden="true"></span> Filter
-          </button>
-      </uib-accordion-heading>
-      <form class="form-inline">
-
-        <div class="form-group">
-          <label for="beta"> Beta :</label>
-          <select name="beta" id="beta" ng-model="symbolsGridCtrl.query.level" class="form-control" ng-options="o.value as o.label for o in symbolsGridCtrl.betaFilterOptions">
-            <!--
-         <option selected="true" value="{}">All</option>
-          <option value="0.5" >less than 0.5</option>
-          <option value="1" > between 0.5 and 1.5 </option>
-          <option value="1.5" >greater than 1.5</option>
-        -->
-          </select>
-        </div>
-
-      </form>
-    </uib-accordion-group>
-  </uib-accordion>
-
 
 
   <!-- Gutter3 = reduced padding -->
@@ -139,7 +118,8 @@
 
 
         <uib-accordion-group class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-info' : 'panel-default') }}"
-          ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="((symbol.quote.ntP > 40) || (symbol.quote.trdVol > 5)) && (symbol.quote.expectedHighPercent > 0)">
+          ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="((symbol.quote.ntP > 40) || (symbol.quote.trdVol > 5)) && (symbol.quote.expectedHighPercent > 0)"
+          ng-show="(!symbol.nextEarningsBeforeFrontMonthExpiry || symbolsGridCtrl.incEarnings) && (!symbolsGridCtrl.earningsOnly || (symbol.daysToEarnings <=3  && symbol.nextEarnings))">
 
           <uib-accordion-heading>
             <div class="row gutter-2">
@@ -210,6 +190,7 @@
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
                       <small><small>Margin : </small></small>
                     </div>
+                    <!-- TD: Move to server -->
                     <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ ( ((-(symbol.frontMonthMarginPercent * symbol.frontMonthLotSize * symbol.quote.ltP)/1000 + 100) || 0)  | moveSize : [0,20,50])">
                       {{0.15 * symbol.frontMonthLotSize * symbol.quote.ltP | number : 0}}
                     </div>
@@ -333,26 +314,6 @@
 
               </div>
 
-              <!--
-         <div class="row gutter-1">
-            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Projected Earnings: </small></small>
-            </div>
-
-            <div class="col-md-3 col-xs-3 col-sm-3">
-              <small>{{symbol.projectedEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}</small>
-            </div>
-
-            <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-              <small><small>Days to Earnings: </small></small>
-            </div>
-
-            <div class="col-md-3 col-xs-3 col-sm-3">
-              <small>{{symbol.daysToEarnings | number : 0}}</small>
-            </div>
-
-          </div>
--->
               <div class="panel panel-danger">
                 <div class="panel-body">
                   <div class="row gutter-1">
@@ -447,7 +408,8 @@
                     </div>
                     <div class="col-md-3 col-xs-3 col-sm-3">
                       <small>
-                {{symbol.previousEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}</small>
+                          {{symbol.previousEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}
+                      </small>
                     </div>
 
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
@@ -455,7 +417,7 @@
                     </div>
                     <div class="col-md-3 col-xs-3 col-sm-3">
                       <small>
-                    {{symbol.nextEarnings?symbol.nextEarnings:symbol.projectedEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}
+                          {{symbol.nextEarnings?symbol.nextEarnings:symbol.projectedEarnings | date : 'EEE,dd.MMM.yy' : '+0530'}}
                     </small>
                     </div>
 
@@ -534,33 +496,3 @@
     </div>
   </uib-accordion>
 </div>
-<!--
-<ul class="thumbnails">
-  <li ng-repeat="quote in symbolsGridCtrl.quotes.data | orderBy:symbolsGridCtrl.sortOrder | limitTo:20 | filter:symbolsGridCtrl.query" ng-show="symbol.quote.symbol == symbolsGridCtrl.selectedSymbolName">
-
-    <div class="row session">
-      <div class="span0 well votingWidget">
-        <div class="votingButton" ng-click="upVoteSession(session)">
-          <i class="icon-chevron-up icon-white"></i>
-        </div>
-        <div class="badge badge-inverse">
-          <div>{{session.upVoteCount}}</div>
-        </div>
-        <div class="<votingButto></votingButto>n" ng-click="downVoteSession(session)">
-          <i class="icon-chevron-down"></i>
-        </div>
-      </div>
-
-      <div class="well span12">
-        <h4 class="well-title">{{symbol.quote.symbol}}</h4>
-        <h6 style="margin-top:-10px">{{symbol.quote.name}}</h6>
-        <span>Duration: {{session.duration}}</span><br />
-        <span>Level: {{session.level}}</span>
-
-        <p>{{session.abstract}}</p>
-      </div>
-    </div>
-
-  </li>
-</ul>
--->
