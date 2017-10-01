@@ -17,6 +17,13 @@
             "problemMatcher": [
                 "$eslint-stylish"
             ]
+        },
+        {
+            "type": "gulp",
+            "task": "buildcontrol:heroku",
+            "problemMatcher": [
+                "$gulp-tsc"
+            ]
         }
     ]
 }
