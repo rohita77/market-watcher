@@ -32,8 +32,14 @@ export function run() {
         .then(() => log(`Finished Refreshing FnO Lot Sizes`))
         .then(() => updateSymbolsFromWatchlists())
         .then(() => log(`Finished Updating Symbols for Watchlists`))
-        .then(() => OptionChain.remove({}))
-        .then(() => log(`Removed Option Chains`))
+        .then(() => {
+
+            let today = moment().clone().startOf('day');
+            if (today.isoWeekday() > 1) today.isoWeekday(6); //Next Monday
+
+            return OptionChain.remove({ lastMod: { $lt: today.toDate() } });
+        })
+        .then((result) => log(`Removed Option Chains ${JSON.stringify(result)}`))
         .then(() => Symbol.find({}).count().exec().then((c) => {
             log(`After Job DB has ${JSON.stringify(c)} symbols`);
         }))
@@ -127,7 +133,7 @@ function updateEachSymbolFromWatchlists(symbols) {
     )
 }
 
-function populateEarnings(sequence, symbolDoc) {
+function populateEarnings(earningPeriod, symbolDoc) {
     /* Next Earning Date */
 
     let query = {};
@@ -137,16 +143,16 @@ function populateEarnings(sequence, symbolDoc) {
     //tgtEarningDate.setDate(tgtEarningDate.getDate() - 1); // Trime Date
 
     let tgtEarningDate = moment().clone().startOf('day').toDate();
-    //log(`${sequence} for ${symbolDoc.symbol} from ${tgtEarningDate}`);
+    //log(`${earningPeriod} for ${symbolDoc.symbol} from ${tgtEarningDate}`);
 
     query.boardMeetingDate = {};
 
-    let op = (sequence === 'previousEarnings') ? '$lt' : '$gte';
+    let op = (earningPeriod === 'previousEarnings') ? '$lt' : '$gte';
 
     query.boardMeetingDate[op] = tgtEarningDate;
     query.purpose = /^Results/;
 
-    let sortOrder = (sequence === 'previousEarnings') ? -1 : 1;
+    let sortOrder = (earningPeriod === 'previousEarnings') ? -1 : 1;
     sort.boardMeetingDate = sortOrder * 1; // Latest or Next
     sort.purpose = 1; // Alway 'Results' before 'Results*'
 
@@ -154,9 +160,9 @@ function populateEarnings(sequence, symbolDoc) {
 
     return boardMeeting.find(query).sort(sort).limit(1).exec()
         .then(bM => {
-            symbolDoc[sequence] = bM[0] ? bM[0].boardMeetingDate : symbolDoc[sequence]; //Retain Previous value if new one is not there
+            symbolDoc[earningPeriod] = bM[0] ? bM[0].boardMeetingDate : symbolDoc[earningPeriod]; //Retain Previous value if new one is not there
             if (symbolDoc.symbol === "HINDALCO")
-                log(`${sequence} for ${symbolDoc.symbol} is ${symbolDoc[sequence]}`);
+                log(`${earningPeriod} for ${symbolDoc.symbol} is ${symbolDoc[earningPeriod]}`);
             return symbolDoc;
         });
 }
@@ -209,9 +215,28 @@ function updateSymbol(symbolDoc) {
                 //log(`nextEarnings for ${eSymbol.symbol} is ${eSymbol.nextEarnings}`);
             }
 
-            let quarterFromPreviousEarnings = moment(eSymbol.previousEarnings).clone().add(1, 'quarters')
+            // log(`Earnings for ${eSymbol.symbol} is Prev: ${eSymbol.previousEarnings} Next: ${eSymbol.nextEarnings}`);
 
-            eSymbol.projectedEarnings = (eSymbol.nextEarnings === null) ? quarterFromPreviousEarnings.toDate() : eSymbol.nextEarnings;
+            if (eSymbol.previousEarnings) {
+                let quarterFromPreviousEarnings = moment(eSymbol.previousEarnings).clone().add(1, 'quarters');
+                eSymbol.projectedEarnings = (eSymbol.nextEarnings == null) ? quarterFromPreviousEarnings.toDate() || null : eSymbol.nextEarnings;
+                // log(`projectedEarnings for ${eSymbol.symbol} is ${eSymbol.projectedEarnings}`);
+
+            }
+            else {
+                log(`Previous Earnings not available for ${eSymbol.symbol}`);
+                eSymbol.projectedEarnings = null;
+
+            }
+
+            let currentDate = moment().clone().utcOffset("+05:30");
+            let nextTradingDate = NSEDataAdapter.getNextTradingDate(currentDate);
+            let frontMonthExpiryDate = NSEDataAdapter.getExpiryDate(nextTradingDate).toDate();
+
+            // log(`frontMonthExpiryDate for ${frontMonthExpiryDate} `);
+
+
+            eSymbol.nextEarningsBeforeFrontMonthExpiry = (eSymbol.nextEarnings == null) ? (eSymbol.projectedEarnings <= frontMonthExpiryDate) : (eSymbol.nextEarnings <= frontMonthExpiryDate)
 
             //TD: check if weekday?
 
