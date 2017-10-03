@@ -35,7 +35,7 @@ export function run() {
         .then(() => {
 
             let today = moment().clone().startOf('day');
-            if (today.isoWeekday() > 1) today.isoWeekday(6); //Next Monday
+            if (today.isoWeekday() > 5) today.isoWeekday(5); //Next Monday
 
             return OptionChain.remove({ lastMod: { $lt: today.toDate() } });
         })
