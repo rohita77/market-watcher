@@ -41,7 +41,7 @@ var OptionChainSchema = new mongoose.Schema({
   expiryDate: String,
   quoteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quote' },
   strikes: [{
-    strikePrice: { type: Number, default: 0.00 },
+    strikePrice: { type: Number},
     call: OptionSchema,
     put: OptionSchema
   }]
@@ -51,16 +51,13 @@ var OptionChainSchema = new mongoose.Schema({
 OptionChainSchema.pre('save', function (next) {
 
   this.strikes =
-  this.strikes.map(function (strike) {
+  this.strikes.filter(function (strike) {
     strike.call.breakEven = rnd(strike.strikePrice + strike.call.midPrice);
     strike.put.breakEven = rnd(strike.strikePrice - strike.put.midPrice);
 
 //    Save only options with any oi and volume
    if ((strike.call.oi > 0 && strike.call.volume > 0) || (strike.put.oi > 0  && strike.put.volume > 0))
    return strike;
-   else
-     return;
-
   }, this);
 
   next();
