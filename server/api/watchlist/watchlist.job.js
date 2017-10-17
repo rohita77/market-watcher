@@ -36,10 +36,19 @@ export function run() {
 
             let today = moment().clone().startOf('day');
             if (today.isoWeekday() > 5) today.isoWeekday(5); //Next Monday
-
+            //TD: Retain Last quote of the day
             return OptionChain.remove({ lastMod: { $lt: today.toDate() } });
         })
         .then((result) => log(`Removed Option Chains ${JSON.stringify(result)}`))
+        .then(() => {
+
+            let today = moment().clone().startOf('day');
+            if (today.isoWeekday() > 5) today.isoWeekday(5); //Next Monday
+            let thirtyDaysBack = today.subtract(30,'days');
+
+            return Quote.remove({ lastMod: { $lt: thirtyDaysBack.toDate() } });
+        })
+        .then((result) => log(`Removed Quotes Older than 30 days ${JSON.stringify(result)}`))
         .then(() => Symbol.find({}).count().exec().then((c) => {
             log(`After Job DB has ${JSON.stringify(c)} symbols`);
         }))
