@@ -17,7 +17,7 @@ function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
   return function(entity) {
     if(entity) {
-      return res.status(statusCode).json(entity);
+      return res.status(statusCode).json({data: entity});
     }
     return null;
   };
@@ -73,7 +73,7 @@ export function index(req, res) {
 
 // Gets a single OptionChain from the DB
 export function show(req, res) {
-  return OptionChain.findById(req.params.id).exec()
+  return OptionChain.find({"symbol" : req.params.id}).sort({"lastMod" : -1}).limit(1).exec()
     .then(handleEntityNotFound(res))
     .then(respondWithResult(res))
     .catch(handleError(res));
