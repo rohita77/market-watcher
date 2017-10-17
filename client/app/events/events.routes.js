@@ -5,6 +5,12 @@ angular.module('marketWatcherApp.events')
     $stateProvider
     .state('events', {
       url: '/events',
-      template: '<events></events>'
-    });
+      views: {
+        "" : {
+          template: '<events></events>'
+        }
+      }
+
+    })
+
   });

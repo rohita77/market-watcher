@@ -4,10 +4,12 @@
 
 
   class SymbolsGridComponent {
-    constructor($log, $interval, $resource, $sce) {
+    constructor($log, $interval, $resource, $sce, Modal) {
       this.$resource = $resource;
       this.$interval = $interval;
       this.$log = $log;
+      this.Modal = Modal;
+
       this.filterIsCollapsed = true;
       this.sortBy = 'symbol';
       this.sortReverse = false;
@@ -118,6 +120,17 @@
 
     }
 
+
+    openOC(symbol) {
+
+          return this.Modal.confirm.ok(function (formData) {
+
+                // formData contains the data collected in the modal
+
+              })("Option Chain For ",symbol);
+
+
+        };
 
   }
 

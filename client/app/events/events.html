@@ -1,54 +1,38 @@
-<div class="container-fluid">
-    <!--  <img ng-src="{{event.imageUrl}}" alt="{{event.name}}"> -->
+<!--  <h3>Option Chain</h3> -->
+    <h4>LTP: {{eventsCtrl.ltp}} </h4>
+    <table class="table table-bordered table-condensed label text-center">
+        <thead>
+            <tr class = "label-info row gutter-2">
+              <th class="col-md-1 col-xs-1 col-sm-1 text-center"> <div>oi-k </div> <div><small><small>(ch)</small></small></div> </th>
+              <th class="col-md-1 col-xs-1 col-sm-1 text-center">vol</th>
+              <th class="col-md-1 col-xs-1 col-sm-1 text-center">iv</th>
+              <th class="col-md-3 col-xs-1 col-sm-1 text-center"><div class="col-md-2">bid / </div><div class="col-md-2">ask<small><small>(ch)</small></small></div></th>
+              <th class="col-md-1 col-xs-1 col-sm-1 text-center">sp</th>
+              <th class="col-md-1 col-xs-1 col-sm-1 text-center"><div>oi-k </div> <div><small><small>(ch)</small></small></div> </th>
+              <th class="col-md-1 col-xs-1 col-sm-1 text-center">vol</th>
+              <th class="col-md-1 col-xs-1 col-sm-1 text-center">iv</th>
+              <th class="col-md-3 col-xs-1 col-sm-1 text-center"><div class="col-md-2">bid / </div><div class="col-md-2">ask<small><small>(ch)</small></small></div></th>
+            </tr>
+          </thead>
+      <tbody>
+          <tr ng-repeat="strike in eventsCtrl.oc.strikes | orderBy: 'strikePrice' | limitTo:200"  class = "row gutter-2">
+              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice,true)"><div>{{strike.call.oi/1000}}</div><div><small><small> ({{strike.call.chngInOI/1000}}) </small> </small></div>
+              </td>
+              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice,true)">{{strike.call.volume}}</td>
+              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice,true)">{{strike.call.iv | number : 0}}</td>
+              <td class="col-md-3 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice,true)"><div class="col-md-2">{{strike.call.bidPrice}} / </div><div class="col-md-2"> {{strike.call.askPrice}}<small><small>({{strike.call.netChng}})</div></td>
+              <td class="col-md-1 col-xs-1 col-sm-1 label-info" id="anchor{{strike.strikePrice}}">{{strike.strikePrice}} </a></td>
+              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice)" ><div>{{strike.put.oi/1000}}</div><div><small><small> ({{strike.put.chngInOI/1000}}) </small> </small></td>
+              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice)" >{{strike.put.volume}}</td>
+              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice)" >{{strike.put.iv  | number : 0}}</td>
+              <td class="col-md-3 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice)" ><div >{{strike.put.bidPrice}} / </div><div class="col-md-2"> {{strike.put.askPrice}}<small><small>({{strike.put.netChng}})</div></td>
+          </tr>
+      </tbody>
 
-    <h4>
-        <!-- Simple dropdown -->
-        <span uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle>
-        {{ symbolsGridCtrl.watchlist.name }}
-      </a>
-      <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
-        <li ng-repeat="choice in items">
-          <a href>{{choice}}</a>
-        </li>
-      </ul>
-    </span> Events
+    </table>
 
-    </span>
-    </h4>
+        <div class="col-md-9 col-xs-9 col-sm-9 text-center">
 
-
-
-
-
-    <!-- Gutter3 = reduced padding -->
-    <div class="row gutter-2">
-
-        <!--TD// new row after every four -->
-        <!-- correctly reduce padding
-      <!--Use a filter to identify selected instead of manipulating the model -->
-        <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="event in eventsCtrl.events | orderBy: 'boardMeetingDate' | limitTo:20 ">
-
-            <div class="col-md-3 col-xs-3 col-sm-3">
-                    <strong> {{event.symbol | uppercase}} </strong>
-            </div>
-
-            <div class="col-md-3 col-xs-3 col-sm-3">
-                <strong> {{event.boardMeetingDate | date : 'dd-MMM': '+0530' }} </strong>
-            </div>
-
-            <div class="col-md-3 col-xs-3 col-sm-3">
-                <small><small>{{event.purpose | limitTo:60}}</small></small>
-            </div>
-
-            <div class="col-md-3 col-xs-3 col-sm-3">
-                <small><small>{{event.watchlists.toString() | limitTo:60}}</small></small>
-            </div>
-
-
+                <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate fa-4x" ng-show="!eventsCtrl.oc"></span>
         </div>
 
-    </div>
-
-
-</div>

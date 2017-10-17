@@ -23,3 +23,14 @@
 .modal-danger .modal-header {
   background: $brand-danger;
 }
+
+.modal-body{
+  overflow-y: auto;
+  padding-left: 0px;
+  padding-right: 0px;
+}
+
+.modal-container-fluid{
+  padding-left: 0px;
+  padding-right: 0px;
+}
