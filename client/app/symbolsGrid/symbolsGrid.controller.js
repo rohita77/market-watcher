@@ -71,7 +71,7 @@
           this.refreshTime = data.refreshTime;
 
           if (isFirstCall) {
-            this.sortBy = 'quote.per';
+            this.sortBy = 'quote.maxROC';
             this.sortReverse = false;
 
             this.$log.info(`First Call retrieved ${data.quotes.length} quotes`);
