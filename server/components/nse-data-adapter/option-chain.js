@@ -44,7 +44,7 @@ export function getStockOptionChain(symbol, expiryDate) {
 
 
 
-let getQuoteJSON = (optionArr) => {
+function getQuoteJSON (optionArr) {
     let x, o = {}, rest;
     (
         [x, o.oi, o.chngInOI, o.volume, o.iv, o.ltp, o.netChng,...rest] = optionArr
@@ -55,7 +55,7 @@ let getQuoteJSON = (optionArr) => {
 }
 
 
-let getBidAskJSON = (optionArr) => {
+function getBidAskJSON (optionArr) {
     let x, o = {}, rest;
     (
         [o.bidQty, o.bidPrice, o.askPrice, o.askQty, ...rest] = optionArr

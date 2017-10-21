@@ -20,8 +20,6 @@ import FnOMktLot from '../../components/nse-data-adapter/models/fno-mkt-lot.mode
 import Quote from '../../api/quote/quote.model';
 import OptionChain from '../../api/option-chain/option-chain.model';
 
-;
-
 export function run() {
     console.log("Watch List Job Fired Time is :" + new Date());
     return refreshWatchlists()

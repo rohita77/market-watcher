@@ -1,7 +1,18 @@
+<!-- TradingView Widget BEGIN -->
+<!-- TradingView Widget BEGIN -->
+
+<!-- TradingView Widget END -->
+
+<!-- TradingView Widget END -->
+
 <div class="container-fluid">
   <!--  <img ng-src="{{event.imageUrl}}" alt="{{event.name}}"> -->
 
   <h4>
+
+
+
+
     <!-- Simple dropdown -->
     <span uib-dropdown on-toggle="toggled(open)">
       <a href id="simple-dropdown" uib-dropdown-toggle>
@@ -125,10 +136,9 @@
       <!-- correctly reduce padding -->
       <!-- Use a filter to identify selected instead of manipulating the model -->
 
-      <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:200 | filter:symbolsGridCtrl.query">
+      <div  class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:200 | filter:symbolsGridCtrl.query">
 
-
-        <uib-accordion-group class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-info' : 'panel-default') }}"
+        <uib-accordion-group  id="anchor-{{symbol.symbol}}" class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-info' : 'panel-default') }}"
           ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="((symbol.quote.ntP > 40) || (symbol.quote.trdVol > 5)) && (symbol.quote.expectedHighPercent > 0)"
           ng-show="(!symbol.nextEarningsBeforeFrontMonthExpiry || symbolsGridCtrl.incEarnings) && (!symbolsGridCtrl.earningsOnly || (symbol.daysToEarnings <=3  && symbol.nextEarnings))">
 
@@ -494,7 +504,7 @@
                 </div>
               </div>
 
-              <div class="row">
+              <div class="row" >
                 <div class="col-md-3 col-xs-3 col-sm-3 text-right">
                   <button class="btn btn-primary btn-sm" ng-click="symbolsGridCtrl.openOC(symbol)">Options</button>
                 </div>
@@ -502,7 +512,7 @@
                 </div>
 
                 <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                  <button class="btn btn-primary btn-sm" ng-click="open()">Chart</button>
+                  <button class="btn btn-primary btn-sm" ng-click="symbolsGridCtrl.openChart(symbol)">Chart</button>
                 </div>
                 <div class="col-md-3 col-xs-3 col-sm-3">
                 </div>
@@ -524,3 +534,5 @@
     </div>
   </uib-accordion>
 </div>
+
+

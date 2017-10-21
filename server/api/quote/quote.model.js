@@ -82,7 +82,7 @@ function toNumber(v) {
 
 }
 
-let rnd = (v, n = 2) => math.round(v, n);
+function rnd (v, n = 2) { return math.round(v, n) }
 
 export default mongoose.model('Quote', QuotesSchema);
 

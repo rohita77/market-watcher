@@ -6,11 +6,11 @@ angular.module('marketWatcherApp.events')
     .state('events', {
       url: '/events',
       views: {
-        "" : {
+        '' : {
           template: '<events></events>'
         }
       }
 
-    })
+    });
 
   });

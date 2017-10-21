@@ -166,6 +166,6 @@ export function getPiplelineForOCSubset(passedSymbol, ltP) {
 
   return pipeline;
 
-};
+}
 
 

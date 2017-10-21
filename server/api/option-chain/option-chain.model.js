@@ -69,7 +69,7 @@ OptionChainSchema.pre('save', function (next) {
 
 })*/
 
-let rnd = (v, n = 2) => math.round(v, n);
+function rnd (v, n = 2) { return math.round(v, n) }
 
 OptionChainSchema.statics.getOptionChainSubsetForSymbol = function (symbol, ltP) {
 

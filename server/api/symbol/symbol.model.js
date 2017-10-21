@@ -2,6 +2,7 @@
 
 import mongoose from 'mongoose';
 import { registerEvents } from './symbol.events';
+import math from 'mathjs';
 
 var SymbolSchema = new mongoose.Schema({
   _id: String,

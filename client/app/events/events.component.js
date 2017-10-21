@@ -37,29 +37,21 @@
 
                 }
                 getMoneyClass(sp, call = false) {
-                        let baseClass = " ", c;
+                        let baseClass = ' ', c;
 
                         if (call) {
-                                if (sp <= this.ltp)
-                                        c = baseClass + "active";
-                                if (sp >= this.sdH)
-                                        c = baseClass + "success";
-                                else if (sp >= this.expH)
-                                        c = baseClass + "warning";
-                                else if (sp >= this.ltp)
-                                        c = baseClass + "danger";
-                                else c = baseClass + "default";
+                                if (sp <= this.ltp) c = baseClass + 'active';
+                                else if (sp >= this.sdH) c = baseClass + 'success';
+                                else if (sp >= this.expH) c = baseClass + 'warning';
+                                else if (sp >= this.ltp) c = baseClass + 'danger';
+                                else c = baseClass + 'default';
                         }
                         else {
-                                if (sp >= this.ltp)
-                                        c = baseClass + "active";
-                                if (sp <= this.sdL)
-                                        c = baseClass + "success";
-                                else if (sp <= this.expL)
-                                        c = baseClass + "warning";
-                                else if (sp <= this.ltp)
-                                        c = baseClass + "danger";
-                                else c = baseClass + "default"
+                                if (sp >= this.ltp) c = baseClass + 'active';
+                                else if (sp <= this.sdL) c = baseClass + 'success';
+                                else if (sp <= this.expL) c = baseClass + 'warning';
+                                else if (sp <= this.ltp) c = baseClass + 'danger';
+                                else c = baseClass + 'default';
                         }
 
                         return c;

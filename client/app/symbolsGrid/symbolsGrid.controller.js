@@ -4,10 +4,12 @@
 
 
   class SymbolsGridComponent {
-    constructor($log, $interval, $resource, $sce, Modal) {
+    constructor($log, $interval, $resource, $sce,$anchorScroll, $location, Modal) {
       this.$resource = $resource;
       this.$interval = $interval;
       this.$log = $log;
+      this.$location = $location;
+      this.$anchorScroll = $anchorScroll;
       this.Modal = Modal;
 
       this.filterIsCollapsed = true;
@@ -52,6 +54,11 @@
 
     toggleSelectedSymbol(symbol) {
       this.selectedSymbol = symbol;
+
+      let hash = this.$location.hash(`anchor-${symbol}`);
+      this.$anchorScroll(hash);
+      this.$anchorScroll.yOffset = 40;
+
     }
 
 
@@ -65,8 +72,8 @@
 
       //TD: Refreshing only Data and not Symbols?
       quoteData.get().$promise
-        .then((data) => {
-
+        .then((resData) => {
+          let data = resData.data[0];
           this.quoteTime = data.quoteTime;
           this.refreshTime = data.refreshTime;
 
@@ -78,14 +85,14 @@
           }
 
           this.watchlist.symbols.forEach(symbol => {
-              symbol.quote = data.quotes.find(quote => {
-                return quote.symbol.match(
-                  new RegExp('^' + symbol.symbol + '$'));
-              });
-              //no match?
-              if (symbol.quote === undefined) symbol.quote = { };
-
+            symbol.quote = data.quotes.find(quote => {
+              return quote.symbol.match(
+                new RegExp('^' + symbol.symbol + '$'));
             });
+            //no match?
+            if (symbol.quote === undefined) { symbol.quote = {}; }
+
+          });
 
         }) //based on format
         .catch((data, status, headers, config) => {
@@ -123,16 +130,36 @@
 
     openOC(symbol) {
 
-          return this.Modal.confirm.ok(function (formData) {
+      let template = `<events symbol="data">`;
 
-                // formData contains the data collected in the modal
+      return this.Modal.confirm.ok(function (formData) {
 
-              })("Option Chain For ",symbol);
+        // formData contains the data collected in the modal
+
+      })(`Option Chain For ${symbol.symbol}`, symbol, template);
 
 
-        };
+    }
+
+    openChart(symbol) {
+
+      let template = `<chart symbol="data">`;
+
+      return this.Modal.confirm.ok(function (formData) {
+
+        // formData contains the data collected in the modal
+
+      })(`Trading View Chart For ${symbol.symbol}`, symbol, template);
+
+
+    }
+
 
   }
+
+
+
+
 
   angular.module('marketWatcherApp')
     .component('symbolsGrid', {
@@ -142,3 +169,5 @@
     });
 
 })();
+
+

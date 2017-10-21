@@ -1,23 +1,22 @@
 'use strict';
 
 angular.module('marketWatcherApp')
-  .factory('Modal', function ($rootScope, $uibModal, $state) {
+  .factory('Modal', function ($rootScope, $uibModal) {
     /**
      * Opens a modal
      * @param  {Object} scope      - an object to be merged with modal's scope
      * @param  {String} modalClass - (optional) class(es) to be applied to the modal
      * @return {Object}            - the instance $uibModal.open() returns
      */
-    function openModal(scope = {}, modalClass = 'modal-default') {
+    function openModal(scope = {},template='', modalClass = 'modal-default') {
       var modalScope = $rootScope.$new();
 
       angular.extend(modalScope, scope);
 
-      // modalScope.symbol1 = 'ARE3';
-
       return $uibModal.open({
         //templateUrl: 'components/modal/modal.html',
-        template: '<modal><events symbol="data">',
+        template: `<modal>${template}`,
+        // template: '<modal><chart>',
         windowClass: modalClass,
         scope: modalScope,
       });
@@ -89,12 +88,14 @@ angular.module('marketWatcherApp')
           return function () {
             var args = Array.prototype.slice.call(arguments),
               name = args.shift(),
-              symbol = args.shift(),
+              data = args.shift(),
+              template = args.shift(),
               okModal;
+
             okModal = openModal({
               modal: {
                 dismissable: true,
-                title: name + symbol.symbol,
+                title: name,
                 html: '<p>Are you sure you want to ok <strong>' + name +
                 '</strong> ?</p>',
                 buttons: [{
@@ -105,8 +106,10 @@ angular.module('marketWatcherApp')
                   }
                 }]
               },
-              data : symbol
-            }, 'modal-danger');
+              data : data
+            },
+            template,
+             'modal-danger');
 
             okModal.result.then(function (event) {
               del.apply(event, args);
