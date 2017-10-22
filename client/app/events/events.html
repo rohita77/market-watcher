@@ -2,7 +2,7 @@
     <h4>LTP: {{eventsCtrl.ltp}} </h4>
     <table class="table table-bordered table-condensed label text-center">
         <thead>
-            <tr class = "label-info row gutter-2">
+            <tr class = "label-info gutter-2">
               <th class="col-md-1 col-xs-1 col-sm-1 text-center"> <div>oi-k </div> <div><small><small>(ch)</small></small></div> </th>
               <th class="col-md-1 col-xs-1 col-sm-1 text-center">vol</th>
               <th class="col-md-1 col-xs-1 col-sm-1 text-center">iv</th>
@@ -15,7 +15,7 @@
             </tr>
           </thead>
       <tbody>
-          <tr ng-repeat="strike in eventsCtrl.oc.strikes | orderBy: 'strikePrice' | limitTo:200"  class = "row gutter-2">
+          <tr ng-repeat="strike in eventsCtrl.oc.strikes | orderBy: 'strikePrice' | limitTo:200"  class = "gutter-2">
               <td class="col-md-1 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice,true)"><div>{{strike.call.oi/1000}}</div><div><small><small> ({{strike.call.chngInOI/1000}}) </small> </small></div>
               </td>
               <td class="col-md-1 col-xs-1 col-sm-1" ng-class="eventsCtrl.getMoneyClass(strike.strikePrice,true)">{{strike.call.volume}}</td>
