@@ -149,7 +149,7 @@
 
         // formData contains the data collected in the modal
 
-      })(`Trading View Chart For ${symbol.symbol}`, symbol, template);
+      })(`Chart For ${symbol.symbol}`, symbol, template);
 
 
     }
