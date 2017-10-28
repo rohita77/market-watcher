@@ -35,6 +35,7 @@ export function getFnOLotSizes(downloadKey) {
 
     const fnOLotSizeCsvMapper = elem => {
         //TD: Use spread operator mklot : {elem[2]...elem[12]}
+
         let e = {
             symbol: elem.SYMBOL,
             mktlot: elem
@@ -120,3 +121,60 @@ export function getNextTradingDate(currentTradingDate = moment().clone().utcOffs
 
 
 export let getStockOptionChain = optionChain.getStockOptionChain;
+
+/*
+<select name="bankNiftySelect" id="bankNiftySelect" onchange="changeNiftyView();" class="goodTextBox" style="width:210px;">
+                            <optgroup label="Broad Market Indices">
+                            <option value="nifty">Nifty 50 </option>
+                            <option value="juniorNifty"> Nifty Next 50 </option>
+                            <!-- <option value="indiavix"> INDIA VIX </option>
+                            <option value="cnx100"> CNX 100</option>
+                            <option value="defty"> S&P CNX DEFTY </option>
+                            <option value="cnx500"> S&P CNX 500 </option>
+                            <option value="midcap"> CNX MIDCAP </option>-->
+							<!-- <option value="nseliquid"> Nifty100 Liquid 15 </option> -->
+                            <option value="niftyMidcap50"> Nifty Midcap 50 </option>
+							<!-- <option value="niftyMidcapLiq15"> Nifty Midcap Liquid 15 </option> -->
+                            </optgroup>
+                            <optgroup label="Sectoral Indices">
+							<option value="cnxAuto">Nifty Auto</option>
+							<option value="bankNifty">Nifty Bank</option>
+							<option value="cnxEnergy">Nifty Energy</option>
+							<option value="cnxFinance">Nifty Financial Services</option>
+							<option value="cnxFMCG">Nifty FMCG</option>
+							<option value="cnxit">Nifty IT</option>
+							<option value="cnxMedia">Nifty Media</option>
+							<option value="cnxMetal">Nifty Metal</option>
+							<option value="cnxPharma">Nifty Pharma</option>
+							<option value="cnxPSU">Nifty PSU Bank</option>
+							<option value="cnxRealty">Nifty Realty</option>
+							<option value="niftyPvtBank">Nifty Private Bank</option>
+							</optgroup>
+							<optgroup label="Thematic Indices">
+							<option value="cnxCommodities">Nifty Commodities</option>
+							<option value="cnxConsumption">Nifty India Consumption</option>
+							<option value="cpse">Nifty CPSE</option>
+							<option value="cnxInfra">Nifty Infrastructure</option>
+							<option value="cnxMNC">Nifty MNC</option>
+							<option value="ni15">Nifty Growth Sector 15</option>
+							<option value="cnxPSE">Nifty PSE</option>
+							<option value="cnxService">Nifty Services Sector</option>
+							<option value="nseliquid"> Nifty100 Liquid 15 </option>
+							<option value="niftyMidcapLiq15"> Nifty Midcap Liquid 15 </option>
+							</optgroup>
+							<optgroup label="Strategy Indices">
+							<option value="cnxDividendOppt">Nifty Dividend Opportunities 50</option>
+							<option value="nv20">Nifty50 Value 20</option>
+							<option value="niftyQuality30">Nifty Quality 30</option>
+							</optgroup>
+							<optgroup label="Others">
+                            <option value="sovGold">Sovereign Gold Bonds</option>
+							<option value="foSec"> FO Stocks</option>
+							<option value="etf"> ETF</option>
+							<option value="goldEtf">Gold ETF</option>
+							<option value="nifty50Etf">Nifty 50 ETF</option>
+							<option value="iL">Institutional Stock Watch</option>
+							<option value="bL">BL Stock Watch</option>
+							<option value="cbmSecList">Bonds in CM</option>
+							</optgroup>
+                        </select> */

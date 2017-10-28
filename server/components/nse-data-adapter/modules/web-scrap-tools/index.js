@@ -26,15 +26,15 @@ export function getSmallJSON(url) {
         json: true
     };
 
-/*
-    var options = {
-        uri: url,
-        headers: {
-            'User-Agent': 'Request-Promise'
-        },
-        json: true // Automatically parses the JSON string in the response
-    };
-*/
+    /*
+        var options = {
+            uri: url,
+            headers: {
+                'User-Agent': 'Request-Promise'
+            },
+            json: true // Automatically parses the JSON string in the response
+        };
+    */
 
     return requestPromise(options)
 }
@@ -45,8 +45,9 @@ export function getSmallCsv(url, csvMapper) {
         'Host': 'www.nseindia.com',
         'Upgrade-Insecure-Requests': 1,
         'User-Agent': 'Mozilla/5.0(Linux; Android 6.0; Nexus 5 Build/MRA58N) AppleWebKit/537.36(KHTML, like Gecko) Chrome/46.0.2490.76 Mobile Safari/537.36',
+        'Accept-Language': 'en-US,en;q=0.8,vi;q=0.6',
         'Accept': 'application/csv,text/csv',
-        'Accept-Encoding': 'gzip, deflate, sdch, br',
+        // 'Accept-Encoding': 'gzip, deflate, sdch, br',
     };
 
     let options = {
@@ -54,21 +55,20 @@ export function getSmallCsv(url, csvMapper) {
         headers: headers
     };
 
-    let csvConverter = new csvtojson.Converter({ constructResult: true }); //for small csv data
-
     console.log(`Downloading CSV File from: ${options.url}`);
 
     return new Promise((resolve, reject) => {
 
         //end_parsed will be emitted once parsing finished
-        csvConverter.on("end_parsed",
-            jsonArray => resolve(jsonArray.map(csvMapper))
-            // console.log('Found LT:' + jsonArray.find(symbol => { return symbol.symbol.match('\^LT$') }).name);
-        );
+        // csvConverter.on("end_parsed",
+        csvtojson()
+            .fromStream(request.get(options))
+            .on("end_parsed", jsonArray => resolve(jsonArray.map(csvMapper))
+            // jsonArray =>  console.log('Found LT:' + jsonArray.find(symbol => { return symbol.symbol.match('\^LT$') }).name)
 
-        request.get(options).pipe(csvConverter);
+            );
 
-    });
+     });
 
 
 }
