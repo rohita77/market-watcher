@@ -179,22 +179,21 @@ function populateFnOMktLot(symbolDoc) {
     /* Next Earning Date */
 
     let query = {};
+    let currentDate = moment().clone().utcOffset("+05:30");
+
+    let nextTradingDate = NSEDataAdapter.getNextTradingDate(currentDate);
+    let frontMonth = NSEDataAdapter.getExpiryMonth(nextTradingDate,"MMM-YY");
 
     query.symbol = symbolDoc.symbol;
 
     return FnOMktLot.findOne(query).exec()
         .then(fML => {
             if (fML) {
-
-                let currentDate = moment().clone().utcOffset("+05:30");
-                let frontMonth = NSEDataAdapter.getNextTradingDate(currentDate).format("MMM-YY");
-
                 symbolDoc.frontMonthLotSize = fML.mktlot[frontMonth.toUpperCase()]; //TD: get Calendar Month for Front Month
-
             }
 
             if (symbolDoc.symbol === "HINDALCO")
-                log(`Lot Size for ${symbolDoc.symbol} is ${symbolDoc.frontMonthLotSize}`);
+                log(`Lot Size for ${symbolDoc.symbol} for frontMonth ${frontMonth} is ${symbolDoc.frontMonthLotSize}`);
             return symbolDoc;
         });
 }
