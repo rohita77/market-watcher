@@ -69,10 +69,10 @@
         </li>
 
         <li role="menuitem">
-            <a ng-click="symbolsGridCtrl.setSortBy('daysToEarnings')" href="">
+          <a ng-click="symbolsGridCtrl.setSortBy('daysToEarnings')" href="">
               <span class="glyphicon" ng-class="(!symbolsGridCtrl.getReverse('daysToEarnings'))?'glyphicon-sort-by-attributes':'glyphicon-sort-by-attributes-alt'"></span> DTE
             </a>
-          </li>
+        </li>
 
       </ul>
     </div>
@@ -126,9 +126,9 @@
       <!-- correctly reduce padding -->
       <!-- Use a filter to identify selected instead of manipulating the model -->
 
-      <div  class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:200 | filter:symbolsGridCtrl.query">
+      <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:200 | filter:symbolsGridCtrl.query">
 
-        <uib-accordion-group  id="anchor-{{symbol.symbol}}" class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-info' : 'panel-default') }}"
+        <uib-accordion-group id="anchor-{{symbol.symbol}}" class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-info' : 'panel-default') }}"
           ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="((symbol.quote.ntP > 40) || (symbol.quote.trdVol > 5)) && (symbol.quote.expectedHighPercent > 0)"
           ng-show="(!symbol.nextEarningsBeforeFrontMonthExpiry || symbolsGridCtrl.incEarnings) && (!symbolsGridCtrl.earningsOnly || (symbol.daysToEarnings <=3  && symbol.nextEarnings))">
 
@@ -147,21 +147,34 @@
                     <span ng-class="'quote-pchg-'+ (symbol.quote.per | moveSize : [2,5,7])">
                       {{symbol.quote.per| number:1 }}%
                     </span>
-                </label>
+                  </label>
+                  <label class="btn btn-default disabled">
+                    <span ng-class="'quote-pchg-'+ (symbol.quote.mPC || 0 | moveSize : [5,9,15])">
+                      {{symbol.quote.mPC| number:1 }}%
+                    </span>
+                  </label>
+                  <label class="btn btn-default disabled">
+                    <span ng-class="'quote-pchg-'+ (symbol.quote.yPC || 0 | moveSize : [10,15,20])">
+                      {{symbol.quote.yPC | number:1}}%
+                    </span>
+                  </label>
+
                   <!--             //TD: Move to Directive -->
                   <label class="btn btn-warning disabled" ng-show="symbol.daysToEarnings < 36">
                     <span class="badge">
                       <small>
                         E{{symbol.daysToEarnings + ((!symbol.nextEarnings)?'?':null) }}
                       </small></span>
-                  </label>
+                    </label>
                 </div>
               </div>
             </div>
 
             <div class="row gutter-2">
               <div class="col-md-12 col-xs-12 col-sm-12">
-                <small><small>{{symbol.name | limitTo:60}}</small></small>
+                <small><small>{{symbol.name | limitTo:60}} ({{symbol.industry | limitTo:60}})</small></small>
+              </div>
+              <div class="col-md-6 col-xs-6 col-sm-6">
               </div>
             </div>
           </uib-accordion-heading>
@@ -191,11 +204,11 @@
                   <div class="row gutter-1">
 
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Margin Rate : </small></small>
+                      <small><small>Lot Size : </small></small>
                     </div>
 
                     <div class="col-md-3 col-xs-3 col-sm-3">
-                      {{symbol.frontMonthMarginPercent * 100 | number : 1}}%
+                      {{symbol.frontMonthLotSize | number : 0}}
                     </div>
 
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
@@ -209,23 +222,37 @@
                   </div>
 
                   <div class="row gutter-1">
-
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Lot Size : </small></small>
+                      <small><small>Call IV : </small></small>
                     </div>
-
-                    <div class="col-md-3 col-xs-3 col-sm-3">
-                      {{symbol.frontMonthLotSize | number : 0}}
+                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ ((symbol.quote.expectedHighOptions.call.iv-30) || 0| moveSize : [10,20,30])">
+                      {{symbol.quote.expectedHighOptions.call.iv | number : 1 }}%
                     </div>
 
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Place Holder: </small></small>
+                      <small><small>Put IV : </small></small>
                     </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3">
+                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ ((symbol.quote.expectedLowOptions.put.iv-30)  || 0| moveSize : [10,20,30])">
+                      {{symbol.quote.expectedLowOptions.put.iv | number : 1 }}%
                     </div>
 
                   </div>
 
+                  <div class="row gutter-1">
+                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                      <small><small>Call Bid Ask : </small></small>
+                    </div>
+                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (-1*((symbol.quote.expectedHighOptions.call.percentSpread||0) -5)  | moveSize : [1,3,5])">
+                      {{symbol.quote.expectedHighOptions.call.percentSpread | number : 1 }}%
+                    </div>
+
+                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                      <small><small>Put Bid Ask : </small></small>
+                    </div>
+                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (-1*((symbol.quote.expectedLowOptions.put.percentSpread||0) -5)  | moveSize : [1,3,5])">
+                      {{symbol.quote.expectedLowOptions.put.percentSpread | number : 1 }}%
+                    </div>
+                  </div>
 
                 </div>
               </div>
@@ -233,58 +260,6 @@
 
               <div class="panel panel-info">
                 <div class="panel-body">
-                  <div class="row gutter-1">
-                    <!-- Not working on small devices -->
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Last Price : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3">
-                      {{symbol.quote.ltP | currency}}
-                      <!-- TD: Convert to filter -->
-                    </div>
-
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Change% : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.per|| 0 | moveSize : [2,5,7])">
-                      <!-- | movesize : [2,5,7] -->
-                      {{symbol.quote.per| number:1 }}%
-                    </div>
-
-                  </div>
-
-                  <div class="row gutter-1">
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>30D Chg : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.mPC || 0 | moveSize : [5,9,15])">
-                      {{symbol.quote.mPC | number:1}}%
-                    </div>
-
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>52W Chg : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.yPC || 0 | moveSize : [10,15,20])">
-                      {{symbol.quote.yPC | number:1}}%
-                    </div>
-
-                  </div>
-                  <div class="row gutter-1">
-
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Expected High : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedHighPercent || 0 | moveSize : [5,9,15])">
-                      {{symbol.quote.expectedHighPercent | number : 1}}%
-                    </div>
-
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Expected Low : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedLowPercent || 0 | moveSize : [5,9,15])">
-                      {{symbol.quote.expectedLowPercent | number : 1}}%
-                    </div>
-                  </div>
 
                   <div class="row gutter-1">
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
@@ -303,20 +278,29 @@
 
                   </div>
 
-
                   <div class="row gutter-1">
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Expected High : </small></small>
+                      <small><small>Exp High : </small></small>
                     </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3">
+                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedHighPercent || 0 | moveSize : [5,9,15])">
                       {{symbol.quote.expectedHigh | currency}}
+                      <small>
+                          <small>
+                            {{symbol.quote.expectedHighPercent | number : 1}}%
+                          </small>
+                      </small>
                     </div>
 
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Expected Low : </small></small>
+                      <small><small>Exp Low : </small></small>
                     </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3">
+                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedLowPercent || 0 | moveSize : [5,9,15])">
                       {{symbol.quote.expectedLow | currency}}
+                      <small>
+                        <small>
+                          {{symbol.quote.expectedLowPercent | number : 1}}%
+                        </small>
+                      </small>
                     </div>
 
                   </div>
@@ -327,21 +311,6 @@
 
               <div class="panel panel-danger">
                 <div class="panel-body">
-                  <div class="row gutter-1">
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Call Bid Ask : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (-1*((symbol.quote.expectedHighOptions.call.percentSpread||0) -5)  | moveSize : [1,3,5])">
-                      {{symbol.quote.expectedHighOptions.call.percentSpread | number : 1 }}%
-                    </div>
-
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Put Bid Ask : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (-1*((symbol.quote.expectedLowOptions.put.percentSpread||0) -5)  | moveSize : [1,3,5])">
-                      {{symbol.quote.expectedLowOptions.put.percentSpread | number : 1 }}%
-                    </div>
-                  </div>
 
                   <div class="row gutter-1">
                     <div class="col-md-3 col-xs-3 col-sm-3 text-right">
@@ -391,22 +360,6 @@
 
                   </div>
 
-                  <div class="row gutter-1">
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Call IV : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ ((symbol.quote.expectedHighOptions.call.iv-30) || 0| moveSize : [10,20,30])">
-                      {{symbol.quote.expectedHighOptions.call.iv | number : 1 }}%
-                    </div>
-
-                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      <small><small>Put IV : </small></small>
-                    </div>
-                    <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ ((symbol.quote.expectedLowOptions.put.iv-30)  || 0| moveSize : [10,20,30])">
-                      {{symbol.quote.expectedLowOptions.put.iv | number : 1 }}%
-                    </div>
-
-                  </div>
 
                 </div>
               </div>
@@ -490,34 +443,98 @@
                     </div>
 
                   </div>
+                  <div class="row gutter-1">
+                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                      <small><small>Margin Rate : </small></small>
+                    </div>
+
+
+                    <div class="col-md-3 col-xs-3 col-sm-3">
+                      {{symbol.frontMonthMarginPercent * 100 | number : 1}}%
+                    </div>
+
+                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                      <small><small>Place Holder: </small></small>
+                    </div>
+                    <div class="col-md-3 col-xs-3 col-sm-3">
+                    </div>
+
+                  </div>
+
+                  <div class="row gutter-1">
+                      <!-- Not working on small devices -->
+                      <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                        <small><small>Last Price : </small></small>
+                      </div>
+                      <div class="col-md-3 col-xs-3 col-sm-3">
+                        {{symbol.quote.ltP | currency}}
+                        <!-- TD: Convert to filter -->
+                      </div>
+
+                      <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                        <small><small>Change% : </small></small>
+                      </div>
+                      <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.per|| 0 | moveSize : [2,5,7])">
+                        <!-- | movesize : [2,5,7] -->
+                        {{symbol.quote.per| number:1 }}%
+                      </div>
+
+                    </div>
+
+                    <div class="row gutter-1">
+                      <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                        <small><small>30D Chg : </small></small>
+                      </div>
+                      <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.mPC || 0 | moveSize : [5,9,15])">
+                        {{symbol.quote.mPC | number:1}}%
+                      </div>
+
+                      <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                        <small><small>52W Chg : </small></small>
+                      </div>
+                      <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.yPC || 0 | moveSize : [10,15,20])">
+                        {{symbol.quote.yPC | number:1}}%
+                      </div>
+
+                    </div>
+
 
                 </div>
               </div>
 
               <div class="panel panel-default">
-                  <div class="panel-body">
+                <div class="panel-body">
 
-                    <div class="row gutter-1">
-                      <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      </div>
-                      <div class="col-md-3 col-xs-3 col-sm-3">
-                          <button class="btn btn-primary btn-sm" ng-click="symbolsGridCtrl.openOC(symbol)">
+                  <div class="row gutter-1">
+                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                    </div>
+                    <div class="col-md-3 col-xs-3 col-sm-3">
+                      <button class="btn btn-primary btn-sm" ng-click="symbolsGridCtrl.openOC(symbol)">
                               <span class="glyphicon glyphicon-link"></span>
                             </button>
-                      </div>
-
-                      <div class="col-md-3 col-xs-3 col-sm-3 text-right">
-                      </div>
-                      <div class="col-md-3 col-xs-3 col-sm-3">
-                          <button class="btn btn-primary btn-sm" ng-click="symbolsGridCtrl.openChart(symbol)">
-                              <span class="glyphicon glyphicon-stats"></span>
-                          </button>
-                      </div>
-
                     </div>
 
+                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                    </div>
+                    <div class="col-md-3 col-xs-3 col-sm-3">
+                      <button class="btn btn-primary btn-sm" ng-click="symbolsGridCtrl.openChart(symbol)">
+                              <i class="fa fa-line-chart"></i>
+                          </button>
+                    </div>
+
+                    <div class="col-md-3 col-xs-3 col-sm-3 text-right">
+                    </div>
+                    <div class="col-md-3 col-xs-3 col-sm-3">
+                      <button class="btn btn-primary btn-sm" ng-click="symbolsGridCtrl.query.key = (symbolsGridCtrl.query.key == symbol.industry) ? '' :  symbol.industry">
+                            <i class="fa fa-industry"></i>
+                          </button>
+                    </div>
+
+
                   </div>
+
                 </div>
+              </div>
 
             </div>
 
@@ -534,5 +551,3 @@
     </div>
   </uib-accordion>
 </div>
-
-

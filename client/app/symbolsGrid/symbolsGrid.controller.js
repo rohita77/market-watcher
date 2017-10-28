@@ -4,7 +4,7 @@
 
 
   class SymbolsGridComponent {
-    constructor($log, $interval, $resource, $sce,$anchorScroll, $location, Modal) {
+    constructor($log, $interval, $resource, $sce, $anchorScroll, $location, Modal) {
       this.$resource = $resource;
       this.$interval = $interval;
       this.$log = $log;
@@ -153,6 +153,7 @@
 
 
     }
+
 
 
   }
