@@ -24,6 +24,11 @@
             "problemMatcher": [
                 "$gulp-tsc"
             ]
+        },
+        {
+            "type": "gulp",
+            "task": "transpile:server",
+            "problemMatcher": []
         }
     ]
 }
