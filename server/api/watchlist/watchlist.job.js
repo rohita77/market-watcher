@@ -33,16 +33,16 @@ export function run() {
         .then(() => {
 
             let today = moment().clone().startOf('day');
-            if (today.isoWeekday() > 5) today.isoWeekday(5); //Next Monday
-            //TD: Retain Last quote of the day
+            if (today.isoWeekday() > 5) today.isoWeekday(5); //Friday
             return OptionChain.remove({ lastMod: { $lt: today.toDate() } });
         })
         .then((result) => log(`Removed Option Chains ${JSON.stringify(result)}`))
         .then(() => {
 
             let today = moment().clone().startOf('day');
-            if (today.isoWeekday() > 5) today.isoWeekday(5); //Next Monday
+            if (today.isoWeekday() > 5) today.isoWeekday(5); //Friday
             let thirtyDaysBack = today.subtract(30,'days');
+            //TD: Retain Last quote of the day
 
             return Quote.remove({ lastMod: { $lt: thirtyDaysBack.toDate() } });
         })

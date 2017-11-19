@@ -12,13 +12,13 @@ var QuoteDataSchema = new mongoose.Schema({
   ptsC: { type: Number, set: toNumber, default: 0.00 },
   per: { type: Number, set: toNumber, default: 0.00 },
   trdVol: { type: Number, set: toNumber, default: 0.00 },
-  trdVolM: { type: Number, set: toNumber, default: 0.00 },
+//  trdVolM: { type: Number, set: toNumber, default: 0.00 },
   ntP: { type: Number, set: toNumber, default: 0.00 },
-  mVal: { type: Number, set: toNumber, default: 0.00 },
+//  mVal: { type: Number, set: toNumber, default: 0.00 },
   wkhi: { type: Number, set: toNumber, default: 0.00 },
   wklo: { type: Number, set: toNumber, default: 0.00 },
-  wkhicm_adj: { type: Number, set: toNumber, default: 0.00 },
-  wklocm_adj: { type: Number, set: toNumber, default: 0.00 },
+  // wkhicm_adj: { type: Number, set: toNumber, default: 0.00 },
+  // wklocm_adj: { type: Number, set: toNumber, default: 0.00 },
   xDt: { type: Date, default: null },
   cAct: { type: String, default: null },
   yPC: { type: Number, set: toNumber, default: 0.00 },
@@ -31,8 +31,7 @@ var QuoteDataSchema = new mongoose.Schema({
   expectedLowPutROCPercent: { type: Number },
   expectedHighOptions: {},
   expectedLowOptions: {},
-  frontMonthLotSize: { type: Number, default: 0 }, //TD
-  frontMonthMarginPercent: { type: Number, default: 0.15 }, //TD
+  frontMonthMarginPercent: { type: Number, default: 0.15 }, //TD  remove or lookup from Symbol
   maxROC: { type: Number, default: 0 }, //TD
 }
 );
@@ -42,11 +41,14 @@ QuoteDataSchema.pre('save', function (next) {
   this.expectedHighPercent = rnd(((this.expectedHigh - this.ltP) * 100) / this.ltP, 2);
   this.expectedLowPercent = rnd(((this.ltP - this.expectedLow) * 100) / this.ltP, 2);
 
-  if (this.expectedHighOptions)
+  if (this.expectedHighOptions) {
     this.expectedHighCallROCPercent = ((this.expectedHighOptions.call.midPrice * 100) / (this.frontMonthMarginPercent * this.ltP));
-  if (this.expectedLowOptions)
+    this.expectedHighCallROCPercent = rnd(this.expectedHighCallROCPercent,2);
+  }
+  if (this.expectedLowOptions) {
     this.expectedLowPutROCPercent = ((this.expectedLowOptions.put.midPrice * 100) / (this.frontMonthMarginPercent * this.ltP));
-  next()
+    this.expectedLowPutROCPercent = rnd(this.expectedLowPutROCPercent,2);
+  }
 
   //Max ROC for ranking and analytics
   let callROC = 0, putROC = 0;
@@ -59,7 +61,12 @@ QuoteDataSchema.pre('save', function (next) {
     putROC = (+this.expectedLowOptions.put.percentSpread < 11) ? +this.expectedLowPutROCPercent || 0 : 0;
   }
 
-  this.maxROC = Math.max(+callROC || 0, +putROC || 0);
+
+  this.maxROC = math.max(+callROC || 0, +putROC || 0);
+  this.maxROC = rnd(this.maxROC,2);
+
+
+  next();
 
 
 })
@@ -104,9 +111,19 @@ db.quotes.aggregate([
           input: "$quotes",
           as: "quote",
           cond: {
-            $or: [
-              { $gte: ["$$quote.trdVol", 40] }, //40 avg for 212 symbols. 6 trading hours
-              { $gte: ["$$quote.ntP", 100] }, ////100 avg for 212 symbols
+            $and : [
+              {
+                $or: [
+                  { $gte: ["$$quote.trdVol", 40] }, //40 avg for 212 symbols. 6 trading hours
+                  { $gte: ["$$quote.ntP", 100] }, ////100 avg for 212 symbols
+                ]
+              },
+              {
+                $or: [
+                  { $gt: ["$$quote.expectedHighPercent", 0] },
+                  { $gt: ["$$quote.expectedLowPercent", 0] }
+                ]
+              }
             ]
           }
 
@@ -127,12 +144,83 @@ db.quotes.aggregate([
       minVol : {
         $min : '$quotes.trdVol'
       },
-
       avgTurnover : {
         $avg : '$quotes.ntP'
       },
       minTurnover : {
         $min : '$quotes.ntP'
+      },
+      avgmaxROC : {
+        $avg : '$quotes.maxROC'
+      },
+      maxROC : {
+        $max : '$quotes.maxROC'
+      },
+      avgExpectedHighPercent : {
+        $avg : '$quotes.expectedHighPercent'
+      },
+      maxExpectedHighPercent : {
+        $max : '$quotes.expectedHighPercent'
+      },
+      avgExpectedLowPercent : {
+        $avg : '$quotes.expectedLowPercent'
+      },
+      maxExpectedLowPercent : {
+        $max : '$quotes.expectedLowPercent'
+      },
+      minCallBA : {
+        $min : '$quotes.expectedHighOptions.call.bidAskSpread'
+      },
+      avgCallBA : {
+        $avg : '$quotes.expectedHighOptions.call.bidAskSpread'
+      },
+      maxCallBA : {
+        $max : '$quotes.expectedHighOptions.call.bidAskSpread'
+      },
+      minPutBA : {
+        $min : '$quotes.expectedLowOptions.put.bidAskSpread'
+      },
+      avgPutBA : {
+        $avg : '$quotes.expectedLowOptions.put.bidAskSpread'
+      },
+      maxPutBA : {
+        $max : '$quotes.expectedLowOptions.put.bidAskSpread'
+      },
+      minCallIV : {
+        $min : '$quotes.expectedHighOptions.call.iv'
+      },
+      avgCallIV : {
+        $avg : '$quotes.expectedHighOptions.call.iv'
+      },
+      maxCallIV : {
+        $max : '$quotes.expectedHighOptions.call.iv'
+      },
+      minPutIV : {
+        $min : '$quotes.expectedLowOptions.put.iv'
+      },
+      avgPutIV : {
+        $avg : '$quotes.expectedLowOptions.put.iv'
+      },
+      maxPutIV : {
+        $max : '$quotes.expectedLowOptions.put.iv'
+      },
+      minCallOI : {
+        $min : '$quotes.expectedHighOptions.call.oi'
+      },
+      avgCallOI : {
+        $avg :  '$quotes.expectedHighOptions.call.oi'
+      },
+      maxCallOI : {
+        $max : '$quotes.expectedHighOptions.call.oi'
+      },
+      minPutOI : {
+        $min : '$quotes.expectedLowOptions.put.oi'
+      },
+      avgPutOI : {
+        $avg : '$quotes.expectedLowOptions.put.oi'
+      },
+      maxPutOI : {
+        $max : '$quotes.expectedLowOptions.put.oi'
       },
       symbols : '$quotes.symbol1'
     }
@@ -140,7 +228,7 @@ db.quotes.aggregate([
 ]
 ).pretty();
 
-*/
+//*/
 /*
 var project = {"_id":"false","quotes.symbol":"true","quotes.expectedHighPercent":"true"};
 
@@ -165,5 +253,31 @@ var query = {
 //db.quotes.findOne({'quotes.expectedHighPercent' : {$not : {$ne :0}}} ,project);
 
 db.quotes.findOne(query ,project);
+
+*/
+
+/*
+filter symbols with no earnings
+filter symbols with daily average volume
+  group by date
+filter symbols with quotes having expected high percent
+
+volume,roc,bidask,iv,oi,option vol,30day chg,
+
+by DTE,
+  average volume,roc,bidask,iv,oi,option vol,chg, 30day chg,
+
+by hour of the day
+  average roc,bidask,iv,oi,option vol,chg,30day chg,
+
+by symbol
+    days to 30%, 40%, 50%, 60%
+    breach break even before expiry
+    breach break even before expiry
+    2X, 3X premium
+    breach break even 50%
+    max loss
+
+h,l,c,o, price of closed option, last quotetimes, first modified date,iv,oi,vol
 
 */

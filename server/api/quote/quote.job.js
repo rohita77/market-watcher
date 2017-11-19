@@ -18,7 +18,7 @@ export function run() {
     log("Quote Job Fired");
     return refreshStockQuotes()
         .then((quotesJSON) => {
-            log(`Refreshed StockQuotes for Index: ${quotesJSON.index} id:${quotesJSON._id} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime}`)
+            log(`Refreshed StockQuotes for Index: ${quotesJSON.index} id:${quotesJSON._id.toLocaleString("en-US", IST)} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString("en-US", IST)}`)
             return quotesJSON;
         })
         //TS+D: Which one to get. The list is big
@@ -28,15 +28,17 @@ export function run() {
             return quotesJSON;
         })
         .then((quotesJSON) => {
-            log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id}`)
+            log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id.toLocaleString("en-US", IST)}`)
             return quotesJSON.save();
 
         })
         .then((saved) => {
-            log(`Saved quotes and with timestamp is:${JSON.stringify(saved.lastMod)}`);
+            log(`Saved quotes at:${saved.lastMod.toLocaleString()}`);
         });
 
 }
+
+let IST = { timeZone: "Asia/Calcutta", timeZoneName: "short" };
 
 function now() {
     return moment().format('HH:mm:ss Z');
@@ -51,29 +53,18 @@ function refreshStockQuotes() {
     return downloads.getQuotesForFnOStocks()
         //save the quotes in the DB once they are downloaded
         .then(quotesJSON => {
-            log(`Fetched Quotes for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime}`);
-            return Quote.findById(quotesJSON.quoteTime).exec()
-                .then((q) => {
-                    if (q) {
-                        log(`Quotes already exists for : ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime}`);
-                        return q;
-                    }
-                    else {
-                        quotesJSON._id = quotesJSON.quoteTime;
-                        return Quote.create(quotesJSON)
-                            .then((quotesJSON) => {
-                                log(`Inserted Quotes for index: ${quotesJSON.index} / with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime}`);
-                                return quotesJSON
-                            });
+            log(`Fetched Quotes for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString("en-US", IST)}`);
 
-                    }
-
-                })
+            return Quote.findOneAndUpdate({ quoteTime : quotesJSON.quoteTime }, quotesJSON, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true,runSettersOnQuery : true }).exec()
+                .then((doc,err) => {
+                    log(`Upserted Quotes for index: ${quotesJSON.index} / with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString("en-US", IST)} and refreshTime: ${quotesJSON.refreshTime.toLocaleString()}`);
+                    if (err)  log(err); //undefined
+                    // log(doc);
+                    return doc;
+                });
 
         })
     //resolve the promise for the insert
-
-
 }
 
 function refreshOptionChains(quotesJSON) {

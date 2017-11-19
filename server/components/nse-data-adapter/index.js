@@ -4,6 +4,14 @@ import moment from 'moment';
 var webScrapTools = require('./modules/web-scrap-tools');
 var optionChain = require('./option-chain');
 
+function now() {
+    return moment().format('HH:mm:ss Z');
+}
+
+function log(message) {
+    console.log(`${now()} ${message}`);
+}
+
 export function getSymbolsInIndex(downloadKey) {
     let url = 'https://www.nseindia.com/content/indices/ind_' + downloadKey + '.csv';
 
@@ -49,8 +57,6 @@ export function getFnOLotSizes(downloadKey) {
     return webScrapTools.getSmallCsv(url, fnOLotSizeCsvMapper);
 }
 
-
-
 export function getQuotesForIndexStocks(index) {
     let url = `https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/${index}.json`;
 
@@ -60,9 +66,9 @@ export function getQuotesForIndexStocks(index) {
             [res.quoteTime,res.time] = [new Date(res.time + ' GMT+0530'),res.quoteTime];
             res.refreshTime = new Date();
             [res.quotes, res.data] = [res.data,res.quotes]
-            let timeZoneFormat = { timeZone: "Asia/Calcutta", timeZoneName: "short" };
+            let IST = { timeZone: "Asia/Calcutta", timeZoneName: "short" };
 
-            console.log(`Number of Quotes: ${res.quotes.length} as of ${res.quoteTime.toLocaleTimeString("en-US", timeZoneFormat)} retrieved at ${res.refreshTime.toLocaleTimeString("en-US", timeZoneFormat)}`);
+            log(`Number of Quotes: ${res.quotes.length} as of ${res.quoteTime.toLocaleString("en-US", IST)} retrieved at ${res.refreshTime.toLocaleString()}`);
             return res;
 
         });
@@ -88,8 +94,6 @@ export function getExpiryMonth(tradingDate, formatString = "MMM-YY") {
     return getExpiryDate(tradingDate).format(formatString);
 
 }
-
-
 
 export function getNextTradingDate(currentTradingDate = moment().clone().utcOffset("+05:30")) {
 
@@ -177,4 +181,5 @@ export let getStockOptionChain = optionChain.getStockOptionChain;
 							<option value="bL">BL Stock Watch</option>
 							<option value="cbmSecList">Bonds in CM</option>
 							</optgroup>
-                        </select> */
+                        </select>
+ */
