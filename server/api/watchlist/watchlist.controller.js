@@ -16,9 +16,9 @@ function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
   return function (entity) {
     if (entity) {
-      //console.log("entity" + entity.name());
-      res.status(statusCode).json(entity);
+      res.status(statusCode).json({data : entity});
     }
+    return null;
   };
 }
 
@@ -62,7 +62,7 @@ function handleError(res, statusCode) {
 
 // Gets a list of Watchlists
 export function index(req, res) {
-  return Watchlist.find().exec()
+  return Watchlist.find({},{name:true}).sort({name:1}).exec()
     .then(respondWithResult(res))
     .catch(handleError(res));
 }

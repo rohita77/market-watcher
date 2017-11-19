@@ -6,11 +6,11 @@
     <!-- Simple dropdown -->
     <span uib-dropdown on-toggle="toggled(open)">
       <a href id="simple-dropdown" uib-dropdown-toggle>
-        {{ symbolsGridCtrl.watchlist.name }}
+        {{ symbolsGridCtrl.selectedWatchlist.name }}
       </a>
       <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
-        <li ng-repeat="choice in items">
-          <a href>{{choice}}</a>
+        <li ng-repeat="choice in symbolsGridCtrl.watchlistChoices" ng-click="symbolsGridCtrl.changeWatchlist(choice)">
+          <a href="#">{{choice.name}}</a>
         </li>
       </ul>
     </span>

@@ -17,10 +17,26 @@
       this.sortReverse = false;
       this.incEarnings = false;
 
-      //GetSymbols
-      //let watchlistData = this.$resource('/api/watchlists/NIFTY100');
+      this.selectedWatchlist = {
+        _id :  'NIFTY100',
+        name : 'NIFTY 100 Index'
+      }
+
+      this.query = {
+        watchlists: 'NIFTY100'
+      };
+
+      //Watchlists
+      let watchlistData = this.$resource('/api/watchlists');
+
+      watchlistData.get().$promise
+        .then((data) => {
+          this.watchlistChoices = data.data;
+        });
+
+
       //TD: Select from Drop Down
-      let symbolsData = this.$resource('/api/symbols/?watchlists=NIFTY100');
+      let symbolsData = this.$resource('/api/symbols');
 
       symbolsData.get().$promise
         .then((data) => {
@@ -49,6 +65,12 @@
           this.$log.warn(data, status, headers, config);
         });
 
+
+    }
+
+    changeWatchlist(choice) {
+      this.query.watchlists=choice._id;
+      this.selectedWatchlist = choice;
 
     }
 

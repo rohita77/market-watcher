@@ -19,19 +19,7 @@ function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
   return function (entity) {
     if (entity) {
-      /*
-            return Promise.resolve(
-              entity.map(e => {
-                e.daysToEarnings = moment(e.projectedEarnings).diff(moment(), 'days');
-                return e
-              })).then(newEntity => {
-        */
       return res.status(statusCode).json({ data: entity });
-      //   }
-
-      // )
-
-      //TD: Move to Directive
     }
     return null;
   };
@@ -82,7 +70,7 @@ function handleError(res, statusCode) {
 export function index(req, res) {
 
   let query = {};
-  query.watchlists = req.query.watchlists;
+  query = (req.query.watchlists) ? {watchlists : req.query.watchlists } : {} ;
   //TD: query.watchlists.$in = req.query.watchlists;
   return Symbol.find(query).exec()
     .then(respondWithResult(res))
