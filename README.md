@@ -33,10 +33,11 @@ Run `grunt build` for building and `grunt serve` for preview.
 Running `npm test` will run the unit tests with karma.
 
 ## Upgrading
-Dependancies
-Dev-Dependancies
-NPM Version
-Node Version
+NPM Version --> node -v -->
+Node Version --> node -v --> npm-windows-upgrade
+Global Package --> npm update -g
+Dependencies --> >npm update --dev
+Dev-Dependencies
 Typings
 ES Lint
 Generator
