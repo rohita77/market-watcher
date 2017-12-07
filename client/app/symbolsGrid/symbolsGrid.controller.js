@@ -152,7 +152,7 @@
 
     openOC(symbol) {
 
-      let template = `<events symbol="data">`;
+      let template = `<option-chain symbol="data">`;
 
       return this.Modal.confirm.ok(function (formData) {
 

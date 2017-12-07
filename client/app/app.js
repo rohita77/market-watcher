@@ -2,7 +2,7 @@
 
 angular.module('marketWatcherApp', ['marketWatcherApp.auth', 'marketWatcherApp.admin',
     'marketWatcherApp.constants', 'ngCookies', 'ngResource', 'ngSanitize', 'btford.socket-io',
-    'ui.router', 'ui.bootstrap', 'validation.match','marketWatcherApp.events','marketWatcherApp.chart'
+    'ui.router', 'ui.bootstrap', 'validation.match','marketWatcherApp.option-chain','marketWatcherApp.chart'
   ])
   .config(function($urlRouterProvider, $locationProvider) {
     $urlRouterProvider.otherwise('/');
