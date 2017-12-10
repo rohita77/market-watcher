@@ -56,18 +56,19 @@ OptionChainSchema.pre('save', function (next) {
     strike.put.breakEven = rnd(strike.strikePrice - strike.put.midPrice);
 
 //    Save only options with any oi and volume
-   if ((strike.call.oi > 0 && strike.call.volume > 0) || (strike.put.oi > 0  && strike.put.volume > 0))
-   return strike;
+    if ((strike.call.oi > 0 && strike.call.volume > 0) || (strike.put.oi > 0 && strike.put.volume > 0))
+      return strike;
   }, this);
 
-  next();
+  if (this.strikes.length <1)
+    next (new Error("No Strikes"));
+  else
+    next();
 })
 
-/*OptionChainSchema.post('save', function (doc) {
-
-//  console.log(`After Creating Option chain for ${doc.symbol}`);
-
-})*/
+// OptionChainSchema.post('save', function (error, doc, next) {
+//   next();
+// })
 
 function rnd (v, n = 2) { return math.round(v, n) }
 
