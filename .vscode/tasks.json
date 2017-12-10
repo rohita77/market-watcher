@@ -29,6 +29,14 @@
             "type": "gulp",
             "task": "transpile:server",
             "problemMatcher": []
+        },
+        {
+            "type": "npm",
+            "script": "build",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
