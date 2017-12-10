@@ -39,7 +39,7 @@ const jobSchedules = [
     jobName: 'refreshQuotesForFnOStocks',
     jobModule: './api/quote/quote.job',
     jobStartHour: 9,                    //9.15
-    jobEndHour: 17                      //15.30, 16.15(excercise)
+    jobEndHour: 16                      //15.30, 16.15(excercise)
   }
 ]
 
@@ -70,7 +70,7 @@ let jobSchedule = jobSchedules.find(
 var job = require(jobSchedule.jobModule);
 
 
-let jobRunHour = moment().utcOffset("+05:30").hour();
+let jobRunHour = moment().utcOffset("+05:30").subtract(11, 'minutes').hour();
 let jobRunWeekDay = moment().utcOffset("+05:30").isoWeekday();
 
 let runNotInRegularJobSchedule = (!((jobRunHour >= jobSchedule.jobStartHour) && (jobRunHour <= jobSchedule.jobEndHour) &&(jobRunWeekDay <= 5)));
