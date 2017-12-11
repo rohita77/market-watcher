@@ -1,0 +1,129 @@
+<div class="container-fluid">
+    <!--  <img ng-src="{{marketAnalysisCtrl.imageUrl}}" alt="{{marketAnalysisCtrl.name}}"> -->
+
+    <h4>
+        <!-- Simple dropdown -->
+        <!-- <span uib-dropdown on-toggle="toggled(open)">
+            <a href id="simple-dropdown" uib-dropdown-toggle>
+
+            </a>
+            <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
+                <li ng-repeat="choice in items">
+                    <a href>{{choice}}</a>
+                </li>
+            </ul>
+        </span> -->
+        Daily Quote Summary
+        </span>
+    </h4>
+
+    <div class="row gutter-2">
+
+                    <!--TD// new row after every four -->
+                    <!-- correctly reduce padding -->
+                  <!--Use a filter to identify selected instead of manipulating the model -->
+                    <div class="col-md-12 col-xs-12 cols-sm-12">
+
+                        <div class="col-md-2 col-xs-2 col-sm-2">
+                                <small><strong>Date</strong></small>
+                        </div>
+
+                        <div class="col-md-1 col-xs-1 col-sm-1">
+                            <small><strong>UL#</strong></small>
+                        </div>
+
+                        <div class="col-md-1 col-xs-1 col-sm-1">
+                                <small><strong>Vol</strong></small>
+                        </div>
+
+                        <div class="col-md-1 col-xs-1 col-sm-1">
+                                <small><strong>T/O</strong></small>
+                        </div>
+
+                        <div class="col-md-1 col-xs-1 col-sm-1">
+                                <small><strong>ROC</strong></small>
+                        </div>
+
+
+                        <div class="col-md-1 col-xs-1 col-sm-1">
+                                <small><strong>C: P:</strong></small>
+                        </div>
+
+
+                        <div class="col-md-1 col-xs-1 col-sm-1">
+                                <small><strong>Ex H/L</strong></small>
+                        </div>
+
+                        <div class="col-md-1 col-xs-1 col-sm-1">
+                                <small><strong>BA%</strong></small>
+                        </div>
+
+                        <div class="col-md-1 col-xs-1 col-sm-1">
+                                <small><strong>IV</strong></small>
+                        </div>
+
+                        <div class="col-md-1 col-xs-1 col-sm-1">
+                                <small><strong>OI</strong></small>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+    <!-- Gutter3 = reduced padding -->
+    <div class="row gutter-2">
+
+        <!--TD// new row after every four -->
+        <!-- correctly reduce padding -->
+      <!--Use a filter to identify selected instead of manipulating the model -->
+        <div class="col-md-12 col-xs-12 cols-sm-12" ng-repeat="ds in marketAnalysisCtrl.dailyStat | orderBy: '_id' | limitTo:35 ">
+
+            <div class="col-md-2 col-xs-2 col-sm-2">
+                    <small>{{ds._id}}</small>
+            </div>
+
+            <div class="col-md-1 col-xs-1 col-sm-1">
+                <small>{{ds.quotestats.totalSymbols | number}}</small>
+            </div>
+
+            <div class="col-md-1 col-xs-1 col-sm-1">
+                    <small>{{ds.quotestats.avgVol | number : 0 }}</small>
+            </div>
+
+            <div class="col-md-1 col-xs-1 col-sm-1">
+                    <small>{{ds.quotestats.avgTurnover | number : 0}}</small>
+            </div>
+
+            <div class="col-md-1 col-xs-1 col-sm-1">
+                    <small>{{ds.quotestats.avgMaxROC | number : 1}}</small>
+            </div>
+
+
+            <div class="col-md-1 col-xs-1 col-sm-1">
+                    <small><strong>C: P:</strong></small>
+            </div>
+
+
+            <div class="col-md-1 col-xs-1 col-sm-1">
+                    <small>{{ds.quotestats.avgExpHiPer | number : 1}}  {{ds.quotestats.avgExpLowPer | number : 1}}</small>
+            </div>
+
+            <div class="col-md-1 col-xs-1 col-sm-1">
+                    <small>{{ds.quotestats.avgCallBA | number : 1}}  {{ds.quotestats.avgPutBA | number : 1}}</small>
+            </div>
+
+            <div class="col-md-1 col-xs-1 col-sm-1">
+                    <small>{{ds.quotestats.avgCallIV | number : 1}}  {{ds.quotestats.avgPutIV | number : 1}}</small>
+            </div>
+
+            <div class="col-md-1 col-xs-1 col-sm-1">
+                    <small>{{ds.quotestats.avgCallOI/100000 | number : 1}}  {{ds.quotestats.avgPutOI/100000 | number : 1}}</small>
+            </div>
+
+        </div>
+
+    </div>
+
+
+</div>
