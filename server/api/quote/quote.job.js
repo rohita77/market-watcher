@@ -55,11 +55,10 @@ function refreshStockQuotes() {
         .then(quotesJSON => {
             log(`Fetched Quotes for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString("en-US", IST)}`);
 
-            return Quote.findOneAndUpdate({ quoteTime : quotesJSON.quoteTime }, quotesJSON, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true,runSettersOnQuery : true }).exec()
+            return Quote.findOneAndUpdate({ _id : quotesJSON.quoteTime }, quotesJSON, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true,runSettersOnQuery : true }).exec()
                 .then((doc,err) => {
-                    log(`Upserted Quotes for index: ${quotesJSON.index} / with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString("en-US", IST)} and refreshTime: ${quotesJSON.refreshTime.toLocaleString()}`);
+                    log(`Upserted Quotes for index: ${quotesJSON.index} / with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString("en-US", IST)} and refreshTime: ${doc.refreshTime.toLocaleString()}`);
                     if (err)  log(err); //undefined
-                    // log(doc);
                     return doc;
                 });
 
@@ -99,7 +98,7 @@ function refreshOptionChain(stockQuote) {
     return downloads.getStockOptionChain(stockQuote.symbol, frontMonth)
         //save the option chain in the DB once they are downloaded
         .then(optionChainArr => {
-            if (optionChainArr) {
+            if (optionChainArr && optionChainArr.length > 0) {
 
                 let optionChainJSON = {
                     symbol: stockQuote.symbol,           //TD: Sub docs expiry date, strike price, option
@@ -111,6 +110,13 @@ function refreshOptionChain(stockQuote) {
                 log(`Fetched Option Chain for ${stockQuote.symbol}/ ${frontMonth} with ${optionChainArr.length} strikes and quoteTime: ${stockQuote.quoteTime}`);
 
                 return OptionChain.create(optionChainJSON)
+                    .then((doc) => {
+                       return doc;
+                    } )
+                    .catch((err) => {
+                        log(`Error Creating Option Chain for ${stockQuote.symbol} / ${frontMonth}: ${err}`);
+                        return null;
+                    });
             }
             else
                 log(`No Option Chain Returned for ${stockQuote.symbol}`);
@@ -142,5 +148,5 @@ function getExpectedMoveForQuote(stockQuote) {
             log(`Stock ${stockQuote.symbol} has expected high/low as ${stockQuote.expectedHigh}/${stockQuote.expectedLow}`)
             return stockQuote
         })
-
+        DailyAverageQuotes
 }

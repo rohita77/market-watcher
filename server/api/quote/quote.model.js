@@ -3,6 +3,8 @@
 import mongoose from 'mongoose';
 import math from 'mathjs';
 
+var queries = require('./quote.queries');
+
 var QuoteDataSchema = new mongoose.Schema({
   symbol: { type: mongoose.Schema.Types.String, ref: 'Quote' },
   open: { type: Number, set: toNumber, default: 0.00 },
@@ -91,6 +93,17 @@ function toNumber(v) {
 
 function rnd (v, n = 2) { return math.round(v, n) }
 
+    // let pipeline = getPipelineForDailvAverageQuotes(['INFY', "M&M", 'RELIANCE'], "20171208");
+QuotesSchema.statics.getDailyQuoteStats = function (symbols,marketQuoteDate) {
+
+  let pipeline = queries.getPipelineForDailyAverageQuotes(symbols,marketQuoteDate);
+  console.log(JSON.stringify(pipeline));
+  return this.aggregate(pipeline)
+
+};
+
+
+
 export default mongoose.model('Quote', QuotesSchema);
 
 //Index on reresh time or last mod or quot time/
@@ -100,133 +113,6 @@ export default mongoose.model('Quote', QuotesSchema);
 db.quotes.findOne({})
 db.quotes.find({ntp: {$gte : 100}}).count()
 
-db.quotes.aggregate([
-  { $sort: { refreshTime: - 1 } },
-  { $limit: 1 },
-  {
-    $project: {
-      refreshTime : true,
-      quotes: {
-        $filter: {
-          input: "$quotes",
-          as: "quote",
-          cond: {
-            $and : [
-              {
-                $or: [
-                  { $gte: ["$$quote.trdVol", 40] }, //40 avg for 212 symbols. 6 trading hours
-                  { $gte: ["$$quote.ntP", 100] }, ////100 avg for 212 symbols
-                ]
-              },
-              {
-                $or: [
-                  { $gt: ["$$quote.expectedHighPercent", 0] },
-                  { $gt: ["$$quote.expectedLowPercent", 0] }
-                ]
-              }
-            ]
-          }
-
-        }
-      }
-    }
-  },
-  {
-    $project : {
-      refreshTime : true,
-      "_id" : false,
-      totalSymbols : {
-        $size : '$quotes.symbol'
-      },
-      avgVol : {
-        $avg : '$quotes.trdVol'
-      },
-      minVol : {
-        $min : '$quotes.trdVol'
-      },
-      avgTurnover : {
-        $avg : '$quotes.ntP'
-      },
-      minTurnover : {
-        $min : '$quotes.ntP'
-      },
-      avgmaxROC : {
-        $avg : '$quotes.maxROC'
-      },
-      maxROC : {
-        $max : '$quotes.maxROC'
-      },
-      avgExpectedHighPercent : {
-        $avg : '$quotes.expectedHighPercent'
-      },
-      maxExpectedHighPercent : {
-        $max : '$quotes.expectedHighPercent'
-      },
-      avgExpectedLowPercent : {
-        $avg : '$quotes.expectedLowPercent'
-      },
-      maxExpectedLowPercent : {
-        $max : '$quotes.expectedLowPercent'
-      },
-      minCallBA : {
-        $min : '$quotes.expectedHighOptions.call.bidAskSpread'
-      },
-      avgCallBA : {
-        $avg : '$quotes.expectedHighOptions.call.bidAskSpread'
-      },
-      maxCallBA : {
-        $max : '$quotes.expectedHighOptions.call.bidAskSpread'
-      },
-      minPutBA : {
-        $min : '$quotes.expectedLowOptions.put.bidAskSpread'
-      },
-      avgPutBA : {
-        $avg : '$quotes.expectedLowOptions.put.bidAskSpread'
-      },
-      maxPutBA : {
-        $max : '$quotes.expectedLowOptions.put.bidAskSpread'
-      },
-      minCallIV : {
-        $min : '$quotes.expectedHighOptions.call.iv'
-      },
-      avgCallIV : {
-        $avg : '$quotes.expectedHighOptions.call.iv'
-      },
-      maxCallIV : {
-        $max : '$quotes.expectedHighOptions.call.iv'
-      },
-      minPutIV : {
-        $min : '$quotes.expectedLowOptions.put.iv'
-      },
-      avgPutIV : {
-        $avg : '$quotes.expectedLowOptions.put.iv'
-      },
-      maxPutIV : {
-        $max : '$quotes.expectedLowOptions.put.iv'
-      },
-      minCallOI : {
-        $min : '$quotes.expectedHighOptions.call.oi'
-      },
-      avgCallOI : {
-        $avg :  '$quotes.expectedHighOptions.call.oi'
-      },
-      maxCallOI : {
-        $max : '$quotes.expectedHighOptions.call.oi'
-      },
-      minPutOI : {
-        $min : '$quotes.expectedLowOptions.put.oi'
-      },
-      avgPutOI : {
-        $avg : '$quotes.expectedLowOptions.put.oi'
-      },
-      maxPutOI : {
-        $max : '$quotes.expectedLowOptions.put.oi'
-      },
-      symbols : '$quotes.symbol1'
-    }
-  }
-]
-).pretty();
 
 //*/
 /*

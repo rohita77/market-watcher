@@ -7,7 +7,7 @@ var downloads = require('../../components/nse-data-adapter/downloads');
 var NSEDataAdapter = require('../../components/nse-data-adapter/index'); //TD Refactor
 var moment = require('moment');
 
-//import Model and save to Mongo
+//import Core Model and save to Mongo
 import Watchlist from './watchlist.model';
 
 import Symbol from './../symbol/symbol.model';
@@ -16,9 +16,11 @@ import boardMeeting from '../../api/board-meeting/board-meeting.model';
 
 import FnOMktLot from '../../components/nse-data-adapter/models/fno-mkt-lot.model';
 
-//import Model and save to Mongo
+//import Quote Model and save to Mongo
 import Quote from '../../api/quote/quote.model';
 import OptionChain from '../../api/option-chain/option-chain.model';
+import DailyStat from '../../api/daily-stat/daily-stat.model';
+
 
 export function run() {
     console.log("Watch List Job Fired Time is :" + new Date());
@@ -41,12 +43,15 @@ export function run() {
 
             let today = moment().clone().startOf('day');
             if (today.isoWeekday() > 5) today.isoWeekday(5); //Friday
-            let thirtyDaysBack = today.subtract(30,'days');
+            let thirtyDaysBack = today.subtract(30, 'days');
             //TD: Retain Last quote of the day
 
             return Quote.remove({ lastMod: { $lt: thirtyDaysBack.toDate() } });
         })
         .then((result) => log(`Removed Quotes Older than 30 days ${JSON.stringify(result)}`))
+        .then(() => {
+            return updateDailyAverageQuotes();
+        })
         .then(() => Symbol.find({}).count().exec().then((c) => {
             log(`After Job DB has ${JSON.stringify(c)} symbols`);
         }))
@@ -182,7 +187,7 @@ function populateFnOMktLot(symbolDoc) {
     let currentDate = moment().clone().utcOffset("+05:30");
 
     let nextTradingDate = NSEDataAdapter.getNextTradingDate(currentDate);
-    let frontMonth = NSEDataAdapter.getExpiryMonth(nextTradingDate,"MMM-YY");
+    let frontMonth = NSEDataAdapter.getExpiryMonth(nextTradingDate, "MMM-YY");
 
     query.symbol = symbolDoc.symbol;
 
@@ -360,6 +365,36 @@ function reduceBoardMeetingsArr(bmArr) {
     }, []);
 }
 
+function updateDailyAverageQuotes() {
+
+    //TD: pass date
+    let today = moment().clone().utcOffset("+05:30");
+    if (today.isoWeekday() > 5) today.isoWeekday(5); //Friday
+    let dt = today.format("YYYYMMDD");
+
+    return Quote.getDailyQuoteStats([],dt)
+        .exec()
+        .then((docs, err) => {
+            return docs[0] ? docs[0] : undefined
+        } )
+        .then((quoteStat) => {
+            if (quoteStat) {
+                let qs = quoteStat;
+                qs._id = undefined;
+                log(JSON.stringify(qs));
+
+                return DailyStat.findOneAndUpdate({ _id: dt }, {$set : {quotestats : qs }}, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true, runSettersOnQuery: true })
+                    .exec()
+                    .then((doc, err) => {
+                        log(`Upserted Daily average quotes for date: ${dt}`);
+                        if (err) log(err); //undefined
+                        return doc;
+                    });
+
+            }
+        })
+
+}
 
 /* Use these script to setup Insert Wachlists
 db.watchlists.insert({_id: 'NIFTY50' , name : 'NIFTY 50 Index' , description : 'Nifty 50 Index',downloadKey : 'nifty50list'});
