@@ -37,6 +37,8 @@ NPM Version --> node -v -->
 Node Version --> node -v --> npm-windows-upgrade
 Global Package --> npm update -g
 Dependencies --> >npm update --dev
+evnpm --depth 9999 update
+
 Dev-Dependencies
 Typings
 ES Lint

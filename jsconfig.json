@@ -12,6 +12,7 @@
 		"jspm_packages",
 		"tmp",
 		"temp",
-		"typings"
+		"typings",
+		"dist"
 	]
 }
