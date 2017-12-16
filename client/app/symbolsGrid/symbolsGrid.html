@@ -176,7 +176,7 @@
             <div class="row gutter-2">
               <div class="col-md-12 col-xs-12 col-sm-12">
                 <small>
-                  <small>{{symbol.name | limitTo:60}} {{symbol.industry | limitTo:60}}</small>
+                  <small>{{symbol.name | limitTo:60}} ({{symbol.industry | limitTo:60}})</small>
                 </small>
               </div>
               <div class="col-md-6 col-xs-6 col-sm-6">
@@ -581,7 +581,7 @@
                   <div class="col-md-3 col-xs-3 col-sm-3 text-right">
                   </div>
                   <div class="col-md-3 col-xs-3 col-sm-3">
-                    <button class="btn btn-primary btn-sm" ng-click="symbolsGridCtrl.query.key = (symbolsGridCtrl.query.key == symbol.industry) ? '' :  symbol.industry">
+                    <button class="btn btn-primary btn-sm" ng-click="symbolsGridCtrl.filterIndustry(symbol)">
                       <i class="fa fa-industry"></i>
                     </button>
                   </div>

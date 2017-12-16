@@ -68,6 +68,11 @@
 
     }
 
+    filterIndustry(symbol) {
+      this.query.key = (this.query.key == symbol.industry) ? '' :  `(${symbol.industry})`;
+    }
+
+
     changeWatchlist(choice) {
       this.query.watchlists=choice._id;
       this.selectedWatchlist = choice;
