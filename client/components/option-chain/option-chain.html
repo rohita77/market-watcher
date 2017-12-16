@@ -16,13 +16,13 @@
           </thead>
       <tbody>
           <tr ng-repeat="strike in ctrl.oc.strikes | orderBy: 'strikePrice' | limitTo:200"  class = "gutter-2">
-              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice,true)"><div>{{strike.call.oi/1000}}</div><div><small><small> ({{strike.call.chngInOI/1000}}) </small> </small></div>
+              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice,true)"><div>{{strike.call.oi/1000 | number : 0 }} </div><div><small><small> ({{strike.call.chngInOI/1000}}) </small> </small></div>
               </td>
               <td class="col-md-1 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice,true)">{{strike.call.volume}}</td>
               <td class="col-md-1 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice,true)">{{strike.call.iv | number : 0}}</td>
               <td class="col-md-2 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice,true)"><div class="col-md-1">{{strike.call.bidPrice}} / </div><div class="col-md-1"> {{strike.call.askPrice}}<small><small>({{strike.call.netChng}})</div></td>
               <td class="col-md-1 col-xs-1 col-sm-1 label-info" id="anchor{{strike.strikePrice}}">{{strike.strikePrice}} </a></td>
-              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice)" ><div>{{strike.put.oi/1000}}</div><div><small><small> ({{strike.put.chngInOI/1000}}) </small> </small></td>
+              <td class="col-md-1 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice)" ><div>{{strike.put.oi/1000 | number : 0 }}</div><div><small><small> ({{strike.put.chngInOI/1000}}) </small> </small></td>
               <td class="col-md-1 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice)" >{{strike.put.volume}}</td>
               <td class="col-md-1 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice)" >{{strike.put.iv  | number : 0}}</td>
               <td class="col-md-2 col-xs-1 col-sm-1" ng-class="ctrl.getMoneyClass(strike.strikePrice)" ><div class="col-md-1">{{strike.put.bidPrice}} / </div><div class="col-md-1"> {{strike.put.askPrice}}<small><small>({{strike.put.netChng}})</div></td>
