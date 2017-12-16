@@ -69,7 +69,7 @@
     }
 
     filterIndustry(symbol) {
-      this.query.key = (this.query.key == symbol.industry) ? '' :  `(${symbol.industry})`;
+      this.query.key = (this.query.key == `(${symbol.industry})`) ? '' :  `(${symbol.industry})`;
     }
 
 

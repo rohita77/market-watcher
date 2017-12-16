@@ -1,36 +1,38 @@
 <div class="container-fluid">
   <!--  <img ng-src="{{event.imageUrl}}" alt="{{event.name}}"> -->
+  <div class="row">
+    <h4>
 
-  <h4>
+          <!-- Simple dropdown -->
+          <span uib-dropdown on-toggle="toggled(open)">
+            <a href id="simple-dropdown" uib-dropdown-toggle>
+              {{ symbolsGridCtrl.selectedWatchlist.name }}
+            </a>
+            <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
+              <li ng-repeat="choice in symbolsGridCtrl.watchlistChoices" ng-click="symbolsGridCtrl.changeWatchlist(choice)">
+                <a href="#">{{choice.name}}</a>
+              </li>
+            </ul>
+          </span>
+          <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate" ng-show="!symbolsGridCtrl.quoteTime"></span>
+          <span ng-show="symbolsGridCtrl.quoteTime">
+            <small>
+              <small>as on {{ symbolsGridCtrl.quoteTime | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.refreshTime |
+                date : 'dd-MMM HH:mm:ss' : '+0800'}} SGT </small>
+            </small>
 
-    <!-- Simple dropdown -->
-    <span uib-dropdown on-toggle="toggled(open)">
-      <a href id="simple-dropdown" uib-dropdown-toggle>
-        {{ symbolsGridCtrl.selectedWatchlist.name }}
-      </a>
-      <ul class="dropdown-menu" uib-dropdown-menu aria-labelledby="simple-dropdown">
-        <li ng-repeat="choice in symbolsGridCtrl.watchlistChoices" ng-click="symbolsGridCtrl.changeWatchlist(choice)">
-          <a href="#">{{choice.name}}</a>
-        </li>
-      </ul>
-    </span>
-    <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate" ng-show="!symbolsGridCtrl.quoteTime"></span>
-    <span ng-show="symbolsGridCtrl.quoteTime">
-      <small>
-        <small>as on {{ symbolsGridCtrl.quoteTime | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.refreshTime |
-          date : 'dd-MMM HH:mm:ss' : '+0800'}} SGT </small>
-      </small>
+          </span>
+        </h4>
 
-    </span>
-  </h4>
 
+  </div>
 
   <!-- Split button -->
   <div class="btn-toolbar" role="toolbar">
 
     <div class="btn-group" uib-dropdown>
-      <button id="split-button" type="button" class="btn btn-info">Sort</button>
-      <button type="button" class="btn btn-info" uib-dropdown-toggle>
+      <button id="split-button" type="button" class="btn btn-sm btn-info">Sort</button>
+      <button type="button" class="btn btn-sm btn-info" uib-dropdown-toggle>
         <span class="glyphicon glyphicon-sort" aria-hidden="true"></span>
         <span class="sr-only">Sort</span>
       </button>
@@ -81,8 +83,8 @@
     </div>
 
     <div class="btn-group" uib-dropdown auto-close="outsideClick">
-      <button id="split-button" type="button" class="btn btn-info">Filter</button>
-      <button type="button" class="btn btn-info" uib-dropdown-toggle>
+      <button id="split-button" type="button" class="btn btn-sm btn-info">Filter</button>
+      <button type="button" class="btn btn-sm btn-info" uib-dropdown-toggle>
         <span class="glyphicon glyphicon-filter" aria-hidden="true"></span>
         <span class="sr-only">Filter</span>
       </button>
@@ -95,7 +97,7 @@
               <input id="symbName" name="symbName" class="form-control" type="text" required ng-pattern="/^[a-zA-Z0-9]*$/" ng-model="symbolsGridCtrl.query.key"
                 placeholder="symbol or name" />
               <span class="input-group-addon" ng-click="symbolsGridCtrl.query.key=''">
-                <span class="glyphicon glyphicon-remove-circle" ng-click="symbolsGridCtrl.query.key=''"></span>
+                <span class="glyphicon glyphicon-remove label-success" ng-click="symbolsGridCtrl.query.key=''"></span>
               </span>
             </div>
 
