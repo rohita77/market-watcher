@@ -10,7 +10,12 @@
     /* margin: 5px; /* Rohit: correct way of doing it? */
 }
 
-.panel-body{
+.panel-body {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.panel {
     padding-top: 3px;
     padding-bottom: 3px;
 }
@@ -47,10 +52,10 @@
     font-weight: bold
 }
 
-.quote-pchg-u-xx {
-    color: blue
-}
 .quote-pchg-u-x {
+    color: lightblue
+}
+.quote-pchg-u-xx {
     color: green
 }
 .quote-pchg-d-xxx {

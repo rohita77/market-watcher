@@ -49,7 +49,7 @@
 
           this.watchlist.symbols.forEach(symbol => {
 
-            symbol.key = [symbol.symbol, symbol.name, symbol.industry];
+            symbol.key = [symbol.symbol, symbol.name, `(${symbol.industry})`];
 
             //TD: To fix sorting issue when quotes are missing, no match?
           });
@@ -79,7 +79,7 @@
 
       let hash = this.$location.hash(`anchor-${symbol}`);
       this.$anchorScroll(hash);
-      this.$anchorScroll.yOffset = 40;
+      this.$anchorScroll.yOffset = 60;
 
     }
 
@@ -158,7 +158,7 @@
 
         // formData contains the data collected in the modal
 
-      })(`Option Chain For ${symbol.symbol}`, symbol, template);
+      })(`Option Chain for ${symbol.symbol} (delayed by 15 min)`, symbol, template);
 
 
     }
@@ -171,7 +171,7 @@
 
         // formData contains the data collected in the modal
 
-      })(`Chart For ${symbol.symbol}`, symbol, template);
+      })(`Chart ( EOD / Delayed ) For ${symbol.symbol}`, symbol, template);
 
 
     }
