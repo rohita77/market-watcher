@@ -163,7 +163,7 @@
 
         // formData contains the data collected in the modal
 
-      })(`Option Chain for ${symbol.symbol} (delayed by 15 min)`, symbol, template);
+      })(`Option Chain for ${symbol.symbol} (15 min delayed)`, symbol, template);
 
 
     }
