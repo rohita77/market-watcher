@@ -2,67 +2,93 @@
 
 (function () {
 
-  class optionChainComponent {
-    /*@ngInject*/
-    constructor($log, $interval, $resource, $sce, $anchorScroll, $location) {
-      this.$location = $location;
-      this.$anchorScroll = $anchorScroll;
+  angular.module('marketWatcherApp.option-chain', [])
+    .directive('optionChain', ['$log', '$interval', '$resource', '$sce', '$anchorScroll', '$location', 'kite', function ($log, $interval, $resource, $sce, $anchorScroll, $location, kite) {
+      return {
+        templateUrl: 'components/option-chain/option-chain.html',
+        // bindings: { symbol: '>symbol' },
+        scope: { symbol: '=' },
+        // controller: optionChainComponent,
+        // controllerAs: 'ctrl',
 
-      this.ltp = this.symbol.quote.ltP;
+        link: function (scope, element, attrs) {
 
-      this.expH = this.symbol.quote.expectedHigh;
-      this.expL = this.symbol.quote.expectedLow;
+          scope.$location = $location;
+          scope.$anchorScroll = $anchorScroll;
 
-      this.sdH = this.symbol.quote.expectedHigh + (this.ltp - this.expL);
-      this.sdL = this.symbol.quote.expectedLow - (this.expH - this.ltp);
+          scope.kite = kite;
 
-      let ocData = $resource(`api/option-chains/${this.symbol.symbol}`);
+          scope.ltp = scope.symbol.quote.ltP;
 
-      ocData.get().$promise
-        .then((data) => {
-          this.oc = data.data[0];
+          scope.expH = scope.symbol.quote.expectedHigh;
+          scope.expL = scope.symbol.quote.expectedLow;
 
-          let hash = $location.hash(`anchor${this.symbol.quote.expectedLowOptions.strikePrice.toString()}`);
-          this.$anchorScroll(hash);
+          scope.sdH = scope.symbol.quote.expectedHigh + (scope.ltp - scope.expL);
+          scope.sdL = scope.symbol.quote.expectedLow - (scope.expH - scope.ltp);
 
-        });
+          let ocData = $resource(`api/option-chains/${scope.symbol.symbol}`);
 
-    }
+          scope.addCallOption = (strike) => addOption(strike, 'C',scope, kite);
+          scope.addPutOption = (strike) => addOption(strike, 'P',scope, kite);
+          scope.getMoneynessClass = (sp, call = false) => getMoneynessClass(sp, call, scope);
 
-    getMoneyClass(sp, call = false) {
-      let baseClass = ' ', c;
+          ocData.get().$promise
+            .then((data) => {
+              scope.oc = data.data[0];
 
-      if (call) {
-        if (sp <= this.ltp) c = baseClass + 'active';
-        else if (sp >= this.sdH) c = baseClass + 'success';
-        else if (sp >= this.expH) c = baseClass + 'warning';
-        else if (sp >= this.ltp) c = baseClass + 'danger';
-        else c = baseClass + 'default';
+              let hash = $location.hash(`anchor${scope.symbol.quote.expectedLowOptions.strikePrice.toString()}`);
+              scope.$anchorScroll(hash);
+
+            });
+
+        }
       }
-      else {
-        if (sp >= this.ltp) c = baseClass + 'active';
-        else if (sp <= this.sdL) c = baseClass + 'success';
-        else if (sp <= this.expL) c = baseClass + 'warning';
-        else if (sp <= this.ltp) c = baseClass + 'danger';
-        else c = baseClass + 'default';
-      }
+    }]);
 
-      return c;
+  function addOption(strike,callOrPut,scope, kite) {
+    // Add a option to the basket
 
-    }
+    let oc = scope.oc;
+    let lotSize = scope.symbol.frontMonthLotSize;
+    let optType = (callOrPut == 'C') ? 'call' : 'put';
+    let askPrice = strike[optType].askPrice;
+
+    let tradingSymbol = `${oc.symbol}${oc.expiryDate.slice(7,9)}${oc.expiryDate.slice(2,5)}${strike.strikePrice}${(callOrPut == 'C')?'CE':'PE'}`
+
+    kite.connect.add({
+      "exchange": 'NFO',
+      "tradingsymbol": tradingSymbol,
+      "quantity": lotSize,
+      "transaction_type": 'SELL',
+      "order_type": 'LIMIT',
+      "price": askPrice
+    });
+
+    alert(`Added ${lotSize} of ${tradingSymbol} at ${askPrice}`);
 
   }
 
-  angular.module('marketWatcherApp.option-chain', [])
-    .component('optionChain', {
-      templateUrl: 'components/option-chain/option-chain.html',
-      bindings: { symbol: '<symbol' },
-      controller: optionChainComponent,
-      controllerAs: 'ctrl',
-    })
-    .name;
+  function getMoneynessClass(sp, call = false, scope) {
+    let baseClass = ' ', c;
 
+    if (call) {
+      if (sp <= scope.ltp) c = baseClass + 'active';
+      else if (sp >= scope.sdH) c = baseClass + 'success';
+      else if (sp >= scope.expH) c = baseClass + 'warning';
+      else if (sp >= scope.ltp) c = baseClass + 'danger';
+      else c = baseClass + 'default';
+    }
+    else {
+      if (sp >= scope.ltp) c = baseClass + 'active';
+      else if (sp <= scope.sdL) c = baseClass + 'success';
+      else if (sp <= scope.expL) c = baseClass + 'warning';
+      else if (sp <= scope.ltp) c = baseClass + 'danger';
+      else c = baseClass + 'default';
+    }
 
+    return c;
+
+  }
 
 })();
 

@@ -1,29 +1,75 @@
 <div class="navbar navbar-default navbar-fixed-top navbar-inverse" ng-controller="NavbarController">
   <div class="container">
     <div class="navbar-header">
-      <button class="navbar-toggle pull-left" data-toggle="collapse" type="button" ng-click="nav.isCollapsed = !nav.isCollapsed">
-        <span class="sr-only">Toggle navigation</span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-        <span class="icon-bar"></span>
-      </button>
-      <a href="/" class="navbar-brand">Market Watch</a>
+      <div>
+        <button class="navbar-toggle pull-left" data-toggle="collapse" type="button" ng-click="nav.isCollapsed = !nav.isCollapsed">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="/" class="navbar-brand">Market Watch</a>
+        <ng-transclude></ng-transclude>
+      </div>
     </div>
+
+    <!-- <div class="navbar navbar-nav  navbar-right" ng-transclude></div> -->
+
     <div uib-collapse="nav.isCollapsed" class="navbar-collapse collapse" id="navbar-main">
       <ul class="nav navbar-nav">
-        <li ng-repeat="item in nav.menu" ui-sref-active="active" ng-click="nav.isCollapsed=true" >
-            <a  data-toggle="collapse"  ui-sref="{{item.state}}">{{item.title}}</a>
+        <li ng-repeat="item in nav.menu" ui-sref-active="active" ng-click="nav.isCollapsed=true">
+          <a data-toggle="collapse" ui-sref="{{item.state}}">{{item.title}}</a>
         </li>
-        <li ng-show="nav.isAdmin()" ui-sref-active="active"><a ui-sref="admin">Admin</a></li>
+        <li ng-show="nav.isAdmin()" ui-sref-active="active">
+          <a ui-sref="admin">Admin</a>
+        </li>
       </ul>
 
       <ul class="nav navbar-nav navbar-right">
-        <li ng-hide="nav.isLoggedIn()" ui-sref-active="active"><a ui-sref="signup">Sign up</a></li>
-        <li ng-hide="nav.isLoggedIn()" ui-sref-active="active"><a ui-sref="login">Login</a></li>
-        <li ng-show="nav.isLoggedIn()"><p class="navbar-text">{{ nav.getCurrentUser().name }}</p> </li>
-        <li ng-show="nav.isLoggedIn()" ui-sref-active="active"><a ui-sref="settings"><span class="glyphicon glyphicon-cog"></span></a></li>
-        <li ng-show="nav.isLoggedIn()"><a ui-sref="logout">Logout</a></li>
+        <li>
+          <a href="#" id="custom-button"> Trade Basket </a>
+        </li>
+        <li ng-hide="nav.isLoggedIn()" ui-sref-active="active">
+          <a ui-sref="signup">Sign up</a>
+        </li>
+        <li ng-hide="nav.isLoggedIn()" ui-sref-active="active">
+          <a ui-sref="login">Login</a>
+        </li>
+        <li ng-show="nav.isLoggedIn()">
+          <p class="navbar-text">{{ nav.getCurrentUser().name }}</p>
+        </li>
+        <li ng-show="nav.isLoggedIn()" ui-sref-active="active">
+          <a ui-sref="settings">
+            <span class="glyphicon glyphicon-cog"></span>
+          </a>
+        </li>
+        <li ng-show="nav.isLoggedIn()">
+          <a ui-sref="logout">Logout</a>
+        </li>
       </ul>
+
+
     </div>
+
+    <!--
+    <div class="btn btn-small">
+        <a href="javascript:" data-kite="34dvxrlj3l08i9tv"
+        data-exchange="NFO"
+        data-tradingsymbol="SBIN17DEC155CE"
+        data-transaction_type="SELL"
+        data-quantity="3000"
+        data-order_type="LIMIT">Buy SBI stock</a>
+
+        <button data-kite="34dvxrlj3l08i9tv"
+        data-exchange="NFO"
+        data-tradingsymbol="SBIN17DEC155CE"
+        data-transaction_type="SELL"
+        data-quantity="3000"
+        data-order_type="LIMIT" >test</button>
+
+    <button id="custom-button">Buy the basket</button>
+    </div>
+ -->
+
   </div>
 </div>
