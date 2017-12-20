@@ -13,7 +13,7 @@ angular.module('marketWatcherApp.chart', [])
           'container_id': 'chart',
           // 'width': 980,
           // 'height': 610,
-           'autosize': true,
+          'autosize': true,
           'symbol': `NSE:${scope.data.symbol}`,
           'interval': 'D',
           'timezone': 'Asia/Kolkata',
