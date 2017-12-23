@@ -26,6 +26,9 @@
           scope.sdH = scope.symbol.quote.expectedHigh + (scope.ltp - scope.expL);
           scope.sdL = scope.symbol.quote.expectedLow - (scope.expH - scope.ltp);
 
+          scope.sdH2 = scope.sdH + (1*(scope.sdH - scope.ltp));
+          scope.sdL2 = scope.sdL - (1*(scope.ltp - scope.sdL));
+
           let ocData = $resource(`api/option-chains/${scope.symbol.symbol}`);
 
           scope.addCallOption = (strike) => addOption(strike, 'C',scope, kite);
@@ -35,6 +38,7 @@
           ocData.get().$promise
             .then((data) => {
               scope.oc = data.data[0];
+
 
               let hash = $location.hash(`anchor${scope.symbol.quote.expectedLowOptions.strikePrice.toString()}`);
               scope.$anchorScroll(hash);
