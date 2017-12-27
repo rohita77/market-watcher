@@ -1,5 +1,5 @@
 <!--  <h3>Option Chain</h3> -->
-<div class="row gutter-2">
+<div class="row slim gutter-1">
 
     <div class="col-md-12 col-xs-12 col-sm-12">
         <div class="btn-group btn-group-xs" ng-if="symbol.quote">
@@ -8,7 +8,7 @@
                     Margin:
                 </small>
             </label>
-            <label class="btn btn-active ">
+            <label class="btn slim btn-active ">
                 <span ng-class="'quote-pchg-'+ ( ((-(symbol.frontMonthMarginPercent * symbol.frontMonthLotSize * symbol.quote.ltP)/1000 + 100) || 0)  | moveSize : [0,20,50])">
                     {{0.15 * symbol.frontMonthLotSize * symbol.quote.ltP | number : 0}}
                 </span>
@@ -18,7 +18,7 @@
                     Lot:
                 </small>
             </label>
-            <label class="btn btn-active ">
+            <label class="btn slim btn-active ">
                 <span>
                     {{symbol.frontMonthLotSize | number : 0}}
                 </span>
