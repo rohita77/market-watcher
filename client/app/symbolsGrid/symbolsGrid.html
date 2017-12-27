@@ -130,12 +130,10 @@
       <!-- correctly reduce padding -->
       <!-- Use a filter to identify selected instead of manipulating the model -->
 
-      <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:200 | filter:symbolsGridCtrl.query">
-
+      <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:200 | filter:symbolsGridCtrl.query track by symbol.symbol">
         <uib-accordion-group id="anchor-{{symbol.symbol}}" class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-primary' : 'panel-default') }}"
-          ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="((symbol.quote.ntP > 40) || (symbol.quote.trdVol > 5)) && (symbol.quote.expectedHighPercent > 0)"
-          ng-show="(!symbol.nextEarningsBeforeFrontMonthExpiry || symbolsGridCtrl.incEarnings) && (!symbolsGridCtrl.earningsOnly || (symbol.daysToEarnings <=3  && symbol.nextEarnings))">
-
+          ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="(((symbol.quote.ntP > 40) || (symbol.quote.trdVol > 5))
+          && (symbol.quote.expectedHighPercent > 0)) &&((!symbol.nextEarningsBeforeFrontMonthExpiry || symbolsGridCtrl.incEarnings) && (!symbolsGridCtrl.earningsOnly || (symbol.daysToEarnings <=3  && symbol.nextEarnings)))">
           <uib-accordion-heading>
             <div class="row gutter-2">
               <div class="col-md-4 col-xs-4 col-sm-4">
@@ -164,8 +162,8 @@
                   </label>
 
                   <!--             //TD: Move to Directive -->
-                  <label class="btn btn-warning disabled" ng-show="symbol.daysToEarnings < 36">
-                    <span class="badge">
+                  <label class="btn slim btn-warning disabled" ng-show="symbol.daysToEarnings < 36">
+                    <span class="badge slim">
                       <small>
                         E{{symbol.daysToEarnings + ((!symbol.nextEarnings)?'?':null) }}
                       </small>
@@ -593,18 +591,18 @@
 
               </div>
 
+            </div>
+
+
           </div>
 
+
+
+        </uib-accordion-group>
 
       </div>
 
 
-
-      </uib-accordion-group>
-
     </div>
-
-
-</div>
-</uib-accordion>
+  </uib-accordion>
 </div>

@@ -111,7 +111,9 @@
             this.$log.info(`First Call retrieved ${data.quotes.length} quotes`);
           }
 
-          this.watchlist.symbols.forEach(symbol => {
+          this.watchlist.symbols = this.watchlist.symbols.map(symbol1 => {
+          // this.watchlist.symbols.forEach(symbol => {
+            let symbol = Object.assign(symbol1)
             symbol.quote = data.quotes.find(quote => {
               return quote.symbol.match(
                 new RegExp('^' + symbol.symbol + '$'));
@@ -119,6 +121,7 @@
             //no match?
             if (symbol.quote === undefined) { symbol.quote = {}; }
 
+            return symbol;
           });
 
         }) //based on format
