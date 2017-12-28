@@ -30,6 +30,21 @@ table {
     border-spacing: 0px;
 }
 
+.btn.slim {
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+
+.badge.slim {
+    padding-left: 2px;
+    padding-right: 2px;
+  }
+
+.row.slim {
+    margin-left: 0px;
+    margin-right: 0px;
+}
+
 // Component styles are injected through grunt
 /* inject:scss */
 @import 'admin/admin';
