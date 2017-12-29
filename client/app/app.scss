@@ -33,12 +33,14 @@ table {
 .btn.slim {
     padding-left: 2px;
     padding-right: 2px;
-  }
+}
 
-.badge.slim {
-    padding-left: 2px;
-    padding-right: 2px;
-  }
+.badge {
+    .btn.slim & {
+        top: 0;
+        padding: 1px 2px;
+    }
+}
 
 .row.slim {
     margin-left: 0px;
