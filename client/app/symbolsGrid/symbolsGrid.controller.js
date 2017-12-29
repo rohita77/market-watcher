@@ -47,11 +47,13 @@
 
           this.$log.info(`Retrieved watchlist ${this.watchlist.name} with ${this.watchlist.symbols.length} symbols`);
 
-          this.watchlist.symbols.forEach(symbol => {
+          this.watchlist.symbols = this.watchlist.symbols.map(symbol => {
 
+            // let symbol = Object.assign(symbol1);
             symbol.key = [symbol.symbol, symbol.name, `(${symbol.industry})`];
 
-            //TD: To fix sorting issue when quotes are missing, no match?
+            return symbol;
+
           });
 
           //TD: Emit from Server instead of client refresh
@@ -65,6 +67,20 @@
           this.$log.warn(data, status, headers, config);
         });
 
+        this.getSortOrder =  (symbol) => {
+
+          if (this.sortBy.match('^quote.')) {
+
+            //convert string in dotNotation to object reference
+            let sortOrder = this.sortBy.split('.').reduce((o, i) => o[i], symbol);
+
+            return -1.0 * Math.abs(sortOrder);
+          }
+          else {
+            return symbol[this.sortBy];
+          }
+          //  return -1.0 * Math.abs(symbol.quote['per']);
+        };
 
     }
 
@@ -89,6 +105,16 @@
     }
 
 
+    setSortBy (sortBy) {
+      this.sortReverse = (this.sortBy === sortBy) ? !this.sortReverse : false;
+      this.sortBy = sortBy;
+
+    };
+
+    getReverse (sortBy) {
+      return (this.sortBy === sortBy) ? !this.sortReverse : false;
+    };
+
     $onInit() {
       this.filterIsCollapsed = true;
     }
@@ -111,51 +137,32 @@
             this.$log.info(`First Call retrieved ${data.quotes.length} quotes`);
           }
 
-          this.watchlist.symbols = this.watchlist.symbols.map(symbol1 => {
+          this.watchlist.symbols = this.watchlist.symbols.filter(symbol => {
+          // this.watchlist.symbols = this.watchlist.symbols.map(symbol => {
           // this.watchlist.symbols.forEach(symbol => {
-            let symbol = Object.assign(symbol1)
-            symbol.quote = data.quotes.find(quote => {
-              return quote.symbol.match(
-                new RegExp('^' + symbol.symbol + '$'));
-            });
-            //no match?
-            if (symbol.quote === undefined) { symbol.quote = {}; }
 
-            return symbol;
+            // let symbol = Object.assign(symbol1);
+            let symbolRegEx = new RegExp('^' + symbol.symbol + '$');
+
+            let quote = data.quotes.find(
+              quote => quote.symbol.match(symbolRegEx)
+            );
+
+
+            symbol.quote = quote || {};
+            // return symbol;
+            return ((symbol.quote.expectedHighPercent > 0 ) && ((symbol.quote.ntP > 40) || (symbol.quote.trdVol > 5)) );
+
           });
-
+          console.log(this.watchlist.symbols.length);
+          console.log(this.watchlist.symbols);
         }) //based on format
         .catch((data, status, headers, config) => {
           this.$log.warn(data, status, headers, config);
         });
 
-
-      this.getSortOrder = (symbol) => {
-
-        if (this.sortBy.match('^quote.')) {
-
-          //convert string in dotNotation to object reference
-          let sortOrder = this.sortBy.split('.').reduce((o, i) => o[i], symbol);
-
-          return -1.0 * Math.abs(sortOrder);
-        }
-        else {
-          return symbol[this.sortBy];
-        }
-        //  return -1.0 * Math.abs(symbol.quote['per']);
-      };
-
-      this.setSortBy = (sortBy) => {
-        this.sortReverse = (this.sortBy === sortBy) ? !this.sortReverse : false;
-        this.sortBy = sortBy;
-
-      };
-
-      this.getReverse = (sortBy) => {
-        return (this.sortBy === sortBy) ? !this.sortReverse : false;
-      };
-
     }
+
 
 
     openOC(symbol) {
@@ -187,9 +194,6 @@
 
 
   }
-
-
-
 
 
   angular.module('marketWatcherApp')
