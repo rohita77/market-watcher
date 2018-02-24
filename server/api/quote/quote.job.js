@@ -96,9 +96,9 @@ function refreshOptionChains(quotesJSON) {
         })
 }
 
-function refreshOptionChain(symbol, frontMonth) {
+function refreshOptionChain(stockQuote, frontMonth) {
 
-    return downloads.getStockOptionChain(symbol, frontMonth)
+    return downloads.getStockOptionChain(stockQuote.symbol, frontMonth)
         //save the option chain in the DB once they are downloaded
         .then(optionChainArr => {
             if (optionChainArr && optionChainArr.length > 0) {
