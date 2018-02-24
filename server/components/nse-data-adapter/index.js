@@ -4,6 +4,28 @@ import moment from 'moment';
 var webScrapTools = require('./modules/web-scrap-tools');
 var optionChain = require('./option-chain');
 
+
+//Get Trading holiday from DB or inject
+const tradingHolidays = [
+
+    "26-Jan-18",
+    "13-Feb-18",
+    "2-Mar-18",
+    "29-Mar-18",
+    "30-Mar-18",
+    "1-May-18",
+    "15-Aug-18",
+    "22-Aug-18",
+    "13-Sep-18",
+    "20-Sep-18",
+    "2-Oct-18",
+    "18-Oct-18",
+    "7-Nov-18",
+    "8-Nov-18",
+    "23-Nov-18",
+    "25-Dec-18"
+];
+
 function now() {
     return moment().format('HH:mm:ss Z');
 }
@@ -79,13 +101,24 @@ export function getExpiryDate(tradingDate) {
 
     let eom = moment(tradingDate).endOf('month');
 
+    //TD: Get 1st Expiry Date from DB that is greater than trading date
+
     //If eom is before Thursday then Last Thursday else This Thursday
     let expiryThursday = eom.clone().day(eom.day() <= 3 ? -3 : 4)
 
-    //TD: Handle Trdaing Holidays
+    //Handle Trading Holidays
+    let expiryDate = (!isTradingHoliday(expiryThursday)) ? expiryThursday : expiryThursday.subtract(1,"day");
+
+    //TD: what if day before is also trading holiday?
 
     //Trading month falls in Current Month Expiry or Next Month Expiry
-    return (expiryThursday.isSameOrAfter(tradingDate)) ? expiryThursday : getExpiryDate(eom.clone().add(1, "day"));
+    return (expiryDate.isSameOrAfter(tradingDate)) ? expiryDate : getExpiryDate(eom.clone().add(1, "day"));
+
+}
+
+export function isTradingHoliday(calendarDate) {
+    return tradingHolidays.find((date) =>
+        calendarDate.isSame(moment(date,"DD-MMM-YY"),"day"));
 
 }
 
