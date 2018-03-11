@@ -77,7 +77,7 @@
         <!--TD// new row after every four -->
         <!-- correctly reduce padding -->
       <!--Use a filter to identify selected instead of manipulating the model -->
-        <div class="col-md-12 col-xs-12 cols-sm-12" ng-repeat="ds in marketAnalysisCtrl.dailyStat | orderBy: '_id' | limitTo:35 ">
+        <div class="col-md-12 col-xs-12 cols-sm-12" ng-repeat="ds in marketAnalysisCtrl.dailyStat | orderBy: '-_id' | limitTo:35 ">
 
             <div class="col-md-2 col-xs-2 col-sm-2">
                     <small>{{ds._id}}</small>
