@@ -1,13 +1,14 @@
 'use strict'
 
 import moment from 'moment';
-var webScrapTools = require('./modules/web-scrap-tools');
-var optionChain = require('./option-chain');
 
+//import NSEDownload from './downloads';
+var NSEDownload = require( './downloads'); //TD:
 
 //Get Trading holiday from DB or inject
 const tradingHolidays = [
 
+    //https://nse-india.com/products/content/derivatives/equities/mrkt_timing_holidays.htm
     "26-Jan-18",
     "13-Feb-18",
     "2-Mar-18",
@@ -26,80 +27,41 @@ const tradingHolidays = [
     "25-Dec-18"
 ];
 
-function now() {
-    return moment().format('HH:mm:ss Z');
+export function isTradingHoliday(calendarDate = moment()) {
+
+    let mcalendarDate = moment(calendarDate).utcOffset("+05:30").startOf('day');
+    let calendarDateString = mcalendarDate.format("DD-MMM-YY");
+
+    return tradingHolidays.find((date) =>
+        (calendarDateString == date) )  ? true : false ;
+
 }
 
-function log(message) {
-    console.log(`${now()} ${message}`);
+export function getNextTradingDate(currentDate = moment()) {
+
+    //local moment('2016-01-01T23:35:01') --> "2016-01-01T23:35:01-06:00";
+    //utc moment.utc('2016-01-01T23:35:01'); --> "2016-01-01T23:35:01+00:00"
+    //Fixed Offset: moment.parseZone("2013-01-01T00:00:00-13:00") --> "2013-01-01T00:00:00-13:00"
+    //Local Format: .format()
+
+    // console.log(currentDate);
+    let mcurrentDate = moment(currentDate).utcOffset("+05:30");
+    let closeOfTrading = mcurrentDate.clone().hour(15).minute(30);
+
+    let nextTradingDate = (mcurrentDate.isSameOrBefore(closeOfTrading)) ? mcurrentDate : mcurrentDate.clone().add(1, "days");
+
+    nextTradingDate = nextTradingDate.startOf('day').hour(15).minute(30);    //Last minute of trading for the given trading date
+
+    if (nextTradingDate.isoWeekday() > 5) nextTradingDate.isoWeekday(8); //Next Monday
+
+    return isTradingHoliday(nextTradingDate) ? getNextTradingDate(nextTradingDate.clone().add(1, "days")) : nextTradingDate.toDate();
 }
 
-export function getSymbolsInIndex(downloadKey) {
-    let url = 'https://www.nseindia.com/content/indices/ind_' + downloadKey + '.csv';
+export function getMonthlyExpiryDate(tradingDate, dtFormat) {
 
-    const indexCsvMapper = elem => ({
-        name: elem['Company Name'],
-        symbol: elem.Symbol,
-        industry: elem.Industry,
-        _id: elem['ISIN Code']
-    });
+    let eom = moment(tradingDate).utcOffset("+05:30").endOf('month');
 
-
-    return webScrapTools.getSmallCsv(url, indexCsvMapper);
-}
-
-export function getBoardMeetings(downloadKey) {
-    let url = 'https://nseindia.com/corporates/datafiles/BM_' + downloadKey + '.csv';
-
-    const bmCsvMapper = elem => ({
-        symbol: elem.Symbol,
-        purpose: elem.Purpose,
-        boardMeetingDate: new Date(elem.BoardMeetingDate + ' GMT+0530')
-    });
-
-    return webScrapTools.getSmallCsv(url, bmCsvMapper);
-}
-
-export function getFnOLotSizes(downloadKey) {
-    let url = 'https://nse-india.com/content/fo/fo_mktlots.csv' //+ downloadKey + '.csv';
-
-    const fnOLotSizeCsvMapper = elem => {
-        //TD: Use spread operator mklot : {elem[2]...elem[12]}
-
-        let e = {
-            symbol: elem.SYMBOL,
-            mktlot: elem
-        }
-        e.mktlot.SYMBOL = undefined;
-        e.mktlot.UNDERLYING = undefined;
-
-        return e;
-    }
-
-    return webScrapTools.getSmallCsv(url, fnOLotSizeCsvMapper);
-}
-
-export function getQuotesForIndexStocks(index) {
-    let url = `https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/${index}.json`;
-
-    return webScrapTools.getSmallJSON(url)
-        .then((res) => {
-            res.index = index;
-            [res.quoteTime,res.time] = [new Date(res.time + ' GMT+0530'),res.quoteTime];
-            res.refreshTime = new Date();
-            [res.quotes, res.data] = [res.data,res.quotes]
-            let IST = { timeZone: "Asia/Calcutta", timeZoneName: "short" };
-
-            log(`Number of Quotes: ${res.quotes.length} as of ${res.quoteTime.toLocaleString("en-US", IST)} retrieved at ${res.refreshTime.toLocaleString()}`);
-            return res;
-
-        });
-}
-
-
-export function getExpiryDate(tradingDate) {
-
-    let eom = moment(tradingDate).endOf('month');
+    eom = eom.startOf('day').hours(15).minute(30); //Last minute of trading
 
     //TD: Get 1st Expiry Date from DB that is greater than trading date
 
@@ -111,15 +73,23 @@ export function getExpiryDate(tradingDate) {
 
     //TD: what if day before is also trading holiday?
 
+    //Return Raw date or Formatted date?
+    let retExpDate = (dtFormat) ?  expiryDate.format(dtFormat) : expiryDate.toDate();
+
     //Trading month falls in Current Month Expiry or Next Month Expiry
-    return (expiryDate.isSameOrAfter(tradingDate)) ? expiryDate : getExpiryDate(eom.clone().add(1, "day"));
+    return (expiryDate.isSameOrAfter(tradingDate)) ? retExpDate : getMonthlyExpiryDate(eom.clone().add(1, "day"),dtFormat);
 
 }
 
-export function isTradingHoliday(calendarDate) {
-    return tradingHolidays.find((date) =>
-        calendarDate.isSame(moment(date,"DD-MMM-YY"),"day"));
+export function getFrontMonthExpiryDate(tradingDate=moment(),dtFormat) {
+    return getMonthlyExpiryDate(tradingDate,dtFormat);
+}
 
+export function getBackMonthExpiryDate(tradingDate=moment(),dtFormat) {
+    let frontMonthExpiryDate = getFrontMonthExpiryDate(tradingDate)
+    let backMonthFirstTradingDate = moment(frontMonthExpiryDate).add(1, "days")
+
+    return getMonthlyExpiryDate(backMonthFirstTradingDate,dtFormat);
 }
 
 export function getExpiryMonth(tradingDate, formatString = "MMM-YY") {
@@ -127,37 +97,6 @@ export function getExpiryMonth(tradingDate, formatString = "MMM-YY") {
     return getExpiryDate(tradingDate).format(formatString);
 
 }
-
-export function getNextTradingDate(currentTradingDate = moment().clone().utcOffset("+05:30")) {
-
-    //https://nse-india.com/products/content/derivatives/equities/mrkt_timing_holidays.htm
-    /*
-    [26-Jan-17,
-    24-Feb-17,
-    13-Mar-17,
-    4-Apr-17,
-    14-Apr-17,
-    1-May-17,
-    26-Jun-17,
-    15-Aug-17,
-    25-Aug-17,
-    2-Oct-17,
-    19-Oct-17,
-    20-Oct-17,
-    25-Dec-17,
-    ]
-    */
-
-    //> 16:00 add 2
-
-    let nextTradingDate = (currentTradingDate.isBefore(16, "HH")) ? currentTradingDate : currentTradingDate.clone().add(1, "days");
-
-    if (nextTradingDate.isoWeekday() > 5) nextTradingDate.isoWeekday(8); //Next Monday
-    return nextTradingDate;
-}
-
-
-export let getStockOptionChain = optionChain.getStockOptionChain;
 
 /*
 <select name="bankNiftySelect" id="bankNiftySelect" onchange="changeNiftyView();" class="goodTextBox" style="width:210px;">
@@ -216,3 +155,40 @@ export let getStockOptionChain = optionChain.getStockOptionChain;
 							</optgroup>
                         </select>
  */
+
+
+export function getSymbolsInWatchList(watchlist) {
+
+    return NSEDownload.getSymbolsInIndex(watchlist.downloadKey);
+
+  }
+
+  export function getFCBoardMeetings() {
+
+    return NSEDownload.getBoardMeetings('All_Forthcoming');
+
+  }
+
+  export function getBoardMeetingsForLast3Months() {
+
+    return NSEDownload.getBoardMeetings('Last_3_Months'); //12 Months? To deal with boundary value past earningg
+
+  }
+
+  export function getFnOLotSizes() {
+
+    return NSEDownload.getFnOLotSizes(); //No Download Key
+
+  }
+
+  export function getQuotesForFnOStocks() {
+
+    return NSEDownload.getQuotesForIndexStocks('foSecStockWatch');
+
+  }
+
+  export function getStockOptionChain(symbol, expiryDate) {
+
+    return NSEDownload.getStockOptionChain(symbol, expiryDate);
+
+  }

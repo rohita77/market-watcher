@@ -4,10 +4,8 @@
 import _ from 'lodash';
 import moment from 'moment';
 
-//import downloads from '../../components/nsedata/downloads'; //TD:
-var downloads = require('../../components/nse-data-adapter/downloads');
-var NSEDataAdapter = require('../../components/nse-data-adapter/index'); //TD Refactor
-
+//import NSEDataAdapter from '../../components/nsedata/downloads'; //TD:
+var NSEDataAdapter = require('../../components/nse-data-adapter/index');
 
 //import Model and save to Mongo
 import Quote from './quote.model'
@@ -50,7 +48,7 @@ function log(message) {
 
 function refreshStockQuotes() {
 
-    return downloads.getQuotesForFnOStocks()
+    return NSEDataAdapter.getQuotesForFnOStocks()
         //save the quotes in the DB once they are downloaded
         .then(quotesJSON => {
             log(`Fetched Quotes for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString("en-US", IST)}`);
@@ -70,11 +68,9 @@ function refreshOptionChains(quotesJSON) {
     let hoursFromOpen = moment().clone().utcOffset("+05:30").hour() - 9;
     hoursFromOpen = hoursFromOpen > 0 ? hoursFromOpen : 1;
 
-    let currentDate = moment().clone().utcOffset("+05:30");
-    let nextTradingDate = NSEDataAdapter.getNextTradingDate(currentDate)
-    let frontMonth = NSEDataAdapter.getExpiryMonth(nextTradingDate, "DDMMMYYYY").toUpperCase();
+    let frontMonthExpiry = NSEDataAdapter.getFrontMonthExpiryDate(moment(), "DDMMMYYYY").toUpperCase();
 
-    log(`Retrieving Option Chains for ${quotesJSON.quotes.length} symbols for ${frontMonth}`);
+    log(`Retrieving Option Chains for ${quotesJSON.quotes.length} symbols for ${frontMonthExpiry}`);
 
     //Promise for each stockQuote that is resolved when the Option Chain is retrieved and saved
     return Promise.all(
@@ -83,7 +79,7 @@ function refreshOptionChains(quotesJSON) {
             if ((stockQuote.trdVol > (5 * hoursFromOpen)) || (stockQuote.ntP > (15 * hoursFromOpen))) { //TD Previous days value and from config
                 //    if ((stockQuote.symbol == 'RELIANCE') || (stockQuote.symbol == 'HINDALCO')) {
 
-                return refreshOptionChain(stockQuote, frontMonth)
+                return refreshOptionChain(stockQuote, frontMonthExpiry)
                     .then((oc) => getExpectedMoveForQuote(stockQuote))
             }
             else
@@ -96,9 +92,9 @@ function refreshOptionChains(quotesJSON) {
         })
 }
 
-function refreshOptionChain(stockQuote, frontMonth) {
+function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
-    return downloads.getStockOptionChain(stockQuote.symbol, frontMonth)
+    return NSEDataAdapter.getStockOptionChain(stockQuote.symbol, frontMonthExpiry)
         //save the option chain in the DB once they are downloaded
         .then(optionChainArr => {
             if (optionChainArr && optionChainArr.length > 0) {
@@ -106,23 +102,23 @@ function refreshOptionChain(stockQuote, frontMonth) {
                 let optionChainJSON = {
                     symbol: stockQuote.symbol,           //TD: Sub docs expiry date, strike price, option
                     quoteId: stockQuote._id,
-                    expiryDate: frontMonth,
+                    expiryDate: frontMonthExpiry,
                     strikes: optionChainArr
                 };
 
-                log(`Fetched Option Chain for ${stockQuote.symbol}/ ${frontMonth} with ${optionChainArr.length} strikes and quoteTime: ${stockQuote.quoteTime}`);
+                log(`Fetched Option Chain for ${stockQuote.symbol}/ ${frontMonthExpiry} with ${optionChainArr.length} strikes and quoteTime: ${stockQuote.quoteTime}`);
 
                 return OptionChain.create(optionChainJSON)
                     .then((doc) => {
                        return doc;
                     } )
                     .catch((err) => {
-                        log(`Error Creating Option Chain for ${stockQuote.symbol} / ${frontMonth}: ${err}`);
+                        log(`Error Creating Option Chain for ${stockQuote.symbol} / ${frontMonthExpiry}: ${err}`);
                         return null;
                     });
             }
             else
-                log(`No Option Chain Returned for ${stockQuote.symbol} for ${frontMonth} `);
+                log(`No Option Chain Returned for ${stockQuote.symbol} for ${frontMonthExpiry} `);
             //TD: Return Promise?
 
         })
