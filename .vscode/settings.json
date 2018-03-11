@@ -10,7 +10,8 @@
         "**/.svn": true,
         "**/.hg": true,
         "**/.DS_Store": true,
-        "**.tmp/":true
+        "**/.tmp": true,
+        "**/dist":true
     }
 
 }

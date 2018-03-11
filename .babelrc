@@ -1,4 +1,25 @@
 {
-    "presets": ["es2015"],
+    "presets": [
+        "es2015"/* ,
+        ["env", {
+            "targets": {
+              "browsers": ["last 2 versions"]
+            }
+          }] */
+    ],
     "plugins": ["transform-class-properties"]
 }
+
+/* https://babeljs.io/env/
+    npm install --save-dev babel-cli babel-preset-env
+    https://github.com/babel/babel-preset-env/issues/186
+
+{
+  "presets": [
++   ["env", {
+-   ["es2015", {
+      "modules": false
+    }]
+  ]
+}
+ */
