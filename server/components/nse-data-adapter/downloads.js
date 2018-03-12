@@ -1,40 +1,79 @@
 'use strict';
 
 //import NSEDataAdapter from './index';
-var NSEDataAdapter = require( './index'); //TD:
+import moment from 'moment';
 
-export function getSymbolsInWatchList(watchlist) {
+var webScrapTools = require('./modules/web-scrap-tools');
+var optionChain = require('./option-chain');
 
-  return NSEDataAdapter.getSymbolsInIndex(watchlist.downloadKey);
-
+function now() {
+  return moment().format('HH:mm:ss Z');
 }
 
-export function getFCBoardMeetings() {
-
-  return NSEDataAdapter.getBoardMeetings('All_Forthcoming');
-
+function log(message) {
+  console.log(`${now()} ${message}`);
 }
 
-export function getBoardMeetingsForLast3Months() {
+export function getSymbolsInIndex(downloadKey) {
+  let url = 'https://www.nseindia.com/content/indices/ind_' + downloadKey + '.csv';
 
-  return NSEDataAdapter.getBoardMeetings('Last_3_Months'); //12 Months? To deal with boundary value past earningg
+  const indexCsvMapper = elem => ({
+      name: elem['Company Name'],
+      symbol: elem.Symbol,
+      industry: elem.Industry,
+      _id: elem['ISIN Code']
+  });
 
+
+  return webScrapTools.getSmallCsv(url, indexCsvMapper);
 }
 
-export function getFnOLotSizes() {
+export function getBoardMeetings(downloadKey) {
+  let url = 'https://nseindia.com/corporates/datafiles/BM_' + downloadKey + '.csv';
 
-  return NSEDataAdapter.getFnOLotSizes(); //No Download Key
+  const bmCsvMapper = elem => ({
+      symbol: elem.Symbol,
+      purpose: elem.Purpose,
+      boardMeetingDate: new Date(elem.BoardMeetingDate + ' GMT+0530')
+  });
 
+  return webScrapTools.getSmallCsv(url, bmCsvMapper);
 }
 
-export function getQuotesForFnOStocks() {
+export function getFnOLotSizes(downloadKey) {
+  let url = 'https://nse-india.com/content/fo/fo_mktlots.csv' //+ downloadKey + '.csv';
 
-  return NSEDataAdapter.getQuotesForIndexStocks('foSecStockWatch');
+  const fnOLotSizeCsvMapper = elem => {
+      //TD: Use spread operator mklot : {elem[2]...elem[12]}
 
+      let e = {
+          symbol: elem.SYMBOL,
+          mktlot: elem
+      }
+      e.mktlot.SYMBOL = undefined;
+      e.mktlot.UNDERLYING = undefined;
+
+      return e;
+  }
+
+  return webScrapTools.getSmallCsv(url, fnOLotSizeCsvMapper);
 }
 
-export function getStockOptionChain(symbol, expiryDate) {
+export function getQuotesForIndexStocks(index) {
+  let url = `https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/${index}.json`;
 
-  return NSEDataAdapter.getStockOptionChain(symbol, expiryDate);
+  return webScrapTools.getSmallJSON(url)
+      .then((res) => {
+          res.index = index;
+          [res.quoteTime,res.time] = [new Date(res.time + ' GMT+0530'),res.quoteTime];
+          res.refreshTime = new Date();
+          [res.quotes, res.data] = [res.data,res.quotes]
+          let IST = { timeZone: "Asia/Calcutta", timeZoneName: "short" };
 
+          log(`Number of Quotes: ${res.quotes.length} as of ${res.quoteTime.toLocaleString("en-US", IST)} retrieved at ${res.refreshTime.toLocaleString()}`);
+          return res;
+
+      });
 }
+
+export let getStockOptionChain = optionChain.getStockOptionChain;
