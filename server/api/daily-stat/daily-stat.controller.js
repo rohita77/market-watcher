@@ -66,7 +66,7 @@ function handleError(res, statusCode) {
 
 // Gets a list of DailyStats
 export function index(req, res) {
-  return DailyStat.find().exec()
+  return DailyStat.find().limit(35).sort({"_id" : -1}).exec()
     .then(respondWithResult(res))
     .catch(handleError(res));
 }
