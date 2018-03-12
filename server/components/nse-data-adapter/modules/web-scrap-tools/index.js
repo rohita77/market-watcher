@@ -8,6 +8,14 @@ import csvtojson from 'csvtojson';
 
 import moment from 'moment';
 
+function now() {
+    return moment().format('HH:mm:ss Z');
+}
+
+function log(message) {
+    console.log(`${now()} ${message}`);
+}
+
 export function getSmallJSON(url) {
 
     const headers = {
@@ -55,7 +63,7 @@ export function getSmallCsv(url, csvMapper) {
         headers: headers
     };
 
-    console.log(`Downloading CSV File from: ${options.url}`);
+    log(`Downloading CSV File from: ${options.url}`);
 
     return new Promise((resolve, reject) => {
 
