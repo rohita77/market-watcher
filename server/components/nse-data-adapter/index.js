@@ -92,12 +92,6 @@ export function getBackMonthExpiryDate(tradingDate=moment(),dtFormat) {
     return getMonthlyExpiryDate(backMonthFirstTradingDate,dtFormat);
 }
 
-export function getExpiryMonth(tradingDate, formatString = "MMM-YY") {
-
-    return getExpiryDate(tradingDate).format(formatString);
-
-}
-
 /*
 <select name="bankNiftySelect" id="bankNiftySelect" onchange="changeNiftyView();" class="goodTextBox" style="width:210px;">
                             <optgroup label="Broad Market Indices">
