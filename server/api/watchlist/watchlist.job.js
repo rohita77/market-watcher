@@ -2,7 +2,8 @@
 
 'use strict';
 import _ from 'lodash';
-//import NSEDataAdapter from '../../components/nsedata/index'; //TD:
+//import downloads from '../../components/nsedata/downloads'; //TD:
+var downloads = require('../../components/nse-data-adapter/downloads');
 var NSEDataAdapter = require('../../components/nse-data-adapter/index'); //TD Refactor
 var moment = require('moment');
 
@@ -79,7 +80,7 @@ function refreshEachWatchlist(watchlists) {
         watchlists.map(watchlist => {
 
             //Promise for each watchlist that is resolved when the symbols are retrieved and saved
-            return NSEDataAdapter.getSymbolsInWatchList(watchlist)
+            return downloads.getSymbolsInWatchList(watchlist)
                 //save the symbols in the watchlist once they are downloaded
                 .then(symbols => {
                     log(`Fetched Watchlist ${watchlist.name} / ${watchlist.downloadKey} with ${symbols.length} symbols`);
@@ -283,7 +284,7 @@ function refreshAllBoardMeetings() {
 
 function refreshFnOLotSize() {
 
-    let download = NSEDataAdapter.getFnOLotSizes
+    let download = downloads.getFnOLotSizes
 
     return FnOMktLot.remove({}).exec()
         .then(() => download())
@@ -309,7 +310,7 @@ function refreshBoardMeetingsFor(timeframe) {
     query.boardMeetingDate = {};
 
     let op = (timeframe === 'past') ? '$lt' : '$gte';
-    let download = (timeframe === 'past') ? NSEDataAdapter.getBoardMeetingsForLast3Months : NSEDataAdapter.getFCBoardMeetings;
+    let download = (timeframe === 'past') ? downloads.getBoardMeetingsForLast3Months : downloads.getFCBoardMeetings;
 
     query.boardMeetingDate[op] = tgtBoardMeetingDate;
 
