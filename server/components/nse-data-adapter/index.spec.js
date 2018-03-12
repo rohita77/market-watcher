@@ -3,7 +3,22 @@
 import moment from 'moment';
 
 // var nseTools = require('../../../components/nse-data-adapter/index');
+
+
+// nseTools.getStockOptionChain('RELIANCE', '31AUG2017')
+//     .then((optionChainData) => console.log(optionChainData))
+
 var NSEDataAdapter = require('./index');
+
+// NSEDataAdapter.getFnOLotSizes()
+//     .then((bmArr) => {
+//         // log(`Retrieved ${bmArr.length} lot sizes`)
+//         console.log(bmArr);
+
+//     })
+//     .then((docs, e) => {
+//         // log(`Inserted ${docs.length} lot sizes ${e} errors`);
+//     })
 
 const nseCloseTime = "15:30:00";
 const ISTUTCOffset =  "GMT+0530";
@@ -98,39 +113,7 @@ describe('Calculate Monthly Expiry', function () {
     });
   });
 
-  describe("Last Month Expiry Date", function() {
-    it('Should return last Thursday of the previous month when trading date is before last Thursday of the current month', function () {
-      let lastMonthExpiryDate = getISTDate("22-Feb-2018");
-      let tradingDate = getISTDate("21-Mar-2018");
-      expect(NSEDataAdapter.getPreviousMonthExpiryDate(tradingDate)).to.deep.equal(lastMonthExpiryDate);
-      expect(NSEDataAdapter.getPreviousMonthExpiryDate(tradingDate,"DDMMMYYYY")).to.deep.equal("22Feb2018");
-    });
-
-    it('Should return last Thursday of the current month when trading date is after the last Thursday of current month', function () {
-      let lastMonthExpiryDate = getISTDate("22-Feb-2018");
-      let tradingDate = getISTDate("26-Feb-2018");
-      expect(NSEDataAdapter.getPreviousMonthExpiryDate(tradingDate)).to.deep.equal(lastMonthExpiryDate);
-      expect(NSEDataAdapter.getPreviousMonthExpiryDate(tradingDate,"DDMMMYYYY")).to.deep.equal("22Feb2018");
-    });
-
-    it('Should return previous trading day if last Thursday of the previous month is a trading holiday', function () {
-      let lastMonthExpiryDate = getISTDate("28-Mar-2018");
-      let tradingDate = getISTDate("29-Mar-2018");
-      expect(NSEDataAdapter.getPreviousMonthExpiryDate(tradingDate)).to.deep.equal(lastMonthExpiryDate);
-      expect(NSEDataAdapter.getPreviousMonthExpiryDate(tradingDate,"DDMMMYYYY")).to.deep.equal("28Mar2018");
-
-      tradingDate = getISTDate("04-Apr-2018");
-      expect(NSEDataAdapter.getPreviousMonthExpiryDate(tradingDate)).to.deep.equal(lastMonthExpiryDate);
-      expect(NSEDataAdapter.getPreviousMonthExpiryDate(tradingDate,"DDMMMYYYY")).to.deep.equal("28Mar2018");
-    });
-  });
-
 });
-
-
-
-
-
 
 
 describe('Market Timing and Status', function () {

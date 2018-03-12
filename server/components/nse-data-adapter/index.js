@@ -92,17 +92,6 @@ export function getBackMonthExpiryDate(tradingDate=moment(),dtFormat) {
     return getMonthlyExpiryDate(backMonthFirstTradingDate,dtFormat);
 }
 
-
-export function getPreviousMonthExpiryDate(tradingDate=moment(),dtFormat) {
-    let frontMonthExpiryDate = getFrontMonthExpiryDate(tradingDate)
-
-    let firstOfMonth = moment(frontMonthExpiryDate).utcOffset("+05:30").startOf('month');
-    firstOfMonth = firstOfMonth.startOf('day').hours(15).minute(30); //Last minute of trading
-    let firstOfPreviousMonth = moment(firstOfMonth).subtract(1, "month")
-
-    return getMonthlyExpiryDate(firstOfPreviousMonth,dtFormat);
-}
-
 /*
 <select name="bankNiftySelect" id="bankNiftySelect" onchange="changeNiftyView();" class="goodTextBox" style="width:210px;">
                             <optgroup label="Broad Market Indices">

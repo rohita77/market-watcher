@@ -25,7 +25,6 @@ var QuoteDataSchema = new mongoose.Schema({
   cAct: { type: String, default: null },
   yPC: { type: Number, set: toNumber, default: 0.00 },
   mPC: { type: Number, set: toNumber, default: 0.00 },
-
   expectedHigh: { type: Number },
   expectedLow: { type: Number },
   expectedHighPercent: { type: Number },
@@ -72,7 +71,7 @@ QuoteDataSchema.pre('save', function (next) {
   next();
 
 
-});
+})
 
 var QuotesSchema = new mongoose.Schema({
   _id: Date,
@@ -88,18 +87,18 @@ function toNumber(v) {
     return isNaN(+cleanStr) ? 0 : +cleanStr;
   }
   else
-    return v;
+    return v
 
 }
 
-function rnd (v, n = 2) { return math.round(v, n); }
+function rnd (v, n = 2) { return math.round(v, n) }
 
     // let pipeline = getPipelineForDailvAverageQuotes(['INFY', "M&M", 'RELIANCE'], "20171208");
 QuotesSchema.statics.getDailyQuoteStats = function (symbols,marketQuoteDate) {
 
   let pipeline = queries.getPipelineForDailyAverageQuotes(symbols,marketQuoteDate);
   console.log(JSON.stringify(pipeline));
-  return this.aggregate(pipeline);
+  return this.aggregate(pipeline)
 
 };
 
