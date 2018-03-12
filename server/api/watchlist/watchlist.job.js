@@ -183,8 +183,10 @@ function populateFnOMktLot(symbolDoc) {
     /* Next Earning Date */
 
     let query = {};
+    let currentDate = moment().clone().utcOffset("+05:30");
 
-    let frontMonth = NSEDataAdapter.getFrontMonthExpiryDate(moment(), "MMM-YY");
+    let nextTradingDate = NSEDataAdapter.getNextTradingDate(currentDate);
+    let frontMonth = NSEDataAdapter.getExpiryMonth(nextTradingDate, "MMM-YY");
 
     query.symbol = symbolDoc.symbol;
 
@@ -237,7 +239,12 @@ function updateSymbol(symbolDoc) {
 
             }
 
-            let frontMonthExpiryDate = NSEDataAdapter.getFrontMonthExpiryDate(moment());
+            let currentDate = moment().clone().utcOffset("+05:30");
+            let nextTradingDate = NSEDataAdapter.getNextTradingDate(currentDate);
+            let frontMonthExpiryDate = NSEDataAdapter.getExpiryDate(nextTradingDate).toDate();
+
+            // log(`frontMonthExpiryDate for ${frontMonthExpiryDate} `);
+
 
             eSymbol.nextEarningsBeforeFrontMonthExpiry = (eSymbol.nextEarnings == null) ? (eSymbol.projectedEarnings <= frontMonthExpiryDate) : (eSymbol.nextEarnings <= frontMonthExpiryDate)
 
