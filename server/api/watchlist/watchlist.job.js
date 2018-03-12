@@ -38,18 +38,12 @@ export function run() {
             return OptionChain.remove({ lastMod: { $lt: today.toDate() } });
         })
         .then((result) => log(`Removed Option Chains ${JSON.stringify(result)}`))
+        .then(() => archiveQuotes())
+        .then((result) => log(`Archived quotes ${JSON.stringify(result)}`))
+        .then(() => updateDailyAverageQuotes())
         .then(() => {
-
-            let today = moment().clone().startOf('day');
-            if (today.isoWeekday() > 5) today.isoWeekday(5); //Friday
-            let thirtyDaysBack = today.subtract(30, 'days');
-            //TD: Retain Last quote of the day
-
-            return Quote.remove({ lastMod: { $lt: thirtyDaysBack.toDate() } });
-        })
-        .then((result) => log(`Removed Quotes Older than 30 days ${JSON.stringify(result)}`))
-        .then(() => {
-            return updateDailyAverageQuotes();
+            //Compute Closing Quote for each option
+            //Store quotes for last 30 days
         })
         .then(() => Symbol.find({}).count().exec().then((c) => {
             log(`After Job DB has ${JSON.stringify(c)} symbols`);
@@ -386,6 +380,16 @@ function updateDailyAverageQuotes() {
             }
         })
 
+}
+
+function archiveQuotes() {
+
+    let lastMonthExpiryDate = NSEDataAdapter.getPreviousMonthExpiryDate();
+
+    //TD: Retain Last quote of the day
+    log(`Archiving quotes older than previous month expiry date ${moment(lastMonthExpiryDate).format()}`);
+
+    return Quote.remove({ lastMod: { $lt: lastMonthExpiryDate } });
 }
 
 /* Use these script to setup Insert Wachlists
