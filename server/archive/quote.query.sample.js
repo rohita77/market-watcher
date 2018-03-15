@@ -2,7 +2,11 @@ db.quotes.aggregate([
     { "$addFields": { "marketQuoteTime": { "$add": ["$quoteTime", 19800000] } } },
     { "$addFields": { "marketQuoteDate": { "$dateToString": { "format": "%G%m%d", "date": "$marketQuoteTime" } } } },
     { "$sort": { "marketQuoteTime": -1 } },
-    { "$match": { "marketQuoteDate": "20171212" } },
+    { "$project":
+                { "marketQuoteDate": true}
+    },
+
+    { "$match": { "marketQuoteDate": "20180212" } },
     { "$skip": 1 },
     { "$group":
         { "_id": "$marketQuoteDate",

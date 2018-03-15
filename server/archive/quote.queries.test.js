@@ -5,7 +5,7 @@
 
     //Test 1
     // let pipeline = getPipelineForDailvAverageQuotes(['INFY', "M&M", 'RELIANCE'], "20171208");
-    let pipeline = getPipelineForDailvAverageQuotes([], "20171130");
+    let pipeline = getPipelineForDailvAverageQuotes([], "20180220");
     // let pipeline = getPipelineForDailvAverageQuotes([]);
 
 
@@ -25,4 +25,4 @@
 
 }
 
-//load("/server/api/quote/quote.queries.test.js");
+//load("server/api/quote/quote.queries.test.js");
