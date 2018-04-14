@@ -50,11 +50,24 @@ describe('Calculate Monthly Expiry', function () {
       expect(NSEDataAdapter.getFrontMonthExpiryDate(tradingDate)).to.deep.equal(frontMonthExpiryDate);
     });
 
+    it('Should return days to last Thursday of the current month when trading date is before last Thursday of the current month', function () {
+      let tradingDate = getISTDate("21-Feb-2018");
+      expect(NSEDataAdapter.getDaysToFrontMonthExpiry(tradingDate)).to.equal(1);
+
+    });
+
+
     it('Should return last Thursday of the next month when trading date is after the last Thursday of current month', function () {
       let frontMonthExpiryDate = getISTDate("22-Feb-2018");
       let tradingDate = getISTDate("29-Jan-2018");
       expect(NSEDataAdapter.getFrontMonthExpiryDate(tradingDate)).to.deep.equal(frontMonthExpiryDate);
       expect(NSEDataAdapter.getFrontMonthExpiryDate(tradingDate,"DDMMMYYYY")).to.deep.equal("22Feb2018");
+    });
+
+    it('Should return days to last Thursday of the next month when trading date is after the last Thursday of current month', function () {
+      let tradingDate = getISTDate("29-Jan-2018");
+      expect(NSEDataAdapter.getDaysToFrontMonthExpiry(tradingDate)).to.equal(24);
+
     });
 
     it('Should return previous trading day if last Thursday of the month is a trading holiday', function () {

@@ -40,7 +40,7 @@
               scope.oc = data.data[0];
 
 
-              let hash = $location.hash(`anchor${scope.symbol.quote.expectedLowOptions.strikePrice.toString()}`);
+              let hash = $location.hash(`anchor${scope.symbol.quote.expectedLowOptions.price.toString()}`);
               scope.$anchorScroll(hash);
 
             });
@@ -55,9 +55,9 @@
     let oc = scope.oc;
     let lotSize = scope.symbol.frontMonthLotSize;
     let optType = (callOrPut == 'C') ? 'call' : 'put';
-    let askPrice = strike[optType].askPrice;
+    let askPrice = strike[optType].ask;
 
-    let tradingSymbol = `${oc.symbol}${oc.expiryDate.slice(7,9)}${oc.expiryDate.slice(2,5)}${strike.strikePrice}${(callOrPut == 'C')?'CE':'PE'}`
+    let tradingSymbol = `${oc.symbol}${oc.expDt.slice(7,9)}${oc.expDt.slice(2,5)}${strike.price}${(callOrPut == 'C')?'CE':'PE'}`
 
     kite.connect.add({
       "exchange": 'NFO',

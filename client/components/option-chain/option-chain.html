@@ -48,12 +48,18 @@
                     </small>
                 </span>
             </label>
+
+            <label class="btn slim btn-active">
+                <span class="text-right">
+
+                </span>
+            </label>
         </div>
     </div>
 </div>
 <table class="table table-bordered table-condensed label text-center">
     <thead>
-        <tr class="label-info gutter-2">
+        <tr class="label-primary gutter-2">
             <th class="col-md-1 col-xs-1 col-sm-1 text-center">
                 <div>oi-k </div>
             </th>
@@ -89,19 +95,24 @@
         </tr>
     </thead>
     <tbody>
-        <tr ng-repeat="strike in oc.strikes | orderBy: 'strikePrice' | limitTo:200" class="gutter-2" ng-show="((strike.strikePrice <= sdH2) && (strike.strikePrice >= sdL2))">
-            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.strikePrice,true)">
+        <tr class="label-active">
+            <td colspan=9>
+                {{oc.expDt }} ( {{oc.expDays}} )
+            </td>
+        </tr>
+        <tr ng-repeat="strike in oc.strikes | orderBy: 'price' | limitTo:200" class="gutter-2" ng-show="((strike.price <= sdH2) && (strike.price >= sdL2))">
+            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.price,true)">
                 <div>{{strike.call.oi/1000 | number : 0 }} </div>
                 <div>
                     <small>
                         <small> ({{strike.call.chngInOI/1000}})
                 </div>
             </td>
-            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.strikePrice,true)">{{strike.call.volume}}</td>
-            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.strikePrice,true)">{{strike.call.iv | number : 0}}</td>
-            <td class="col-md-2 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.strikePrice,true)">
-                <div class="col-md-1" ng-click="addCallOption(strike)">{{strike.call.bidPrice}} / </div>
-                <div class="col-md-1"> {{strike.call.askPrice}}
+            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.price,true)">{{strike.call.vol}}</td>
+            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.price,true)">{{strike.call.iv | number : 0}}</td>
+            <td class="col-md-2 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.price,true)">
+                <div class="col-md-1" ng-click="addCallOption(strike)">{{strike.call.bid}} / </div>
+                <div class="col-md-1"> {{strike.call.ask}}
                     <small>
                         <small>
                             ({{strike.call.netChng}})
@@ -109,8 +120,8 @@
                     </small>
                 </div>
             </td>
-            <td class="col-md-1 col-xs-1 col-sm-1 label-info" id="anchor{{strike.strikePrice}}">{{strike.strikePrice}}</td>
-            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.strikePrice)">
+            <td class="col-md-1 col-xs-1 col-sm-1 label-active" id="anchor{{strike.price}}">{{strike.price}}</td>
+            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.price)">
                 <div>{{strike.put.oi/1000 | number : 0 }}</div>
                 <div>
                     <small>
@@ -120,11 +131,11 @@
                     </small>
                 </div>
             </td>
-            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.strikePrice)">{{strike.put.volume}}</td>
-            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.strikePrice)">{{strike.put.iv | number : 0}}</td>
-            <td class="col-md-2 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.strikePrice)">
-                <div class="col-md-1" ng-click="addPutOption(strike)">{{strike.put.bidPrice}} / </div>
-                <div class="col-md-1"> {{strike.put.askPrice}}
+            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.price)">{{strike.put.vol}}</td>
+            <td class="col-md-1 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.price)">{{strike.put.iv | number : 0}}</td>
+            <td class="col-md-2 col-xs-1 col-sm-1" ng-class="getMoneynessClass(strike.price)">
+                <div class="col-md-1" ng-click="addPutOption(strike)">{{strike.put.bid}} / </div>
+                <div class="col-md-1"> {{strike.put.ask}}
                     <small>
                         <small>
                             ({{strike.put.netChng}})

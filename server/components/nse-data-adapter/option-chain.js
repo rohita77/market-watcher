@@ -8,8 +8,6 @@ export function getStockOptionChain(symbol, expiryDate) {
     //TD : As on Sep 22, 2017 15:30:29 IST //*[@id="wrapper_btm"]/table[1]/tbody/tr/td[2]/div/span[2]/text()
     //#wrapper_btm > table:nth-child(3) > tbody > tr > td:nth-child(2) > div > span:nth-child(2)
 
-
-
     const optionChainHtmlToJSONTransformer = $ => {
 
         let trArr = $('#octable > tbody > tr');
@@ -33,7 +31,7 @@ export function getStockOptionChain(symbol, expiryDate) {
             [put.quote, rest] = getQuoteJSON(rest.reverse());
 
             return {
-                strikePrice: strikePrice,
+                price: strikePrice,
                 call: Object.assign(call.quote,call.bidAsk),
                 put: Object.assign(put.quote,put.bidAsk)
             }
@@ -50,7 +48,7 @@ export function getStockOptionChain(symbol, expiryDate) {
 function getQuoteJSON (optionArr) {
     let x, o = {}, rest;
     (
-        [x, o.oi, o.chngInOI, o.volume, o.iv, o.ltp, o.netChng,...rest] = optionArr
+        [x, o.oi, o.chngInOI, o.vol, o.iv, o.ltp, o.netChng,...rest] = optionArr
 
     )
 
@@ -61,7 +59,7 @@ function getQuoteJSON (optionArr) {
 function getBidAskJSON (optionArr) {
     let x, o = {}, rest;
     (
-        [o.bidQty, o.bidPrice, o.askPrice, o.askQty, ...rest] = optionArr
+        [o.bidQty, o.bid, o.ask, o.askQty, ...rest] = optionArr
 
     )
 

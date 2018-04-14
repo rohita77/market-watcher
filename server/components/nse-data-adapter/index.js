@@ -186,13 +186,19 @@ export function getFnOLotSizes() {
 
 }
 
+export function getDaysToFrontMonthExpiry(tradingDate = moment()) {
+
+    return moment(getFrontMonthExpiryDate(tradingDate)).diff(moment(getNextTradingDate(tradingDate)), 'days');
+}
+
+
 export function getQuotesForFnOStocks() {
 
     return NSEDownload.getQuotesForIndexStocks('foSecStockWatch')
         .then(quotesJSON => {
             quotesJSON.nxtTrdDt = getNextTradingDate();
             quotesJSON.frMnthExpDt = getFrontMonthExpiryDate();
-            quotesJSON.dysToFrMnthExp = moment(quotesJSON.frMnthExpDt).diff(moment(quotesJSON.nxtTrdDt), 'days');
+            quotesJSON.dysToFrMnthExp = getDaysToFrontMonthExpiry();
             return quotesJSON;
         }
 
