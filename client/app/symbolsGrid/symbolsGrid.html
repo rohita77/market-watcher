@@ -17,11 +17,20 @@
       <span class="glyphicon glyphicon-refresh glyphicon-refresh-animate" ng-show="!symbolsGridCtrl.quoteTime"></span>
       <span ng-show="symbolsGridCtrl.quoteTime">
         <small>
-          <small>as on {{ symbolsGridCtrl.quoteTime | date : 'HH:mm:ss' : '+0530'}} IST fetched at {{symbolsGridCtrl.refreshTime
-            | date : 'dd-MMM HH:mm:ss' : '+0800'}} SGT </small>
+          <small>as on {{ symbolsGridCtrl.quoteTime | date : 'HH:mm' : '+0530'}} IST fetched at {{symbolsGridCtrl.refreshTime |
+            date : 'dd-MMM HH:mm' : '+0800'}} SGT </small>
         </small>
 
       </span>
+
+      <span ng-show="symbolsGridCtrl.quoteTime">
+        <small>
+          <small>
+            8 hrs to market close Market is closed. Next Trading Date is Mon,18-Mar
+          </small>
+
+      </span>
+
     </h4>
 
 
@@ -119,6 +128,16 @@
     </div>
   </div>
 
+  <div>
+    <span>
+      <small>
+        <small>
+          Front Month Expiry is on Wed, 28-Mar-18 7 days to front month expiry (Wed, 28-Mar-18) Fri, 30-Mar is trading holiday
+        </small>
+      </small>
+    </span>
+  </div>
+
   <br>
 
 
@@ -132,8 +151,7 @@
 
       <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:200 | filter:symbolsGridCtrl.query track by symbol._id">
         <uib-accordion-group id="anchor-{{symbol.symbol}}" class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-primary' : 'panel-default') }}"
-
-        ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="((symbol.quote.expectedHighPercent > 0) &&(!symbol.nextEarningsBeforeFrontMonthExpiry || symbolsGridCtrl.incEarnings) && (!symbolsGridCtrl.earningsOnly || (symbol.daysToEarnings <=3  && symbol.nextEarnings)) )">
+          ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="((symbol.quote.expectedHighPercent > 0) &&(!symbol.nextEarningsBeforeFrontMonthExpiry || symbolsGridCtrl.incEarnings) && (!symbolsGridCtrl.earningsOnly || (symbol.daysToEarnings <=3  && symbol.nextEarnings)) )">
 
 
           <uib-accordion-heading>
@@ -263,8 +281,8 @@
                       <small>Call Bid Ask : </small>
                     </small>
                   </div>
-                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (-1*((symbol.quote.expectedHighOptions.call.percentSpread||0) -5)  | moveSize : [1,3,5])">
-                    {{symbol.quote.expectedHighOptions.call.percentSpread | number : 1 }}%
+                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (-1*((symbol.quote.expectedHighOptions.call.perSpr||0) -5)  | moveSize : [1,3,5])">
+                    {{symbol.quote.expectedHighOptions.call.perSpr | number : 1 }}%
                   </div>
 
                   <div class="col-md-3 col-xs-3 col-sm-3 text-right">
@@ -272,8 +290,8 @@
                       <small>Put Bid Ask : </small>
                     </small>
                   </div>
-                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (-1*((symbol.quote.expectedLowOptions.put.percentSpread||0) -5)  | moveSize : [1,3,5])">
-                    {{symbol.quote.expectedLowOptions.put.percentSpread | number : 1 }}%
+                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (-1*((symbol.quote.expectedLowOptions.put.perSpr||0) -5)  | moveSize : [1,3,5])">
+                    {{symbol.quote.expectedLowOptions.put.perSpr | number : 1 }}%
                   </div>
                 </div>
 
@@ -344,16 +362,16 @@
                       <small>Call OI Chg : </small>
                     </small>
                   </div>
-                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedHighOptions.call.percentchngInOI || 0 | moveSize : [3,5,10])">
-                    {{symbol.quote.expectedHighOptions.call.percentchngInOI | number : 1 }}%
+                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedHighOptions.call.perChngInOI || 0 | moveSize : [3,5,10])">
+                    {{symbol.quote.expectedHighOptions.call.perChngInOI | number : 1 }}%
                   </div>
                   <div class="col-md-3 col-xs-3 col-sm-3 text-right">
                     <small>
                       <small>Put OI Chg : </small>
                     </small>
                   </div>
-                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedLowOptions.put.percentchngInOI  || 0| moveSize : [3,5,10])">
-                    {{symbol.quote.expectedLowOptions.put.percentchngInOI | number : 1 }}%
+                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedLowOptions.put.perChngInOI  || 0| moveSize : [3,5,10])">
+                    {{symbol.quote.expectedLowOptions.put.perChngInOI | number : 1 }}%
                   </div>
                 </div>
 
@@ -383,8 +401,8 @@
                       <small>Call Vol : </small>
                     </small>
                   </div>
-                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedHighOptions.call.volume || 0 | moveSize : [100,500,1000])">
-                    {{symbol.quote.expectedHighOptions.call.volume | number:0}}
+                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedHighOptions.call.vol || 0 | moveSize : [100,500,1000])">
+                    {{symbol.quote.expectedHighOptions.call.vol | number:0}}
                   </div>
 
                   <div class="col-md-3 col-xs-3 col-sm-3 text-right">
@@ -392,8 +410,8 @@
                       <small>Put Vol : </small>
                     </small>
                   </div>
-                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedLowOptions.put.volume || 0 | moveSize : [100,500,1000])">
-                    {{symbol.quote.expectedLowOptions.put.volume | number:0}}
+                  <div class="col-md-3 col-xs-3 col-sm-3" ng-class="'quote-pchg-'+ (symbol.quote.expectedLowOptions.put.vol || 0 | moveSize : [100,500,1000])">
+                    {{symbol.quote.expectedLowOptions.put.vol | number:0}}
                   </div>
 
                 </div>

@@ -100,9 +100,14 @@ function refreshOptionChain(stockQuote, frontMonthExpiry) {
       if (optionChainArr && optionChainArr.length > 0) {
 
         let optionChainJSON = {
-          symbol: stockQuote.symbol,           //TD: Sub docs expiry date, strike price, option
+          symbol: stockQuote.symbol,
           quoteId: stockQuote._id,
-          expiryDate: frontMonthExpiry,
+          expDt: frontMonthExpiry,    //TD: expiry date to date
+
+          spot : stockQuote.ltP,
+          mrgnPer: stockQuote.frMnthMrgnPer,
+          // lotSz: Number, //TD
+          expDays: NSEDataAdapter.getDaysToFrontMonthExpiry(),
           strikes: optionChainArr
         };
 
