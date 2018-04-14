@@ -3,7 +3,7 @@
 import moment from 'moment';
 
 //import NSEDownload from './downloads';
-var NSEDownload = require( './downloads'); //TD:
+var NSEDownload = require('./downloads'); //TD:
 
 //Get Trading holiday from DB or inject
 const tradingHolidays = [
@@ -33,7 +33,7 @@ export function isTradingHoliday(calendarDate = moment()) {
     let calendarDateString = mcalendarDate.format("DD-MMM-YY");
 
     return tradingHolidays.find((date) =>
-        (calendarDateString == date) )  ? true : false ;
+        (calendarDateString == date)) ? true : false;
 
 }
 
@@ -69,38 +69,38 @@ export function getMonthlyExpiryDate(tradingDate, dtFormat) {
     let expiryThursday = eom.clone().day(eom.day() <= 3 ? -3 : 4)
 
     //Handle Trading Holidays
-    let expiryDate = (!isTradingHoliday(expiryThursday)) ? expiryThursday : expiryThursday.subtract(1,"day");
+    let expiryDate = (!isTradingHoliday(expiryThursday)) ? expiryThursday : expiryThursday.subtract(1, "day");
 
     //TD: what if day before is also trading holiday?
 
     //Return Raw date or Formatted date?
-    let retExpDate = (dtFormat) ?  expiryDate.format(dtFormat) : expiryDate.toDate();
+    let retExpDate = (dtFormat) ? expiryDate.format(dtFormat) : expiryDate.toDate();
 
     //Trading month falls in Current Month Expiry or Next Month Expiry
-    return (expiryDate.isSameOrAfter(tradingDate)) ? retExpDate : getMonthlyExpiryDate(eom.clone().add(1, "day"),dtFormat);
+    return (expiryDate.isSameOrAfter(tradingDate)) ? retExpDate : getMonthlyExpiryDate(eom.clone().add(1, "day"), dtFormat);
 
 }
 
-export function getFrontMonthExpiryDate(tradingDate=moment(),dtFormat) {
-    return getMonthlyExpiryDate(tradingDate,dtFormat);
+export function getFrontMonthExpiryDate(tradingDate = moment(), dtFormat) {
+    return getMonthlyExpiryDate(tradingDate, dtFormat);
 }
 
-export function getBackMonthExpiryDate(tradingDate=moment(),dtFormat) {
+export function getBackMonthExpiryDate(tradingDate = moment(), dtFormat) {
     let frontMonthExpiryDate = getFrontMonthExpiryDate(tradingDate)
     let backMonthFirstTradingDate = moment(frontMonthExpiryDate).add(1, "days")
 
-    return getMonthlyExpiryDate(backMonthFirstTradingDate,dtFormat);
+    return getMonthlyExpiryDate(backMonthFirstTradingDate, dtFormat);
 }
 
 
-export function getPreviousMonthExpiryDate(tradingDate=moment(),dtFormat) {
+export function getPreviousMonthExpiryDate(tradingDate = moment(), dtFormat) {
     let frontMonthExpiryDate = getFrontMonthExpiryDate(tradingDate)
 
     let firstOfMonth = moment(frontMonthExpiryDate).utcOffset("+05:30").startOf('month');
     firstOfMonth = firstOfMonth.startOf('day').hours(15).minute(30); //Last minute of trading
     let firstOfPreviousMonth = moment(firstOfMonth).subtract(1, "month")
 
-    return getMonthlyExpiryDate(firstOfPreviousMonth,dtFormat);
+    return getMonthlyExpiryDate(firstOfPreviousMonth, dtFormat);
 }
 
 /*
@@ -166,34 +166,42 @@ export function getSymbolsInWatchList(watchlist) {
 
     return NSEDownload.getSymbolsInIndex(watchlist.downloadKey);
 
-  }
+}
 
-  export function getFCBoardMeetings() {
+export function getFCBoardMeetings() {
 
     return NSEDownload.getBoardMeetings('All_Forthcoming');
 
-  }
+}
 
-  export function getBoardMeetingsForLast3Months() {
+export function getBoardMeetingsForLast3Months() {
 
     return NSEDownload.getBoardMeetings('Last_3_Months'); //12 Months? To deal with boundary value past earningg
 
-  }
+}
 
-  export function getFnOLotSizes() {
+export function getFnOLotSizes() {
 
     return NSEDownload.getFnOLotSizes(); //No Download Key
 
-  }
+}
 
-  export function getQuotesForFnOStocks() {
+export function getQuotesForFnOStocks() {
 
-    return NSEDownload.getQuotesForIndexStocks('foSecStockWatch');
+    return NSEDownload.getQuotesForIndexStocks('foSecStockWatch')
+        .then(quotesJSON => {
+            quotesJSON.nxtTrdDt = getNextTradingDate();
+            quotesJSON.frMnthExpDt = getFrontMonthExpiryDate();
+            quotesJSON.dysToFrMnthExp = moment(quotesJSON.frMnthExpDt).diff(moment(quotesJSON.nxtTrdDt), 'days');
+            return quotesJSON;
+        }
 
-  }
+        );
 
-  export function getStockOptionChain(symbol, expiryDate) {
+}
+
+export function getStockOptionChain(symbol, expiryDate) {
 
     return NSEDownload.getStockOptionChain(symbol, expiryDate);
 
-  }
+}

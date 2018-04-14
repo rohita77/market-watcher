@@ -66,11 +66,12 @@ export function getQuotesForIndexStocks(index) {
       .then((res) => {
           res.index = index;
           [res.quoteTime,res.time] = [new Date(res.time + ' GMT+0530'),res.quoteTime];
+          res.quoteDate = moment(res.quoteTime).utcOffset('GMT+05:30').startOf('day').hours(16).toDate();
           res.refreshTime = new Date();
           [res.quotes, res.data] = [res.data,res.quotes]
           let IST = { timeZone: "Asia/Calcutta", timeZoneName: "short" };
 
-          log(`Number of Quotes: ${res.quotes.length} as of ${res.quoteTime.toLocaleString("en-US", IST)} retrieved at ${res.refreshTime.toLocaleString()}`);
+          log(`Number of Quotes: ${res.quotes.length} as of ${res.quoteTime.toLocaleString("en-US", IST)} for trade date ${res.quoteDate.toLocaleString("en-US", IST)} retrieved at ${res.refreshTime.toLocaleString()}`);
           return res;
 
       });
