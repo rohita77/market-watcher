@@ -12,8 +12,26 @@
           padding-left: 2px;
           padding-right: 2px;
         }
+        td.warning {
+          background-color : #f2f791
+        }
+        td.success {
+          background-color : #a9c29f
+        }
+        td.danger {
+          background-color : #ee7467
+        }
+    }
+      .label-active {
+        color : white
+      }
+      .label-primary {
+        color : #fff
       }
     }
     padding-left: 0px;
     padding-right: 0px;
   }
+
+
+  //
