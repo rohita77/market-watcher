@@ -12,25 +12,62 @@ if (env === 'development' || env === 'test') {
 
 
 import mongoose from 'mongoose';
-import FnOMktLot from './components/nse-data-adapter/models/fno-mkt-lot.model';
+
 
 mongoose.plugin(require('./components/lastMod'));
 
 mongoose.Promise = require('bluebird');
 var config = require('./config/environment');
 
+let [a, b, db, targetModelName, ...params] = process.argv;
+
+let uri = `mongodb://localhost/${db}`
 // Connect to MongoDB
-mongoose.connect(config.mongo.uri, config.mongo.options);
+mongoose.connect(uri, config.mongo.options);
 mongoose.connection.on('error', function (err) {
     console.error('MongoDB connection error: ' + err);
     process.exit(-1);
 });
 
-let expiryMonth = moment('28-SEP-2017',"DD-MMM-YYYY").format("MMM-YY").toUpperCase();
+const models = [
+    {
+        modelName: 'fno-mkt-lot',
+        modelPath: './components/nse-data-adapter/models/fno-mkt-lot.model',
+    },
+    {
+        modelName: 'quote',
+        modelPath: './api/quote/quote.model',
+    },
+    {
+        modelName: 'option-chain',
+        modelPath: './api/option-chain/option-chain.model',
+    },
+]
+
+
+targetModelName = new RegExp('^' + targetModelName + '$');
+
+let targetModel = models.find(
+    m => m.modelName.match(targetModelName)
+);
+
+console.log(`ModelPath: ${targetModel.modelPath}`);
+
+let model = require(targetModel.modelPath);
 
 //Test from getting mktlot
-FnOMktLot.getFnOMktLot('HINDALCO', expiryMonth)
-    .then(
-    (r) =>
-        console.log(`Market lot is ${JSON.stringify(r)}`)
-    )
+// model.default.getFnOMktLot(params[2], params[1])
+//     .then(
+//         (r) =>
+//             console.log(`Market lot for ${params[2]} / ${params[1]}  is ${JSON.stringify(r)}`)
+//     )
+//     .then(() => process.exit(0));
+
+
+
+model.default.test(params)
+.then(() => process.exit(0));
+
+
+/* node dist/server/model.test mlab-24-Feb-18 quote getDailyQuoteStats 20180221 */
+/* node dist/server/model.test marketwatcher option-chain getOptionChainSubsetForSymbol HINDALCO 230 */
