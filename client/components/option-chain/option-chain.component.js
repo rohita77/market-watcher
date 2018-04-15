@@ -54,18 +54,18 @@
 
     let oc = scope.oc;
     let lotSize = scope.symbol.frontMonthLotSize;
-    let optType = (callOrPut == 'C') ? 'call' : 'put';
+    let optType = (callOrPut === 'C') ? 'call' : 'put';
     let askPrice = strike[optType].ask;
 
     let tradingSymbol = `${oc.symbol}${oc.expDt.slice(7,9)}${oc.expDt.slice(2,5)}${strike.price}${(callOrPut == 'C')?'CE':'PE'}`
 
     kite.connect.add({
-      "exchange": 'NFO',
-      "tradingsymbol": tradingSymbol,
-      "quantity": lotSize,
-      "transaction_type": 'SELL',
-      "order_type": 'LIMIT',
-      "price": askPrice
+      exchange: 'NFO',
+      tradingsymbol: tradingSymbol,
+      quantity: lotSize,
+      transaction_type: 'SELL',
+      order_type: 'LIMIT',
+      price: askPrice
     });
 
     alert(`Added ${lotSize} of ${tradingSymbol} at ${askPrice}`);
