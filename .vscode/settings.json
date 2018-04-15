@@ -2,8 +2,9 @@
 {"files.autoSave": "afterDelay",
 "files.autoSaveDelay": 1000,
 "files.trimTrailingWhitespace": true,
-"editor.wrappingColumn": 120,
-"editor.renderWhitespace": true,
+"editor.wordWrap":"wordWrapColumn",
+"editor.wordWrapColumn": 120,
+"editor.renderWhitespace":"none",
 
     "files.exclude": {
         "**/.git": true,
