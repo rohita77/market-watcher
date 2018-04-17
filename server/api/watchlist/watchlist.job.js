@@ -155,7 +155,7 @@ function populateEarnings(earningPeriod, symbolDoc) {
     let op = (earningPeriod === 'previousEarnings') ? '$lt' : '$gte';
 
     query.boardMeetingDate[op] = tgtEarningDate;
-    query.purpose = /^Results/;
+    query.purpose = /Results/;
 
     let sortOrder = (earningPeriod === 'previousEarnings') ? -1 : 1;
     sort.boardMeetingDate = sortOrder * 1; // Latest or Next
