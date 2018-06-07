@@ -126,7 +126,7 @@ export function getPiplelineForOCSubset(passedSymbol, ltP) {
                     $and: [
                         { $gte: ["$$strike.price", "$expHiHlfSD"] },
                         { $lt: ["$$strike.price", "$expHiOneSD"] },
-                        { $and: [{ $gte: ["$$strike.call.vol", 1] }, { $gte: ["$$strike.call.oi", 1] }] },
+                        { $and: [{ $gt: ["$$strike.call.bid", 0] },{ $gte: ["$$strike.call.vol", 1] }, { $gte: ["$$strike.call.oi", 1] }] },
                     ]
                 }
             }
@@ -139,7 +139,7 @@ export function getPiplelineForOCSubset(passedSymbol, ltP) {
                     $and: [
                         { $lte: ["$$strike.price", "$expLoHlfSD"] },
                         { $gt: ["$$strike.price", "$expLoOneSD"] },
-                        { $and: [{ $gte: ["$$strike.put.vol", 1] }, { $gte: ["$$strike.put.oi", 1] }] },
+                        { $and: [{ $gt: ["$$strike.put.bid", 0] },{ $gte: ["$$strike.put.vol", 1] }, { $gte: ["$$strike.put.oi", 1] }] },
                     ]
                 }
             }
@@ -153,7 +153,7 @@ export function getPiplelineForOCSubset(passedSymbol, ltP) {
                 cond: {
                     $and: [
                         { $gte: ["$$strike.price", "$expHiOneSD"] },
-                        { $and: [{ $gte: ["$$strike.call.vol", 1] }, { $gte: ["$$strike.call.oi", 1] }] },
+                        { $and: [{ $gt: ["$$strike.call.bid", 0] },{ $gte: ["$$strike.call.vol", 1] }, { $gte: ["$$strike.call.oi", 1] }] },
                     ]
                 }
             }
@@ -165,7 +165,7 @@ export function getPiplelineForOCSubset(passedSymbol, ltP) {
                 cond: {
                     $and: [
                         { $lte: ["$$strike.price", "$expLoOneSD"] },
-                        { $and: [{ $gte: ["$$strike.put.vol", 1] }, { $gte: ["$$strike.put.oi", 1] }] },
+                        { $and: [{ $gt: ["$$strike.put.bid", 0] },{ $gte: ["$$strike.put.vol", 1] }, { $gte: ["$$strike.put.oi", 1] }] },
                     ]
                 }
             }
@@ -225,6 +225,47 @@ export function getPiplelineForOCSubset(passedSymbol, ltP) {
     }
 
     pipeline.push(stage);
+
+    // Stage 7  Projeject Only what is required
+    stage = {};
+    stage.$project = {
+        '_id': false,
+        symbol: true,
+        ATMOption: true,
+        NTMOption: true,
+        strikesAboveExpectedHigh : true,
+        strikesBelowExpectedLow : true,
+        strikesAboveExpHiOneSD : true,
+        strikesBelowExpLoOneSD : true,
+
+        expectedHigh: true,
+        expectedLow: true,
+        expectedHighOptions: '$firstStrikeAboveExpectedHigh',
+        expectedLowOptions: '$firstStrikeBelowExpectedLow',
+        expHiHlfSD : { price : '$expHiHlfSD',
+            nextStrike : {
+                price : '$firstStrikeAboveExpectedHigh.price',
+                perSpot : '$firstStrikeAboveExpectedHigh.perSpot'},
+            nextCall : '$firstStrikeAboveExpectedHigh.call'},
+        expLoHlfSD : { price : '$expLoHlfSD',
+            nextStrike : {
+                price : '$firstStrikeBelowExpectedLow.price' ,
+                perSpot : '$firstStrikeBelowExpectedLow.perSpot'},
+            nextPut : '$firstStrikeBelowExpectedLow.put'},
+        expHiOneSD : { price : '$expHiOneSD',
+            nextStrike : {
+                price : '$firstStrikeAboveExpHiOneSD.price'  ,
+                perSpot : '$firstStrikeAboveExpHiOneSD.perSpot'},
+            nextCall : '$firstStrikeAboveExpHiOneSD.call'},
+        expLoOneSD : { price : '$expLoOneSD',
+            nextStrike : {
+                price : '$firstStrikeBelowExpLoOneSD.price'  ,
+                perSpot : '$firstStrikeBelowExpLoOneSD.perSpot'},
+            nextPut : '$firstStrikeBelowExpLoOneSD.put'}
+    }
+
+    pipeline.push(stage);
+
 
   return pipeline;
 
