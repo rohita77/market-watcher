@@ -71,3 +71,7 @@ model.default.test(params)
 
 /* node dist/server/model.test mlab-24-Feb-18 quote getDailyQuoteStats 20180221 */
 /* node dist/server/model.test marketwatcher option-chain getOptionChainSubsetForSymbol HINDALCO 230 */
+
+/*
+https://nse-india.com/products/dynaContent/common/productsSymbolMapping.jsp?instrumentType=OPTIDX&symbol=NIFTY&expiryDate=28-12-2017&optionType=CE&strikePrice=&dateRange=&fromDate=01-Oct-2017&toDate=28-Dec-2017&segmentLink=9&symbolCount=
+*/
