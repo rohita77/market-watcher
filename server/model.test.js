@@ -74,4 +74,6 @@ model.default.test(params)
 
 /*
 https://nse-india.com/products/dynaContent/common/productsSymbolMapping.jsp?instrumentType=OPTIDX&symbol=NIFTY&expiryDate=28-12-2017&optionType=CE&strikePrice=&dateRange=&fromDate=01-Oct-2017&toDate=28-Dec-2017&segmentLink=9&symbolCount=
+ss
+
 */
