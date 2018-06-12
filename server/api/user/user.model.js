@@ -212,7 +212,7 @@ UserSchema.methods = {
                    .toString('base64');
     }
 
-    return crypto.pbkdf2(password, salt, defaultIterations, defaultKeyLength, (err, key) => {
+    return crypto.pbkdf2(password, salt, defaultIterations, defaultKeyLength,'sha1', (err, key) => {
       if (err) {
         callback(err);
       } else {
