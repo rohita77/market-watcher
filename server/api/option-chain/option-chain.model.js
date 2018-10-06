@@ -79,7 +79,7 @@ OptionChainSchema.pre('save', function (next) {
   this.strikes =
     this.strikes.filter(function (strike) {
       //    Save only options with any oi and volume
-      if ((strike.call && strike.call.oi > 0 && strike.call.vol > 0) || (strike.put && strike.put.oi > 0 && strike.put.vol > 0)) {
+      if ((strike.call && strike.call.oi > 0 && strike.call.vol > 0 && strike.call.bid > 0) || (strike.put && strike.put.oi > 0 && strike.put.vol > 0 && strike.put.bid > 0)) {
         // console.log(`${strike.price}  ${spot} ${mrgnPer}`);
 
         strike.perSpot = (strike.price - spot) * 100 / (spot);
