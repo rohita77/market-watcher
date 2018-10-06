@@ -7,8 +7,7 @@ import math from 'mathjs';
 var queries = require('./option-chain.queries');
 
 let int = (n, k = 10) => Math.round(n * k) / k;
-let JStr = (s) => JSON.stringify(s);
-let log = (s) => console.log(s);
+let rnd = (v, n = 2) => { return math.round(v, n) }
 
 var OptionSchema = new mongoose.Schema({
   oi: { type: Number, default: 0.00 },
@@ -21,6 +20,9 @@ var OptionSchema = new mongoose.Schema({
   bid: { type: Number, default: 0.00 },
   ask: { type: Number, default: 0.00 },
   askQty: { type: Number, default: 0.00 },
+
+  hi: { type: Number, default: 0.00 },
+  lo: { type: Number, default: 0.00 },
 
   mid: { type: Number }, //TD: In default cannot reference another property
   bidAskSpr: { type: Number },
@@ -35,12 +37,21 @@ var OptionSchema = new mongoose.Schema({
 
 //TD: Null Option if there is no oi or volume ?
 OptionSchema.pre('save', function (next) {
+//  console.info("Inside Option Schema Save");
   this.mid = rnd((this.bid + this.ask) / 2);
   this.bidAskSpr = rnd((this.ask - this.bid));
   this.perSpr = rnd((this.bidAskSpr / this.ask) * 100);
   this.perChngInOI = rnd((this.chngInOI / (this.oi - this.chngInOI)) * 100);
 
   next()
+})
+
+var StrikeSchema = new mongoose.Schema({
+  price: { type: Number },
+  perSpot: { type: Number },
+  call: OptionSchema,
+  put: OptionSchema
+
 })
 
 var OptionChainSchema = new mongoose.Schema({
@@ -53,12 +64,7 @@ var OptionChainSchema = new mongoose.Schema({
   lotSz: Number, //TD
   expDays: Number,
   //TD: expHi, expLo, etc.
-  strikes: [{
-    price: { type: Number },
-    perSpot: { type: Number },
-    call: OptionSchema,
-    put: OptionSchema
-  }]
+  strikes: [StrikeSchema]
 });
 
 //TD: Get Rid of options wih no OI or volume
@@ -101,19 +107,12 @@ OptionChainSchema.pre('save', function (next) {
 
     }, this);
 
-
-
   if (this.strikes.length < 1)
-    next(new Error("No Strikes"));
+    next(new Error("No Liquid Strikes"));
   else
     next();
 })
 
-// OptionChainSchema.post('save', function (error, doc, next) {
-//   next();
-// })
-
-function rnd(v, n = 2) { return math.round(v, n) }
 
 OptionChainSchema.statics.getOptionChainSubsetForSymbol = function (symbol, ltP) {
 
@@ -127,10 +126,16 @@ OptionChainSchema.statics.getOptionChainSubsetForSymbol = function (symbol, ltP)
 
 };
 
+//******************************************* Test Wrapper ************************************************************/
+let JStr = (s) => JSON.stringify(s);
+let log = (s) => console.log(s);
+
 let logCallOpt = (o) => logOpt(o, 'call');
 let logPutOpt = (o) => logOpt(o, 'put');
 
 function logOpt(o, t) {
+  log(JStr(o));
+
   let n = {};
   [n.mid, n.bidAskSpr, n.perSpr, n.oi, n.chngInOI, n.perChngInOI, n.vol, n.iv, n.netChng] =
 
@@ -154,7 +159,7 @@ OptionChainSchema.statics.test = function (params) {
             arrRes.forEach((u) => {
 
               log('------------------------------------------------ Summary -----------------------------------------------------------------------------------------------');
-              log(`${u.symbol} Spot: ${params[2]} Exp Hi: ${u.expHiHlfSD} Exp Lo: ${u.expLoHlfSD}  1SDExpHi: ${u.expHiOneSD} 1SDExpLo: ${u.expLoOneSD}`);
+              log(`${u.symbol} Spot: ${params[2]} Exp Hi: ${u.expHiHlfSD.price} Exp Lo: ${u.expLoHlfSD.price}  1SDExpHi: ${rnd(u.expHiOneSD.price,2)} 1SDExpLo: ${rnd(u.expLoOneSD.price)}`);
 
               log('------------------------------------------------ ATM Options -----------------------------------------------------------------------------------------------');
               logCallOpt(u.ATMOption);
@@ -164,29 +169,40 @@ OptionChainSchema.statics.test = function (params) {
               logCallOpt(u.NTMOption);
               logPutOpt(u.NTMOption);
 
-              log('------------------------------------------------ Half SD Expected High Call -----------------------------------------------------------------------------------------------');
-              logCallOpt(u.firstStrikeAboveExpectedHigh);
+              log('--------------------------------------------------- Half SD Expected High Call -----------------------------------------------------------------------------------------');
 
-              log('------------------------------------------------  Half SD Expected Low Put --------------------------------------------------------------------------------------------------');
-              logPutOpt(u.firstStrikeBelowExpectedLow);
+              let o;
 
-              log('------------------------------------------------  One SD Expected High Call -----------------------------------------------------------------------------------------------');
-              logCallOpt(u.firstStrikeAboveExpHiOneSD);
+              o = {call :u.expHiHlfSD.nextCall};
+              logCallOpt(Object.assign(u.expHiHlfSD.nextStrike,o));
 
-              log('------------------------------------------------ One SD Expected Low Put --------------------------------------------------------------------------------------------------');
-              logPutOpt(u.firstStrikeBelowExpLoOneSD);
+              log('--------------------------------------------------- Half SD Expected Low Put -------------------------------------------------------------------------------------------');
+
+              o = {put :u.expLoHlfSD.nextPut};
+              logPutOpt(Object.assign(u.expLoHlfSD.nextStrike,o));
 
 
-              log('------------------------------------------------ CALLS above expHiHlfSD -----------------------------------------------------------------------------------------------');
+              log('---------------------------------------------------  One SD Expected High Call -----------------------------------------------------------------------------------------');
+
+              o = {call :u.expHiOneSD.nextCall};
+              logCallOpt(Object.assign(u.expHiOneSD.nextStrike,o));
+
+              log('--------------------------------------------------- One SD Expected Low Put --------------------------------------------------------------------------------------------');
+
+              o = {put :u.expLoOneSD.nextPut};
+              logPutOpt(Object.assign(u.expLoOneSD.nextStrike,o));
+
+
+              log('--------------------------------------------------- CALLS above expHiHlfSD --------------------------------------------------------------------------------------------');
               u.strikesAboveExpectedHigh.forEach((s) => logCallOpt(s));
 
-              log('------------------------------------------------ CALLS above expHiOneSD -----------------------------------------------------------------------------------------------');
+              log('--------------------------------------------------- CALLS above expHiOneSD --------------------------------------------------------------------------------------------');
               u.strikesAboveExpHiOneSD.forEach((s) => logCallOpt(s));
 
-              log('------------------------------------------------ PUTS below expLoHlfSD -----------------------------------------------------------------------------------------------');
+              log('--------------------------------------------------- PUTS below expLoHlfSD --------------------------------------------------------------------------------------------');
               u.strikesBelowExpectedLow.forEach((s) => logPutOpt(s));
 
-              log('------------------------------------------------ PUTS below expLoOneSD -----------------------------------------------------------------------------------------------');
+              log('--------------------------------------------------- PUTS below expLoOneSD --------------------------------------------------------------------------------------------');
               u.strikesBelowExpLoOneSD.forEach((s) => logPutOpt(s));
 
             })
@@ -206,9 +222,6 @@ OptionChainSchema.statics.test = function (params) {
 
 registerEvents(OptionChainSchema);
 export default mongoose.model('OptionChain', OptionChainSchema);
-
-
-
 
 
 /*

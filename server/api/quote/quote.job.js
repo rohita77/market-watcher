@@ -88,15 +88,16 @@ function refreshOptionChains(quotesJSON) {
     .then((quotes) => {
       let qj = quotesJSON;
       qj.quotes = quotes;
-      return qj;
+      return qj;x
     })
 }
 
+/*
 function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
   return NSEDataAdapter.getStockOptionChain(stockQuote.symbol, frontMonthExpiry)
   //save the option chain in the DB once they are downloaded
-    .then(optionChainArr => {
+    .then(async optionChainArr => {
       if (optionChainArr && optionChainArr.length > 0) {
 
         let optionChainJSON = {
@@ -112,21 +113,87 @@ function refreshOptionChain(stockQuote, frontMonthExpiry) {
         };
 
         log(`Fetched Option Chain for ${stockQuote.symbol}/ ${frontMonthExpiry} with ${optionChainArr.length} strikes and quoteTime: ${stockQuote.quoteTime}`);
+*/
+/*
+        return OptionChain.findOneAndUpdate({ symbol: optionChainJSON.symbol, expDt: optionChainJSON.expDt }, optionChainJSON, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true, runSettersOnQuery: true }).exec()
+        .then((doc, err) => {
+          if (err) log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`);
+          return doc;
+        })
+        .catch((err) => {
+          log(`Catch Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`);
+          return null;
+        });
+*/
 
-        return OptionChain.create(optionChainJSON)
-          .then((doc) => {
+/*
+        let err
+        let doc =   await OptionChain.create(optionChainJSON)
+        console.log(`doc ${doc}`);
+//          .then((doc,err) => {
+            if (err) log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`);
             return doc;
-          })
-          .catch((err) => {
+  //        })
+  /*
+  .catch((err) => {
             log(`Error Creating Option Chain for ${stockQuote.symbol} / ${frontMonthExpiry}: ${err}`);
             return null;
           });
-      }
+  */
+//*/
+/*
+return oc;
+        }
       else
         log(`No Option Chain Returned for ${stockQuote.symbol} for ${frontMonthExpiry} `);
       //TD: Return Promise?
 
     })
+
+}
+*/
+
+async function refreshOptionChain(stockQuote, frontMonthExpiry) {
+
+  let optionChainArr = await NSEDataAdapter.getStockOptionChain(stockQuote.symbol, frontMonthExpiry);
+
+  if (!optionChainArr && optionChainArr.length <= 0)
+    log(`No Option Chain returned for ${stockQuote.symbol} for ${frontMonthExpiry} `);
+    //TD: Return Promise?
+  else {
+
+    log(`Fetched Option Chain for ${stockQuote.symbol}/ ${frontMonthExpiry} with ${optionChainArr.length} strikes and quoteTime: ${stockQuote.quoteTime}`);
+
+
+    //Check if option chain alread exists in DB TD: Use a better primary key
+    let optionChainDoc = await OptionChain.findOneAndRemove({
+        symbol: stockQuote.symbol, expDt: frontMonthExpiry /*, quoteId:stockQuote._id ,*/
+    })
+
+    //if optionChainDoc //Merge
+    //TD: find new hi/lo for e
+    //Merge strikes
+
+    //save the option chain in the DB once they are downloaded
+    let optionChainJSON = {
+      symbol: stockQuote.symbol,
+      quoteId: stockQuote._id,
+      expDt: frontMonthExpiry,    //TD: expiry date to date
+
+      spot: stockQuote.ltP,
+      mrgnPer: stockQuote.frMnthMrgnPer,
+  //  lotSz: Number, //TD
+      expDays: NSEDataAdapter.getDaysToFrontMonthExpiry(),
+      strikes: optionChainArr
+    };
+
+    optionChainDoc = await OptionChain.create(optionChainJSON)
+      .catch(
+        err =>log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
+      )
+
+    return optionChainDoc;
+  }
 
 }
 
@@ -135,20 +202,21 @@ function getExpectedMoveForQuote(stockQuote) {
   //Get Expected High and Low and options at High and Low Symbol
   //TD: pass quoteId
   return OptionChain.getOptionChainSubsetForSymbol(stockQuote.symbol, stockQuote.ltP)
-    .project({
-      '_id': false,
-      symbol: true,
-      expectedHigh: true,
-      expectedLow: true,
-      expectedHighOptions: '$firstStrikeAboveExpectedHigh',
-      expectedLowOptions: '$firstStrikeBelowExpectedLow'
-
-    })
     .exec()
     .then((docs, err) => docs[0] ? docs[0] : {})
     .then((expOC) => {
       let o = stockQuote;
-      ({ expectedHigh: o.expectedHigh, expectedLow: o.expectedLow, expectedHighOptions: o.expectedHighOptions, expectedLowOptions: o.expectedLowOptions } = expOC);
+      ({
+        expectedHigh: o.expectedHigh,
+        expectedLow: o.expectedLow,
+        expectedHighOptions: o.expectedHighOptions,
+        expectedLowOptions: o.expectedLowOptions,
+        expHiHlfSD : o.expHiHlfSD,
+        expLoHlfSD : o.expLoHlfSD,
+        expHiOneSD : o.expHiOneSD,
+        expLoOneSD : o.expLoOneSD,
+      } = expOC);
+
       log(`Stock ${stockQuote.symbol} has expected high/low as ${stockQuote.expectedHigh}/${stockQuote.expectedLow}`)
       return stockQuote
     })
