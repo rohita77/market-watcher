@@ -3,6 +3,7 @@
 'use strict';
 import _ from 'lodash';
 import moment from 'moment';
+import jsonpatch from 'fast-json-patch';
 
 //import NSEDataAdapter from '../../components/nsedata/downloads'; //TD:
 var NSEDataAdapter = require('../../components/nse-data-adapter/index');
@@ -19,7 +20,7 @@ export function run() {
       log(`Refreshed StockQuotes for Index: ${quotesJSON.index} id:${quotesJSON._id.toLocaleString('en-US', IST)} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`)
       return quotesJSON;
     })
-  //TS+D: Which one to get. The list is big
+    //TS+D: Which one to get. The list is big
     .then((quotesJSON) => refreshOptionChains(quotesJSON))
     .then((quotesJSON) => {
       log(`Refreshed Option chains and updated in ${quotesJSON.quotes.length} quotes`);
@@ -49,7 +50,7 @@ function log(message) {
 function refreshStockQuotes() {
 
   return NSEDataAdapter.getQuotesForFnOStocks()
-  //save the quotes in the DB once they are downloaded
+    //save the quotes in the DB once they are downloaded
     .then(quotesJSON => {
       log(`Fetched Quotes for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`);
 
@@ -61,7 +62,7 @@ function refreshStockQuotes() {
         });
 
     })
-    //resolve the promise for the insert
+  //resolve the promise for the insert
 }
 
 function refreshOptionChains(quotesJSON) {
@@ -88,70 +89,10 @@ function refreshOptionChains(quotesJSON) {
     .then((quotes) => {
       let qj = quotesJSON;
       qj.quotes = quotes;
-      return qj;x
+      return qj; x
     })
 }
 
-/*
-function refreshOptionChain(stockQuote, frontMonthExpiry) {
-
-  return NSEDataAdapter.getStockOptionChain(stockQuote.symbol, frontMonthExpiry)
-  //save the option chain in the DB once they are downloaded
-    .then(async optionChainArr => {
-      if (optionChainArr && optionChainArr.length > 0) {
-
-        let optionChainJSON = {
-          symbol: stockQuote.symbol,
-          quoteId: stockQuote._id,
-          expDt: frontMonthExpiry,    //TD: expiry date to date
-
-          spot : stockQuote.ltP,
-          mrgnPer: stockQuote.frMnthMrgnPer,
-          // lotSz: Number, //TD
-          expDays: NSEDataAdapter.getDaysToFrontMonthExpiry(),
-          strikes: optionChainArr
-        };
-
-        log(`Fetched Option Chain for ${stockQuote.symbol}/ ${frontMonthExpiry} with ${optionChainArr.length} strikes and quoteTime: ${stockQuote.quoteTime}`);
-*/
-/*
-        return OptionChain.findOneAndUpdate({ symbol: optionChainJSON.symbol, expDt: optionChainJSON.expDt }, optionChainJSON, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true, runSettersOnQuery: true }).exec()
-        .then((doc, err) => {
-          if (err) log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`);
-          return doc;
-        })
-        .catch((err) => {
-          log(`Catch Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`);
-          return null;
-        });
-*/
-
-/*
-        let err
-        let doc =   await OptionChain.create(optionChainJSON)
-        console.log(`doc ${doc}`);
-//          .then((doc,err) => {
-            if (err) log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`);
-            return doc;
-  //        })
-  /*
-  .catch((err) => {
-            log(`Error Creating Option Chain for ${stockQuote.symbol} / ${frontMonthExpiry}: ${err}`);
-            return null;
-          });
-  */
-//*/
-/*
-return oc;
-        }
-      else
-        log(`No Option Chain Returned for ${stockQuote.symbol} for ${frontMonthExpiry} `);
-      //TD: Return Promise?
-
-    })
-
-}
-*/
 
 async function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
@@ -159,22 +100,27 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
   if (!optionChainArr && optionChainArr.length <= 0)
     log(`No Option Chain returned for ${stockQuote.symbol} for ${frontMonthExpiry} `);
-    //TD: Return Promise?
+  //TD: Return Promise?
   else {
 
     log(`Fetched Option Chain for ${stockQuote.symbol}/ ${frontMonthExpiry} with ${optionChainArr.length} strikes and quoteTime: ${stockQuote.quoteTime}`);
 
-
     //Check if option chain alread exists in DB TD: Use a better primary key
-    let optionChainDoc = await OptionChain.findOneAndRemove({
-        symbol: stockQuote.symbol, expDt: frontMonthExpiry /*, quoteId:stockQuote._id ,*/
-    })
+    let ocQuery = {
+      symbol: stockQuote.symbol, expDt: frontMonthExpiry /*, quoteId:stockQuote._id ,*/
+    }
 
-    //if optionChainDoc //Merge
-    //TD: find new hi/lo for e
-    //Merge strikes
+    let optionChainDoc = await OptionChain.findOneAndRemove(ocQuery).exec()
 
-    //save the option chain in the DB once they are downloaded
+    //Merge strikes array
+    let arr = optionChainArr;
+
+    if (optionChainDoc) {
+      let patch = jsonpatch.compare(optionChainArr,optionChainDoc.strikes);
+      arr = jsonpatch.applyPatch(optionChainArr, patch).newDocument;
+    }
+
+    //create new option chain
     let optionChainJSON = {
       symbol: stockQuote.symbol,
       quoteId: stockQuote._id,
@@ -182,14 +128,15 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
       spot: stockQuote.ltP,
       mrgnPer: stockQuote.frMnthMrgnPer,
-  //  lotSz: Number, //TD
+      //  lotSz: Number, //TD
       expDays: NSEDataAdapter.getDaysToFrontMonthExpiry(),
-      strikes: optionChainArr
+      strikes: arr
     };
 
+    //Save new options chain in DB
     optionChainDoc = await OptionChain.create(optionChainJSON)
       .catch(
-        err =>log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
+        err => log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
       )
 
     return optionChainDoc;
@@ -211,10 +158,10 @@ function getExpectedMoveForQuote(stockQuote) {
         expectedLow: o.expectedLow,
         expectedHighOptions: o.expectedHighOptions,
         expectedLowOptions: o.expectedLowOptions,
-        expHiHlfSD : o.expHiHlfSD,
-        expLoHlfSD : o.expLoHlfSD,
-        expHiOneSD : o.expHiOneSD,
-        expLoOneSD : o.expLoOneSD,
+        expHiHlfSD: o.expHiHlfSD,
+        expLoHlfSD: o.expLoHlfSD,
+        expHiOneSD: o.expHiOneSD,
+        expLoOneSD: o.expLoOneSD,
       } = expOC);
 
       log(`Stock ${stockQuote.symbol} has expected high/low as ${stockQuote.expectedHigh}/${stockQuote.expectedLow}`)

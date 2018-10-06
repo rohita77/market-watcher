@@ -37,11 +37,14 @@ var OptionSchema = new mongoose.Schema({
 
 //TD: Null Option if there is no oi or volume ?
 OptionSchema.pre('save', function (next) {
-//  console.info("Inside Option Schema Save");
+  //  console.info("Inside Option Schema Save");
   this.mid = rnd((this.bid + this.ask) / 2);
   this.bidAskSpr = rnd((this.ask - this.bid));
   this.perSpr = rnd((this.bidAskSpr / this.ask) * 100);
   this.perChngInOI = rnd((this.chngInOI / (this.oi - this.chngInOI)) * 100);
+
+  this.hi = math.max(this.hi, this.ltp);
+  this.lo = math.min(this.lo || this.ltp , this.ltp);
 
   next()
 })
@@ -70,40 +73,39 @@ var OptionChainSchema = new mongoose.Schema({
 //TD: Get Rid of options wih no OI or volume
 OptionChainSchema.pre('save', function (next) {
 
-    let spot = this.spot;
-    let mrgnPer = this.mrgnPer;
+  let spot = this.spot;
+  let mrgnPer = this.mrgnPer;
 
   this.strikes =
     this.strikes.filter(function (strike) {
       //    Save only options with any oi and volume
-      if ((strike.call.oi > 0 && strike.call.vol > 0) || (strike.put.oi > 0 && strike.put.vol > 0))
-        {
-          // console.log(`${strike.price}  ${spot} ${mrgnPer}`);
+      if ((strike.call && strike.call.oi > 0 && strike.call.vol > 0) || (strike.put && strike.put.oi > 0 && strike.put.vol > 0)) {
+        // console.log(`${strike.price}  ${spot} ${mrgnPer}`);
 
-          strike.perSpot = (strike.price - spot) * 100 / (spot);
-          strike.perSpot = rnd(strike.perSpot, 2);
+        strike.perSpot = (strike.price - spot) * 100 / (spot);
+        strike.perSpot = rnd(strike.perSpot, 2);
 
-          strike.call.be = strike.price + strike.call.mid;
-          strike.call.be = rnd(strike.call.be, 2);
+        strike.call.be = strike.price + strike.call.mid;
+        strike.call.be = rnd(strike.call.be, 2);
 
-          strike.put.be = strike.price - strike.put.mid;
-          strike.put.be = rnd(strike.put.be, 2);
+        strike.put.be = strike.price - strike.put.mid;
+        strike.put.be = rnd(strike.put.be, 2);
 
-          strike.call.perROC = (strike.call.mid * 100) / (mrgnPer * spot);
-          strike.call.perROC = rnd(strike.call.perROC, 2);
+        strike.call.perROC = (strike.call.mid * 100) / (mrgnPer * spot);
+        strike.call.perROC = rnd(strike.call.perROC, 2);
 
-          strike.put.perROC = (strike.put.mid * 100) / (mrgnPer * spot);
-          strike.put.perROC = rnd(strike.put.perROC, 2);
+        strike.put.perROC = (strike.put.mid * 100) / (mrgnPer * spot);
+        strike.put.perROC = rnd(strike.put.perROC, 2);
 
-          strike.call.bePerSpot = (strike.call.be - spot) * 100 / (spot);
-          strike.call.bePerSpot = rnd(strike.call.bePerSpot, 2);
+        strike.call.bePerSpot = (strike.call.be - spot) * 100 / (spot);
+        strike.call.bePerSpot = rnd(strike.call.bePerSpot, 2);
 
-          strike.put.bePerSpot = (strike.put.be - spot) * 100 / (spot);
-          strike.put.bePerSpot = rnd(strike.put.bePerSpot, 2);
+        strike.put.bePerSpot = (strike.put.be - spot) * 100 / (spot);
+        strike.put.bePerSpot = rnd(strike.put.bePerSpot, 2);
 
-          return strike;
+        return strike;
 
-        }
+      }
 
     }, this);
 
@@ -159,7 +161,7 @@ OptionChainSchema.statics.test = function (params) {
             arrRes.forEach((u) => {
 
               log('------------------------------------------------ Summary -----------------------------------------------------------------------------------------------');
-              log(`${u.symbol} Spot: ${params[2]} Exp Hi: ${u.expHiHlfSD.price} Exp Lo: ${u.expLoHlfSD.price}  1SDExpHi: ${rnd(u.expHiOneSD.price,2)} 1SDExpLo: ${rnd(u.expLoOneSD.price)}`);
+              log(`${u.symbol} Spot: ${params[2]} Exp Hi: ${u.expHiHlfSD.price} Exp Lo: ${u.expLoHlfSD.price}  1SDExpHi: ${rnd(u.expHiOneSD.price, 2)} 1SDExpLo: ${rnd(u.expLoOneSD.price)}`);
 
               log('------------------------------------------------ ATM Options -----------------------------------------------------------------------------------------------');
               logCallOpt(u.ATMOption);
@@ -173,24 +175,24 @@ OptionChainSchema.statics.test = function (params) {
 
               let o;
 
-              o = {call :u.expHiHlfSD.nextCall};
-              logCallOpt(Object.assign(u.expHiHlfSD.nextStrike,o));
+              o = { call: u.expHiHlfSD.nextCall };
+              logCallOpt(Object.assign(u.expHiHlfSD.nextStrike, o));
 
               log('--------------------------------------------------- Half SD Expected Low Put -------------------------------------------------------------------------------------------');
 
-              o = {put :u.expLoHlfSD.nextPut};
-              logPutOpt(Object.assign(u.expLoHlfSD.nextStrike,o));
+              o = { put: u.expLoHlfSD.nextPut };
+              logPutOpt(Object.assign(u.expLoHlfSD.nextStrike, o));
 
 
               log('---------------------------------------------------  One SD Expected High Call -----------------------------------------------------------------------------------------');
 
-              o = {call :u.expHiOneSD.nextCall};
-              logCallOpt(Object.assign(u.expHiOneSD.nextStrike,o));
+              o = { call: u.expHiOneSD.nextCall };
+              logCallOpt(Object.assign(u.expHiOneSD.nextStrike, o));
 
               log('--------------------------------------------------- One SD Expected Low Put --------------------------------------------------------------------------------------------');
 
-              o = {put :u.expLoOneSD.nextPut};
-              logPutOpt(Object.assign(u.expLoOneSD.nextStrike,o));
+              o = { put: u.expLoOneSD.nextPut };
+              logPutOpt(Object.assign(u.expLoOneSD.nextStrike, o));
 
 
               log('--------------------------------------------------- CALLS above expHiHlfSD --------------------------------------------------------------------------------------------');
