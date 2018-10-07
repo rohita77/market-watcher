@@ -151,7 +151,7 @@
 
       <div class="col-md-3 col-xs-12 cols-sm-4" ng-repeat="symbol in symbolsGridCtrl.watchlist.symbols | orderBy:symbolsGridCtrl.getSortOrder:symbolsGridCtrl.sortReverse | limitTo:200 | filter:symbolsGridCtrl.query track by symbol._id">
         <uib-accordion-group id="anchor-{{symbol.symbol}}" class="{{'panel-rounded ' + ((symbol.symbol == symbolsGridCtrl.selectedSymbol) ? 'panel-primary' : 'panel-default') }}"
-          ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="((symbol.quote.expectedHighPercent > 0) &&(!symbol.nextEarningsBeforeFrontMonthExpiry || symbolsGridCtrl.incEarnings) && (!symbolsGridCtrl.earningsOnly || (symbol.daysToEarnings <=3  && symbol.nextEarnings)) )">
+          ng-click="symbolsGridCtrl.toggleSelectedSymbol(symbol.symbol)" ng-if="((!symbol.nextEarningsBeforeFrontMonthExpiry || symbolsGridCtrl.incEarnings) && (!symbolsGridCtrl.earningsOnly || (symbol.daysToEarnings <=3  && symbol.nextEarnings)) )">
 
 
           <uib-accordion-heading>

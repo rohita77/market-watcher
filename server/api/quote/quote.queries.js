@@ -1,53 +1,26 @@
-//'use strict'
+'use strict'
 
-export function getPipelineForDailyAverageQuotes(symbols,marketQuoteDate) {
+import moment from 'moment';
+
+const ISTOffset = 5.5 * 60 * 60000;
+
+export function getPipelineForDailyAverageQuotes(symbols, marketQuoteDate) {
 
     // let n = (n1 = 0) => (typeof n1 !== 'undefined') ? n1 : 0;
+
+    //TD: Convert marketQuoteDate to UTC start and end instead of converting $quoteTime and then match
+    //TD: store Trade Date and Time in IST
 
     //* User aggregation framework
     let stage = {};
     let pipeline = [];
     let $project = {};
-    const ISTOffset = 5.5 * 60 * 60000;
 
-    stage.$addFields = {
-        marketQuoteTime: {
-            $add: ["$quoteTime",ISTOffset]
-        }
-    };
-    pipeline.push(stage);
+    let pLFCQ = getPipelineForClosingQuotes(symbols, marketQuoteDate)
 
-    stage = {};
-    stage.$addFields = {
-        marketQuoteDate: {
-            $dateToString: { format: "%G%m%d", date: "$marketQuoteTime" }
-        }
-    };
-    pipeline.push(stage);
+    pipeline.push(...pLFCQ);
 
-    pipeline.push({ $sort: { marketQuoteTime: -1 } });
-
-    if (marketQuoteDate) {
-        pipeline.push({$match : {
-            marketQuoteDate : marketQuoteDate
-        }});
-        pipeline.push({$skip : 1});
-    }
-
-    stage = {};
-    stage.$group = {
-        _id: "$marketQuoteDate",
-        marketQuoteTime: { $first: "$marketQuoteTime" },
-        refreshTime: { $first: "$refreshTime" },
-        quoteTime: { $first: "$quoteTime" },
-        // quotes : {
-        //     $slice : [{$addToSet : "$quotes"}, 1, 1]
-        // },
-        // quotes: { $first: { $slice: ["$quotes", 1, 1] }},
-        // quotes: { $slice: ["$quotes", 1, 2] },
-        quotes: { $first: "$quotes"},
-    };
-    pipeline.push(stage);
+// Liquid UL Only
 
     stage = {};
     $project = {};
@@ -62,8 +35,8 @@ export function getPipelineForDailyAverageQuotes(symbols,marketQuoteDate) {
     }
     $project.quotes.$filter.cond.$and = [];
 
-    if (symbols.length > 0 ) {
-        $project.quotes.$filter.cond.$and.push({ $in :["$$quote.symbol", symbols] });
+    if (symbols.length > 0) {
+        $project.quotes.$filter.cond.$and.push({ $in: ["$$quote.symbol", symbols] });
     }
 
     $project.quotes.$filter.cond.$and.push({
@@ -89,39 +62,20 @@ export function getPipelineForDailyAverageQuotes(symbols,marketQuoteDate) {
 
     // $project.quotes.$filter.cond.$and.push({ $gt: ["$$quote.maxROC", 0]});
 
+//UL with Liquid Options
     $project.quotes.$filter.cond.$and.push({
         $or: [
-            { $lt: ["$$quote.expectedHighOptions.call.bidAskSpread", 15] },
-            { $lt: ["$$quote.expectedLowOptions.put.bidAskSpread", 15] }
+            { $lt: ["$$quote.expectedHighOptions.call.bidAskSpr", 15] },
+            { $lt: ["$$quote.expectedLowOptions.put.bidAskSpr", 15] }
         ]
     });
 
     stage.$project = $project
     pipeline.push(stage);
 
-    stage = {};
-    $project = {};
-    $project._id = true;
-    // $project.marketQuoteDate = true;
-    $project.refreshTime = true;
-    $project.marketQuoteTime = true;
-    // $project.quotes = true;
+    let aQSToPL = getPipelineForQuoteSummary();
 
-    $project.totalSymbols= { $size: '$quotes.symbol'},
-    $project.avgVol= { $avg: '$quotes.trdVol'},
-    $project.avgTurnover= { $avg: '$quotes.ntP'},
-    $project.avgMaxROC= { $avg: ({ $max: ["$quotes.expectedHighCallROCPercent" || 0, "$quotes.expectedLowPutROCPercent" || 0] }) || 0},
-    $project.avgExpHiPer= { $avg: '$quotes.expectedHighPercent'},
-    $project.avgExpLowPer= { $avg: '$quotes.expectedLowPercent'},
-    $project.avgCallBA= { $avg: '$quotes.expectedHighOptions.call.bidAskSpread'},
-    $project.avgPutBA= { $avg: '$quotes.expectedLowOptions.put.bidAskSpread'},
-    $project.avgCallIV= { $avg: '$quotes.expectedHighOptions.call.iv'},
-    $project.avgPutIV= { $avg: '$quotes.expectedLowOptions.put.iv'},
-    $project.avgCallOI= { $avg: '$quotes.expectedHighOptions.call.oi'},
-    $project.avgPutOI= { $avg: '$quotes.expectedLowOptions.put.oi'},
-
-    stage.$project = $project;
-    pipeline.push(stage);
+    pipeline.push(...aQSToPL);
 
     pipeline.push({ $sort: { marketQuoteDate: 1 } });
 
@@ -133,3 +87,107 @@ export function getPipelineForDailyAverageQuotes(symbols,marketQuoteDate) {
 
 
 // load("market-watcher/server/api/quote/quote.queries.js"); */
+
+
+export function getPipelineForClosingQuotesWithSummary(symbols, marketQuoteDate) {
+
+    let stage = {};
+    let pipeline = [];
+    let $project = {};
+
+    let pLCQ = getPipelineForClosingQuotes(symbols, marketQuoteDate);
+    let aQSToPL = getPipelineForQuoteSummary();
+
+   return [...pLCQ,...aQSToPL];
+
+}
+
+export function getPipelineForClosingQuotes(symbols, marketQuoteDate) {
+
+    // let n = (n1 = 0) => (typeof n1 !== 'undefined') ? n1 : 0;
+
+    //TD: Convert marketQuoteDate to UTC start and end instead of converting $quoteTime and then match
+    //TD: store Trade Date and Time in IST
+
+    //* User aggregation framework
+    let stage = {};
+    let pipeline = [];
+    let $project = {};
+
+    stage.$addFields = {
+        marketQuoteTime: {
+            $add: ["$quoteTime", ISTOffset]
+        }
+    };
+    pipeline.push(stage);
+
+    stage = {};
+    stage.$addFields = {
+        marketQuoteDate: {
+            $dateToString: { format: "%G%m%d", date: "$marketQuoteTime" }
+        }
+    };
+    pipeline.push(stage);
+
+    pipeline.push({ $sort: { marketQuoteTime: -1 } });
+
+    if (marketQuoteDate) {
+        pipeline.push({
+            $match: {
+                marketQuoteDate: marketQuoteDate
+            }
+        });
+        pipeline.push({ $skip: 1 });
+    }
+
+    stage = {};
+    stage.$group = {
+        _id: "$marketQuoteDate",
+        marketQuoteTime: { $first: "$marketQuoteTime" },
+        refreshTime: { $first: "$refreshTime" },
+        quoteTime: { $first: "$quoteTime" },
+        // quotes : {
+        //     $slice : [{$addToSet : "$quotes"}, 1, 1]
+        // },
+        // quotes: { $first: { $slice: ["$quotes", 1, 1] }},
+        // quotes: { $slice: ["$quotes", 1, 2] },
+        quotes: { $first: "$quotes" },
+    };
+    pipeline.push(stage);
+
+   return pipeline;
+
+}
+
+function getPipelineForQuoteSummary() {
+    let stage = {};
+    let pipeline = [];
+    let $project = {};
+
+    stage = {};
+    $project = {};
+    $project._id = true;
+    // $project.marketQuoteDate = true;
+    $project.refreshTime = true;
+    $project.marketQuoteTime = true;
+    // $project.quotes = true;
+
+    $project.totalSymbols = { $size: '$quotes.symbol' },
+        $project.avgVol = { $avg: '$quotes.trdVol' },
+        $project.avgTO = { $avg: '$quotes.ntP' },
+        $project.avgMaxROC = { $avg: ({ $max: ["$quotes.expectedHighCallROCPercent" || 0, "$quotes.expectedLowPutROCPercent" || 0] }) || 0 },
+        $project.avgExpHiPer = { $avg: '$quotes.expectedHighPercent' },
+        $project.avgExpLoPer = { $avg: '$quotes.expectedLowPercent' },
+        $project.avgCallBA = { $avg: '$quotes.expectedHighOptions.call.bidAskSpr' },
+        $project.avgPutBA = { $avg: '$quotes.expectedLowOptions.put.bidAskSpr' },
+        $project.avgCallIV = { $avg: '$quotes.expectedHighOptions.call.iv' },
+        $project.avgPutIV = { $avg: '$quotes.expectedLowOptions.put.iv' },
+        $project.avgCallOI = { $avg: '$quotes.expectedHighOptions.call.oi' },
+        $project.avgPutOI = { $avg: '$quotes.expectedLowOptions.put.oi' },
+
+        stage.$project = $project;
+        pipeline.push(stage);
+
+   return pipeline;
+
+}

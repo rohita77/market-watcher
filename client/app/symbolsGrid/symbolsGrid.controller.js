@@ -151,7 +151,7 @@
 
             symbol.quote = quote || {};
             // return symbol;
-            return ((symbol.quote.expectedHighPercent > 0 ) && ((symbol.quote.ntP > 40) || (symbol.quote.trdVol > 5)) );
+            return (((symbol.quote.ntP > 40) || (symbol.quote.trdVol > 5)) );
 
           });
           console.log(this.watchlist.symbols.length);

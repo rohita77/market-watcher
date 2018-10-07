@@ -60,7 +60,7 @@ var StrikeSchema = new mongoose.Schema({
 var OptionChainSchema = new mongoose.Schema({
   symbol: String,           //TD: Sub docs expiry date, strike price, option
   expDt: String,            //TD: Date format
-  quoteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quote' },
+  quoteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quote.quotes' },
   // quoteTime: Date, //TD
   spot: Number,
   mrgnPer: Number,

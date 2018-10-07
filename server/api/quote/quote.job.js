@@ -47,8 +47,34 @@ function log(message) {
   console.log(`${now()} ${message}`);
 }
 
-function refreshStockQuotes() {
+async function refreshStockQuotes() {
 
+  let quotesJSON = await NSEDataAdapter.getQuotesForFnOStocks()
+
+  let log_suffix = ` for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`
+
+  log(`Fetched Quotes` + log_suffix);
+
+  quotesJSON._id = quotesJSON.quoteTime
+
+  //Check if quote alread exists in DB TD
+  let quoteQuery = {
+    _id: quotesJSON.quoteTime /*, watch_list ,*/
+  }
+
+  let quoteDoc = await Quote.findOneAndRemove(quoteQuery).exec()
+
+  //save the quotes in the DB once they are downloaded
+  quoteDoc = await Quote.create(quotesJSON)
+    .catch(
+      err => log(`Error ${err} saving quotes` + log_suffix)
+    )
+
+  log(`Upserted Quotes` + log_suffix);
+
+  return quoteDoc;
+
+/*
   return NSEDataAdapter.getQuotesForFnOStocks()
     //save the quotes in the DB once they are downloaded
     .then(quotesJSON => {
@@ -62,7 +88,9 @@ function refreshStockQuotes() {
         });
 
     })
-  //resolve the promise for the insert
+*/
+//resolve the promise for the insert
+
 }
 
 function refreshOptionChains(quotesJSON) {
@@ -89,7 +117,7 @@ function refreshOptionChains(quotesJSON) {
     .then((quotes) => {
       let qj = quotesJSON;
       qj.quotes = quotes;
-      return qj; x
+      return qj;
     })
 }
 
@@ -105,7 +133,7 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
     log(`Fetched Option Chain for ${stockQuote.symbol}/ ${frontMonthExpiry} with ${optionChainArr.length} strikes and quoteTime: ${stockQuote.quoteTime}`);
 
-    //Check if option chain alread exists in DB TD: Use a better primary key
+    //Check if option chain already exists in DB TD: Use a better primary key
     let ocQuery = {
       symbol: stockQuote.symbol, expDt: frontMonthExpiry /*, quoteId:stockQuote._id ,*/
     }
@@ -116,7 +144,7 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
     let arr = optionChainArr;
 
     if (optionChainDoc) {
-      let patch = jsonpatch.compare(optionChainArr,optionChainDoc.strikes);
+      let patch = jsonpatch.compare(optionChainArr, optionChainDoc.strikes);
       arr = jsonpatch.applyPatch(optionChainArr, patch).newDocument;
     }
 
