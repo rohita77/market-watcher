@@ -1,7 +1,6 @@
 'use strict';
 
-import mongoose from 'mongoose';
-
+const mongoose = require('mongoose');
 var WatchlistSchema = new mongoose.Schema({
   _id : String,
   name: String, //NIFTY 50 Index
@@ -20,4 +19,4 @@ var WatchlistSchema = new mongoose.Schema({
   ]
 });
 
-export default mongoose.model('Watchlist', WatchlistSchema);
+module.exports = mongoose.model('Watchlist', WatchlistSchema);

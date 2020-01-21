@@ -4,11 +4,11 @@
 
 'use strict';
 
-import {EventEmitter} from 'events';
-import Quote from './quote.model';
+const EventEmitter = require('events').EventEmitter;
+const Quote = require('./quote.model');
 var QuoteEvents = new EventEmitter();
 
-// Set max event listeners (0 == unlimited)
+// Set max event listeners (0===unlimited)
 QuoteEvents.setMaxListeners(0);
 
 // Model events
@@ -30,4 +30,4 @@ function emitEvent(event) {
   }
 }
 
-export default QuoteEvents;
+module.exports = QuoteEvents;

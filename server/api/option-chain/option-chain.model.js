@@ -1,37 +1,90 @@
 'use strict';
 
-import mongoose from 'mongoose';
-import { registerEvents } from './option-chain.events';
-import math from 'mathjs';
+const mongoose = require('mongoose');
+const registerEvents = require('./option-chain.events').registerEvents;
+const math = require('mathjs');
 
 var queries = require('./option-chain.queries');
 
 let int = (n, k = 10) => Math.round(n * k) / k;
-let rnd = (v, n = 2) => { return math.round(v, n) }
+let rnd = (v, n = 2) => {
+  return math.round(v, n)
+}
 
 var OptionSchema = new mongoose.Schema({
-  oi: { type: Number, default: 0.00 },
-  chngInOI: { type: Number, default: 0.00 },  //TD: setter to convert to number
-  vol: { type: Number, default: 0.00 },
-  iv: { type: Number, default: 0.00 },
-  ltp: { type: Number, default: 0.00 },
-  netChng: { type: Number, default: 0.00 },
-  bidQty: { type: Number, default: 0.00 },
-  bid: { type: Number, default: 0.00 },
-  ask: { type: Number, default: 0.00 },
-  askQty: { type: Number, default: 0.00 },
+  oi: {
+    type: Number,
+    default: 0.00
+  },
+  chngInOI: {
+    type: Number,
+    default: 0.00
+  }, //TD: setter to convert to number
+  vol: {
+    type: Number,
+    default: 0.00
+  },
+  iv: {
+    type: Number,
+    default: 0.00
+  },
+  ltp: {
+    type: Number,
+    default: 0.00
+  },
+  netChng: {
+    type: Number,
+    default: 0.00
+  },
+  bidQty: {
+    type: Number,
+    default: 0.00
+  },
+  bid: {
+    type: Number,
+    default: 0.00
+  },
+  ask: {
+    type: Number,
+    default: 0.00
+  },
+  askQty: {
+    type: Number,
+    default: 0.00
+  },
 
-  hi: { type: Number, default: 0.00 },
-  lo: { type: Number, default: 0.00 },
+  hi: {
+    type: Number,
+    default: 0.00
+  },
+  lo: {
+    type: Number,
+    default: 0.00
+  },
 
-  mid: { type: Number }, //TD: In default cannot reference another property
-  bidAskSpr: { type: Number },
-  perSpr: { type: Number },
-  be: { type: Number, default: 0.00 },
-  perChngInOI: { type: Number },
+  mid: {
+    type: Number
+  }, //TD: In default cannot reference another property
+  bidAskSpr: {
+    type: Number
+  },
+  perSpr: {
+    type: Number
+  },
+  be: {
+    type: Number,
+    default: 0.00
+  },
+  perChngInOI: {
+    type: Number
+  },
 
-  perROC: { type: Number },
-  bePerSpot: { type: Number },
+  perROC: {
+    type: Number
+  },
+  bePerSpot: {
+    type: Number
+  },
 
 })
 
@@ -44,23 +97,30 @@ OptionSchema.pre('save', function (next) {
   this.perChngInOI = rnd((this.chngInOI / (this.oi - this.chngInOI)) * 100);
 
   this.hi = math.max(this.hi, this.ltp);
-  this.lo = math.min(this.lo || this.ltp , this.ltp);
+  this.lo = math.min(this.lo || this.ltp, this.ltp);
 
   next()
 })
 
 var StrikeSchema = new mongoose.Schema({
-  price: { type: Number },
-  perSpot: { type: Number },
+  price: {
+    type: Number
+  },
+  perSpot: {
+    type: Number
+  },
   call: OptionSchema,
   put: OptionSchema
 
 })
 
 var OptionChainSchema = new mongoose.Schema({
-  symbol: String,           //TD: Sub docs expiry date, strike price, option
-  expDt: String,            //TD: Date format
-  quoteId: { type: mongoose.Schema.Types.ObjectId, ref: 'Quote.quotes' },
+  symbol: String, //TD: Sub docs expiry date, strike price, option
+  expDt: String, //TD: Date format
+  quoteId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Quote.quotes'
+  },
   // quoteTime: Date, //TD
   spot: Number,
   mrgnPer: Number,
@@ -74,36 +134,43 @@ var OptionChainSchema = new mongoose.Schema({
 OptionChainSchema.pre('save', function (next) {
 
   let spot = this.spot;
-  let mrgnPer = this.mrgnPer;
+  let mrgnPer = this.mrgnPer || 0;
 
+  let self = this;
   this.strikes =
     this.strikes.filter(function (strike) {
       //    Save only options with any oi and volume
       if ((strike.call && strike.call.oi > 0 && strike.call.vol > 0 && strike.call.bid > 0) || (strike.put && strike.put.oi > 0 && strike.put.vol > 0 && strike.put.bid > 0)) {
         // console.log(`${strike.price}  ${spot} ${mrgnPer}`);
+        try {
 
-        strike.perSpot = (strike.price - spot) * 100 / (spot);
-        strike.perSpot = rnd(strike.perSpot, 2);
+          strike.perSpot = (strike.price - spot) * 100 / (spot);
+          strike.perSpot = rnd(strike.perSpot, 2);
 
-        strike.call.be = strike.price + strike.call.mid;
-        strike.call.be = rnd(strike.call.be, 2);
+          strike.call.be = strike.price + strike.call.mid;
+          strike.call.be = rnd(strike.call.be, 2);
 
-        strike.put.be = strike.price - strike.put.mid;
-        strike.put.be = rnd(strike.put.be, 2);
+          strike.put.be = strike.price - strike.put.mid;
+          strike.put.be = rnd(strike.put.be, 2);
 
-        strike.call.perROC = (strike.call.mid * 100) / (mrgnPer * spot);
-        strike.call.perROC = rnd(strike.call.perROC, 2);
+          strike.call.perROC = (strike.call.mid * 100) / (mrgnPer * spot);
+          strike.call.perROC = rnd(strike.call.perROC, 2);
 
-        strike.put.perROC = (strike.put.mid * 100) / (mrgnPer * spot);
-        strike.put.perROC = rnd(strike.put.perROC, 2);
+          strike.put.perROC = (strike.put.mid * 100) / (mrgnPer * spot);
+          strike.put.perROC = rnd(strike.put.perROC, 2);
 
-        strike.call.bePerSpot = (strike.call.be - spot) * 100 / (spot);
-        strike.call.bePerSpot = rnd(strike.call.bePerSpot, 2);
+          strike.call.bePerSpot = (strike.call.be - spot) * 100 / (spot);
+          strike.call.bePerSpot = rnd(strike.call.bePerSpot, 2);
 
-        strike.put.bePerSpot = (strike.put.be - spot) * 100 / (spot);
-        strike.put.bePerSpot = rnd(strike.put.bePerSpot, 2);
+          strike.put.bePerSpot = (strike.put.be - spot) * 100 / (spot);
+          strike.put.bePerSpot = rnd(strike.put.bePerSpot, 2);
 
-        return strike;
+          return strike;
+        } catch (error) {
+          console.log(`UL is : ${self.symbol} and spot ${spot} and mrgnPer ${mrgnPer}`);
+          console.log(`strike is : ${strike}`);
+
+        }
 
       }
 
@@ -136,14 +203,14 @@ let logCallOpt = (o) => logOpt(o, 'call');
 let logPutOpt = (o) => logOpt(o, 'put');
 
 function logOpt(o, t) {
-  log(JStr(o));
+  log(new JStr(o));
 
   let n = {};
   [n.mid, n.bidAskSpr, n.perSpr, n.oi, n.chngInOI, n.perChngInOI, n.vol, n.iv, n.netChng] =
 
-    [o[t].mid, o[t].bidAskSpr, o[t].perSpr, o[t].oi, o[t].chngInOI, o[t].perChngInOI, o[t].vol, o[t].iv, o[t].netChng];
+  [o[t].mid, o[t].bidAskSpr, o[t].perSpr, o[t].oi, o[t].chngInOI, o[t].perChngInOI, o[t].vol, o[t].iv, o[t].netChng];
 
-  log(`SP: ${o.price} perSpot: ${o.perSpot} BE:${o[t].be} bePerSpot: ${o[t].bePerSpot} perROC: ${o[t].perROC} ${t}: ${JStr(n)}`);
+  log(`SP: ${o.price} perSpot: ${o.perSpot} BE:${o[t].be} bePerSpot: ${o[t].bePerSpot} perROC: ${o[t].perROC} ${t}: ${new JStr(n)}`);
 
 }
 
@@ -175,23 +242,31 @@ OptionChainSchema.statics.test = function (params) {
 
               let o;
 
-              o = { call: u.expHiHlfSD.nextCall };
+              o = {
+                call: u.expHiHlfSD.nextCall
+              };
               logCallOpt(Object.assign(u.expHiHlfSD.nextStrike, o));
 
               log('--------------------------------------------------- Half SD Expected Low Put -------------------------------------------------------------------------------------------');
 
-              o = { put: u.expLoHlfSD.nextPut };
+              o = {
+                put: u.expLoHlfSD.nextPut
+              };
               logPutOpt(Object.assign(u.expLoHlfSD.nextStrike, o));
 
 
               log('---------------------------------------------------  One SD Expected High Call -----------------------------------------------------------------------------------------');
 
-              o = { call: u.expHiOneSD.nextCall };
+              o = {
+                call: u.expHiOneSD.nextCall
+              };
               logCallOpt(Object.assign(u.expHiOneSD.nextStrike, o));
 
               log('--------------------------------------------------- One SD Expected Low Put --------------------------------------------------------------------------------------------');
 
-              o = { put: u.expLoOneSD.nextPut };
+              o = {
+                put: u.expLoOneSD.nextPut
+              };
               logPutOpt(Object.assign(u.expLoOneSD.nextStrike, o));
 
 
@@ -211,7 +286,6 @@ OptionChainSchema.statics.test = function (params) {
 
           }
         });
-      break;
     default:
       break;
   }
@@ -223,7 +297,7 @@ OptionChainSchema.statics.test = function (params) {
 
 
 registerEvents(OptionChainSchema);
-export default mongoose.model('OptionChain', OptionChainSchema);
+module.exports = mongoose.model('OptionChain', OptionChainSchema);
 
 
 /*

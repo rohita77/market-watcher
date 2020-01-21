@@ -1,7 +1,7 @@
 'use strict';
 
 var app = require('../..');
-import request from 'supertest';
+const request = require('supertest');
 
 var newThing;
 

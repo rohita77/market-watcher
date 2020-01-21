@@ -1,15 +1,15 @@
 'use strict';
 
-import app from '../..';
-import User from './user.model';
-import request from 'supertest';
+const app = require('../..');
+const User = require('./user.model');
+const request = require('supertest');
 
 describe('User API:', function() {
   var user;
 
   // Clear users before testing
   before(function() {
-    return User.remove().then(function() {
+    return User.deleteMany().then(function() {
       user = new User({
         name: 'Fake User',
         email: 'test@example.com',
@@ -22,7 +22,7 @@ describe('User API:', function() {
 
   // Clear users after testing
   after(function() {
-    return User.remove();
+    return User.deleteMany();
   });
 
   describe('GET /api/users/me', function() {

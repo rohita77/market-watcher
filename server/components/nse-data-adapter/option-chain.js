@@ -1,8 +1,8 @@
 'use strict'
 var webScrapTools =require('./modules/web-scrap-tools');
 
-export function getStockOptionChain(symbol, expiryDate) {
-    let url = `https://nse-india.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?instrument=OPTSTK&symbol=${encodeURIComponent(symbol)}&date=${expiryDate}`;
+exports.getStockOptionChain=(symbol, expiryDate) => {
+    let url = `https://www1.nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?instrument=OPTSTK&symbol=${encodeURIComponent(symbol)}&date=${expiryDate}`;
 
     // console.log(url);
     //TD : As on Sep 22, 2017 15:30:29 IST //*[@id="wrapper_btm"]/table[1]/tbody/tr/td[2]/div/span[2]/text()
@@ -10,6 +10,7 @@ export function getStockOptionChain(symbol, expiryDate) {
 
     const optionChainHtmlToJSONTransformer = $ => {
 
+        // console.log(`body ${$}`);
         let trArr = $('#octable > tbody > tr');
         trArr.splice(-1, 1);
 

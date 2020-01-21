@@ -1,27 +1,27 @@
 //node dist/server/batchApp.job
 
 'use strict';
-import _ from 'lodash';
+var _ = require('lodash');
 //import NSEDataAdapter from '../../components/nsedata/index'; //TD:
 var NSEDataAdapter = require('../../components/nse-data-adapter/index'); //TD Refactor
 var moment = require('moment');
 
 //import Core Model and save to Mongo
-import Watchlist from './watchlist.model';
+var Watchlist = require( './watchlist.model');
 
-import Symbol from './../symbol/symbol.model';
+var Symbol = require( './../../api/symbol/symbol.model');
 
-import boardMeeting from '../../api/board-meeting/board-meeting.model';
+var boardMeeting = require( '../../api/board-meeting/board-meeting.model');
 
-import FnOMktLot from '../../components/nse-data-adapter/models/fno-mkt-lot.model';
+var FnOMktLot = require( '../../components/nse-data-adapter/models/fno-mkt-lot.model');
 
-//import Quote Model and save to Mongo
-import Quote from '../../api/quote/quote.model';
-import OptionChain from '../../api/option-chain/option-chain.model';
-import DailyStat from '../../api/daily-stat/daily-stat.model';
+//var Quote Model and save to Mongo
+var Quote = require( '../../api/quote/quote.model');
+var OptionChain = require( '../../api/option-chain/option-chain.model');
+var DailyStat = require( '../../api/daily-stat/daily-stat.model');
 
 
-export function run() {
+exports.run = () => {
     console.log("Watch List Job Fired Time is :" + new Date());
     return refreshWatchlists()
         .then(() => log(`Finished Refreshing Watchlists`))
@@ -35,7 +35,7 @@ export function run() {
 
             let today = moment().clone().startOf('day');
             if (today.isoWeekday() > 5) today.isoWeekday(5); //Friday
-            return OptionChain.remove({ lastMod: { $lt: today.toDate() } });
+            return OptionChain.deleteMany({ lastMod: { $lt: today.toDate() } });
         })
         .then((result) => log(`Removed Option Chains ${JSON.stringify(result)}`))
         .then(() => archiveQuotes())
@@ -45,7 +45,7 @@ export function run() {
             //Compute Closing Quote for each option
             //Store quotes for last 30 days
         })
-        .then(() => Symbol.find({}).count().exec().then((c) => {
+        .then(() => Symbol.find({}).countDocuments().exec().then((c) => {
             log(`After Job DB has ${JSON.stringify(c)} symbols`);
         }))
 }
@@ -96,36 +96,50 @@ function updateSymbolsFromWatchlists() {
         { $unwind: "$symbols" },
         {
             $group: {
-                '_id': "$symbols",
+                '_id': "$symbols.symbol",
 
                 "watchlists": {
                     "$addToSet": "$_id"
-                }
+                },
+                "symbol" : {"$first" :"$symbols"}
+
             }
         },
         {
             $project: {
-                "_id": "$_id._id",
-                symbol: "$_id.symbol",
-                name: "$_id.name",
-                industry: "$_id.industry",
-                market: "$_id.market",
+                "_id": "$symbol._id",
+                symbol: "$symbol.symbol",
+                name: "$symbol.name",
+                industry: "$symbol.industry",
+                market: "$symbol.market",
                 watchlists: 1
             }
         }];
 
     log(`Firing Symbol saves`);
+
+
     return Watchlist.aggregate(pipleline)
         //    .limit(2)
         .exec()
-        .then(symbols => updateEachSymbolFromWatchlists(symbols))
+        .then(symbols => updateEachSymbolFromWatchlists(symbols));
 
 }
 
 function updateEachSymbolFromWatchlists(symbols) {
+    let symbol_ids = ['zzzz'];
+
     return Promise.all(
         //Save list of symbols
         symbols.map(symbolDoc => {
+
+            //Update symbols only once even if it is present in multiple watch lists
+
+            if (symbol_ids.find(s => s.match(symbolDoc._id)))
+                return Promise.resolve(); //Null in array
+            else
+                symbol_ids.push(symbolDoc._id);
+
             return Promise.all([
 
                 //Move to Board Meetings
@@ -157,7 +171,7 @@ function populateEarnings(earningPeriod, symbolDoc) {
     query.boardMeetingDate[op] = tgtEarningDate;
     query.purpose = /Results/;
 
-    let sortOrder = (earningPeriod === 'previousEarnings') ? -1 : 1;
+    let sortOrder = (earningPeriod ==='previousEarnings') ? -1 : 1;
     sort.boardMeetingDate = sortOrder * 1; // Latest or Next
     sort.purpose = 1; // Alway 'Results' before 'Results*'
 
@@ -166,7 +180,7 @@ function populateEarnings(earningPeriod, symbolDoc) {
     return boardMeeting.find(query).sort(sort).limit(1).exec()
         .then(bM => {
             symbolDoc[earningPeriod] = bM[0] ? bM[0].boardMeetingDate : symbolDoc[earningPeriod]; //Retain Previous value if new one is not there
-            if (symbolDoc.symbol === "HINDALCO")
+            if (symbolDoc.symbol ==="HINDALCO")
                 log(`${earningPeriod} for ${symbolDoc.symbol} is ${symbolDoc[earningPeriod]}`);
             return symbolDoc;
         });
@@ -188,7 +202,7 @@ function populateFnOMktLot(symbolDoc) {
                 symbolDoc.frontMonthLotSize = fML.mktlot[frontMonth.toUpperCase()]; //TD: get Calendar Month for Front Month
             }
 
-            if (symbolDoc.symbol === "HINDALCO")
+            if (symbolDoc.symbol ==="HINDALCO")
                 log(`Lot Size for ${symbolDoc.symbol} for frontMonth ${frontMonth} is ${symbolDoc.frontMonthLotSize}`);
             return symbolDoc;
         });
@@ -220,8 +234,9 @@ function updateSymbol(symbolDoc) {
             // log(`Earnings for ${eSymbol.symbol} is Prev: ${eSymbol.previousEarnings} Next: ${eSymbol.nextEarnings}`);
 
             if (eSymbol.previousEarnings) {
+
                 let quarterFromPreviousEarnings = moment(eSymbol.previousEarnings).clone().add(1, 'quarters');
-                eSymbol.projectedEarnings = (eSymbol.nextEarnings == null) ? quarterFromPreviousEarnings.toDate() || null : eSymbol.nextEarnings;
+                eSymbol.projectedEarnings = (eSymbol.nextEarnings ===null) ? quarterFromPreviousEarnings.toDate() || null : eSymbol.nextEarnings;
                 // log(`projectedEarnings for ${eSymbol.symbol} is ${eSymbol.projectedEarnings}`);
 
             }
@@ -233,7 +248,7 @@ function updateSymbol(symbolDoc) {
 
             let frontMonthExpiryDate = NSEDataAdapter.getFrontMonthExpiryDate(moment());
 
-            eSymbol.nextEarningsBeforeFrontMonthExpiry = (eSymbol.nextEarnings == null) ? (eSymbol.projectedEarnings <= frontMonthExpiryDate) : (eSymbol.nextEarnings <= frontMonthExpiryDate)
+            eSymbol.nextEarningsBeforeFrontMonthExpiry = (eSymbol.nextEarnings ===null) ? (eSymbol.projectedEarnings <= frontMonthExpiryDate) : (eSymbol.nextEarnings <= frontMonthExpiryDate)
 
             //TD: check if weekday?
 
@@ -272,14 +287,14 @@ function refreshFnOLotSize() {
 
     let download = NSEDataAdapter.getFnOLotSizes
 
-    return FnOMktLot.remove({}).exec()
+    return FnOMktLot.deleteMany({}).exec()
         .then(() => download())
         .then((bmArr) => {
             log(`Retrieved ${bmArr.length} lot sizes`)
             return FnOMktLot.insertMany(bmArr);
         })
         .then((docs, e) => {
-            log(`Inserted ${docs.length} lot sizes ${e} errors`);
+            log(`Inserted ${docs.length} lot sizes ${e || "no" } errors`);
         })
 
 }
@@ -290,24 +305,24 @@ function refreshBoardMeetingsFor(timeframe) {
     //tgtBoardMeetingDate.setDate(tgtBoardMeetingDate.getDate() - 1); //TD: Timezone //TD:Trim Date?
 
     let tgtBoardMeetingDate = new Date(moment().clone().startOf('day'));
-    log(`${timeframe} meeting from ${tgtBoardMeetingDate}`);
+    log(`Downloading ${timeframe} meeting from ${tgtBoardMeetingDate}`);
 
     let query = {};
     query.boardMeetingDate = {};
 
-    let op = (timeframe === 'past') ? '$lt' : '$gte';
-    let download = (timeframe === 'past') ? NSEDataAdapter.getBoardMeetingsForLast3Months : NSEDataAdapter.getFCBoardMeetings;
+    let op = (timeframe ==='past') ? '$lt' : '$gte';
+    let download = (timeframe ==='past') ? NSEDataAdapter.getBoardMeetingsForLast3Months : NSEDataAdapter.getFCBoardMeetings;
 
     query.boardMeetingDate[op] = tgtBoardMeetingDate;
 
-    return boardMeeting.remove(query).exec()
+    return boardMeeting.deleteMany(query).exec()
         .then(() => download())
         .then((bmArr) => {
             log(`Retrieved ${bmArr.length} ${timeframe} meetings`)
             return boardMeeting.insertMany(bmArr);
         })
         .then((docs, e) => {
-            log(`Inserted ${docs.length} ${timeframe} meetings with ${e} errors`);
+            log(`Inserted ${docs.length} ${timeframe} meetings with ${e || "no" } errors`);
         })
     //            .then(bmArr => reduceBoardMeetingsArr(bmArr))
     //            .then(bmArr => console.log(bmArr))
@@ -327,7 +342,7 @@ function reduceBoardMeetingsArr(bmArr) {
         //Find symbol and date in Accumulator Array
 
         let facc = acc.find((fCV, fCI) => {
-            return (fCV.symbol === rCV.symbol) && (fCV.boardMeetingDate === rCV.boardMeetingDate);
+            return (fCV.symbol ===rCV.symbol) && (fCV.boardMeetingDate ===rCV.boardMeetingDate);
 
         });
 
@@ -389,7 +404,7 @@ function archiveQuotes() {
     //TD: Retain Last quote of the day
     log(`Archiving quotes older than previous month expiry date ${moment(lastMonthExpiryDate).format()}`);
 
-    return Quote.remove({ lastMod: { $lt: lastMonthExpiryDate } });
+    return Quote.deleteMany({ lastMod: { $lt: lastMonthExpiryDate } });
 }
 
 /* Use these script to setup Insert Wachlists

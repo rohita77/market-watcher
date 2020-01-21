@@ -4,10 +4,11 @@
 
 'use strict';
 
-import {EventEmitter} from 'events';
+const EventEmitter = require('events').EventEmitter;
+
 var SymbolEvents = new EventEmitter();
 
-// Set max event listeners (0 == unlimited)
+// Set max event listeners (0===unlimited)
 SymbolEvents.setMaxListeners(0);
 
 // Model events
@@ -31,5 +32,5 @@ function emitEvent(event) {
   };
 }
 
-export {registerEvents};
-export default SymbolEvents;
+exports.default = SymbolEvents;
+exports.registerEvents = registerEvents;

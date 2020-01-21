@@ -1,7 +1,7 @@
 {
   "expr": true,
   "node": true,
-  "esnext": true,
+  "esversion" : 8,
   "bitwise": true,
   "eqeqeq": true,
   "immed": true,
@@ -11,5 +11,11 @@
   "undef": true,
   "smarttabs": true,
   "asi": true,
-  "debug": true
+  "debug": true,
+  "globals": {
+    "print":true,
+    "load":true,
+    "db" : true,
+    "alert":true
+  }
 }

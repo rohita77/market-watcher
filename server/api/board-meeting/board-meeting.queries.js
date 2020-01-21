@@ -9,7 +9,7 @@ var query = {};
 var sort = {};
 var limit = {};
 
-
+let print = console.log;
 
 /* Next Earning Date */
 var tgtEarningDate;
@@ -27,5 +27,6 @@ sort.purpose = 1;
 
 query.symbol = /^HINDALCO/;
 
+let db
 var  arrRes= db.boardmeetings.find(query).sort(sort).limit(1);
 print(JSON.stringify(arrRes.toArray()));

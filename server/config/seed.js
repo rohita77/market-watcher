@@ -4,10 +4,9 @@
  */
 
 'use strict';
-import Thing from '../api/thing/thing.model';
-import User from '../api/user/user.model';
-
-Thing.find({}).remove()
+const Thing = require('../api/thing/thing.model');
+const User = require('../api/user/user.model');
+Thing.find({}).deleteMany()
   .then(() => {
     Thing.create({
       name: 'Development Tools',
@@ -39,7 +38,7 @@ Thing.find({}).remove()
     });
   });
 
-User.find({}).remove()
+User.find({}).deleteMany()
   .then(() => {
     User.create({
       provider: 'local',

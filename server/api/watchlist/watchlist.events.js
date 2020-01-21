@@ -4,11 +4,11 @@
 
 'use strict';
 
-import {EventEmitter} from 'events';
-import Watchlist from './watchlist.model';
+const EventEmitter = require('events').EventEmitter;
+const Watchlist = require('./watchlist.model');
 var WatchlistEvents = new EventEmitter();
 
-// Set max event listeners (0 == unlimited)
+// Set max event listeners (0===unlimited)
 WatchlistEvents.setMaxListeners(0);
 
 // Model events
@@ -30,4 +30,4 @@ function emitEvent(event) {
   }
 }
 
-export default WatchlistEvents;
+module.exports = WatchlistEvents;

@@ -4,11 +4,17 @@
 
 'use strict';
 
-import express from 'express';
-import mongoose from 'mongoose';
+const express = require('express');
+const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
-import config from './config/environment';
-import http from 'http';
+const config = require('./config/environment');
+const http = require('http');
+
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+
 
 // Connect to MongoDB
 mongoose.connect(config.mongo.uri, config.mongo.options);
@@ -27,9 +33,9 @@ var socketio = require('socket.io')(server, {
   serveClient: config.env !== 'production',
   path: '/socket.io-client'
 });
-require('./config/socketio').default(socketio);
-require('./config/express').default(app);
-require('./routes').default(app);
+require('./config/socketio')(socketio);
+require('./config/express')(app);
+require('./routes')(app);
 
 // Start server
 function startServer() {

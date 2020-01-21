@@ -10,11 +10,9 @@
 
 'use strict';
 
-import jsonpatch from 'fast-json-patch';
-import Symbol from './symbol.model';
-
-import moment from 'moment';
-
+const jsonpatch = require('fast-json-patch');
+const Symbol = require('./symbol.model');
+const moment = require('moment');
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
   return function (entity) {
@@ -41,7 +39,7 @@ function patchUpdates(patches) {
 function removeEntity(res) {
   return function (entity) {
     if (entity) {
-      return entity.remove()
+      return entity.deleteMany()
         .then(() => {
           res.status(204).end();
         });
@@ -67,7 +65,7 @@ function handleError(res, statusCode) {
 }
 
 // Gets a list of Symbols
-export function index(req, res) {
+exports.index=(req, res)  =>{
 
   let query = {};
   query = (req.query.watchlists) ? {watchlists : req.query.watchlists } : {} ;
@@ -78,7 +76,7 @@ export function index(req, res) {
 }
 
 // Gets a single Symbol from the DB
-export function show(req, res) {
+exports.show=(req, res) =>{
   return Symbol.findById(req.params.id).exec()
     .then(handleEntityNotFound(res))
     .then(respondWithResult(res))
@@ -86,14 +84,14 @@ export function show(req, res) {
 }
 
 // Creates a new Symbol in the DB
-export function create(req, res) {
+exports.create=(req, res) =>{
   return Symbol.create(req.body)
     .then(respondWithResult(res, 201))
     .catch(handleError(res));
 }
 
 // Upserts the given Symbol in the DB at the specified ID
-export function upsert(req, res) {
+exports.upsert=(req, res) => {
   if (req.body._id) {
     Reflect.deleteProperty(req.body, '_id');
   }
@@ -104,7 +102,7 @@ export function upsert(req, res) {
 }
 
 // Updates an existing Symbol in the DB
-export function patch(req, res) {
+exports.patch=(req, res) =>{
   if (req.body._id) {
     Reflect.deleteProperty(req.body, '_id');
   }
@@ -116,7 +114,7 @@ export function patch(req, res) {
 }
 
 // Deletes a Symbol from the DB
-export function destroy(req, res) {
+exports.destroy=(req, res) => {
   return Symbol.findById(req.params.id).exec()
     .then(handleEntityNotFound(res))
     .then(removeEntity(res))

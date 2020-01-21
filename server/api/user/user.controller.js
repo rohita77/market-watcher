@@ -1,9 +1,9 @@
 'use strict';
 
-import User from './user.model';
-import passport from 'passport';
-import config from '../../config/environment';
-import jwt from 'jsonwebtoken';
+const User = require('./user.model');
+const passport = require('passport');
+const config = require('../../config/environment');
+const jwt = require('jsonwebtoken');
 
 function validationError(res, statusCode) {
   statusCode = statusCode || 422;
@@ -23,7 +23,7 @@ function handleError(res, statusCode) {
  * Get list of users
  * restriction: 'admin'
  */
-export function index(req, res) {
+exports.index=(req, res)  =>{
   return User.find({}, '-salt -password').exec()
     .then(users => {
       res.status(200).json(users);
@@ -34,7 +34,7 @@ export function index(req, res) {
 /**
  * Creates a new user
  */
-export function create(req, res, next) {
+exports.create = (req, res, next)=> {
   var newUser = new User(req.body);
   newUser.provider = 'local';
   newUser.role = 'user';
@@ -51,7 +51,7 @@ export function create(req, res, next) {
 /**
  * Get a single user
  */
-export function show(req, res, next) {
+exports.show = (req, res, next) => {
   var userId = req.params.id;
 
   return User.findById(userId).exec()
@@ -68,7 +68,7 @@ export function show(req, res, next) {
  * Deletes a user
  * restriction: 'admin'
  */
-export function destroy(req, res) {
+exports.destroy=(req, res) => {
   return User.findByIdAndRemove(req.params.id).exec()
     .then(function() {
       res.status(204).end();
@@ -79,7 +79,7 @@ export function destroy(req, res) {
 /**
  * Change a users password
  */
-export function changePassword(req, res, next) {
+exports.changePassword=(req, res, next)=> {
   var userId = req.user._id;
   var oldPass = String(req.body.oldPassword);
   var newPass = String(req.body.newPassword);
@@ -102,7 +102,7 @@ export function changePassword(req, res, next) {
 /**
  * Get my info
  */
-export function me(req, res, next) {
+exports.me = (req, res, next) => {
   var userId = req.user._id;
 
   return User.findOne({ _id: userId }, '-salt -password').exec()
@@ -118,6 +118,6 @@ export function me(req, res, next) {
 /**
  * Authentication callback
  */
-export function authCallback(req, res, next) {
+exports.authCallback = (req, res, next) => {
   res.redirect('/');
 }

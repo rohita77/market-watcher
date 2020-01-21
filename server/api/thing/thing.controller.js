@@ -9,8 +9,8 @@
 
 'use strict';
 
-import _ from 'lodash';
-import Thing from './thing.model';
+const _ = require('lodash');
+const Thing = require('./thing.model');
 
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
@@ -34,7 +34,7 @@ function saveUpdates(updates) {
 function removeEntity(res) {
   return function(entity) {
     if (entity) {
-      return entity.remove()
+      return entity.deleteMany()
         .then(() => {
           res.status(204).end();
         });
@@ -60,14 +60,14 @@ function handleError(res, statusCode) {
 }
 
 // Gets a list of Things
-export function index(req, res) {
+exports.index=(req, res)  =>{
   return Thing.find().exec()
     .then(respondWithResult(res))
     .catch(handleError(res));
 }
 
 // Gets a single Thing from the DB
-export function show(req, res) {
+exports.show=(req, res) =>{
   return Thing.findById(req.params.id).exec()
     .then(handleEntityNotFound(res))
     .then(respondWithResult(res))
@@ -75,14 +75,14 @@ export function show(req, res) {
 }
 
 // Creates a new Thing in the DB
-export function create(req, res) {
+exports.create=(req, res) =>{
   return Thing.create(req.body)
     .then(respondWithResult(res, 201))
     .catch(handleError(res));
 }
 
 // Updates an existing Thing in the DB
-export function update(req, res) {
+exports.update=(req, res) => {
   if (req.body._id) {
     delete req.body._id;
   }
@@ -94,7 +94,7 @@ export function update(req, res) {
 }
 
 // Deletes a Thing from the DB
-export function destroy(req, res) {
+exports.destroy=(req, res) => {
   return Thing.findById(req.params.id).exec()
     .then(handleEntityNotFound(res))
     .then(removeEntity(res))

@@ -4,10 +4,10 @@
 
 'use strict';
 
-import {EventEmitter} from 'events';
+const EventEmitter = require('events').EventEmitter;
 var BoardMeetingEvents = new EventEmitter();
 
-// Set max event listeners (0 == unlimited)
+// Set max event listeners (0===unlimited)
 BoardMeetingEvents.setMaxListeners(0);
 
 // Model events
@@ -31,5 +31,5 @@ function emitEvent(event) {
   };
 }
 
-export {registerEvents};
-export default BoardMeetingEvents;
+exports.registerEvents = registerEvents ;
+exports.default= BoardMeetingEvents;

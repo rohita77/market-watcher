@@ -1,11 +1,10 @@
 'use strict';
 
-import mongoose from 'mongoose';
-
+const mongoose = require('mongoose');
 var ThingSchema = new mongoose.Schema({
   name: String,
   info: String,
   active: Boolean
 });
 
-export default mongoose.model('Thing', ThingSchema);
+module.exports = mongoose.model('Thing', ThingSchema);

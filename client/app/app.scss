@@ -8,7 +8,7 @@ $icon-font-path: "../bower_components/bootstrap-sass-official/vendor/assets/font
 @import '../bower_components/bootstrap-sass-official/vendor/assets/stylesheets/bootstrap';
 
 $fa-font-path: "../bower_components/font-awesome/fonts";
-@import '../bower_components/font-awesome/scss/font-awesome';
+@import '../bower_components/font-awesome/scss/fontawesome.scss';
 
 /**
  * App-wide Styles
@@ -49,6 +49,7 @@ table {
 
 // Component styles are injected through grunt
 /* inject:scss */
+@import 'variables-darkly';
 @import 'admin/admin';
 @import 'events/events';
 @import 'main/main';

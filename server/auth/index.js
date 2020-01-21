@@ -1,15 +1,15 @@
 'use strict';
 
-import express from 'express';
-import passport from 'passport';
-import config from '../config/environment';
-import User from '../api/user/user.model';
+const express = require('express');
+const passport = require('passport');
+const config = require('../config/environment');
+const User = require('../api/user/user.model');
 
 // Passport Configuration
-require('./local/passport').setup(User, config);
+require('./local/passport')(User, config);
 
 var router = express.Router();
 
-router.use('/local', require('./local').default);
+router.use('/local', require('./local'));
 
-export default router;
+module.exports = router;

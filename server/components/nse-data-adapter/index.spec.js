@@ -1,7 +1,6 @@
 'use strict'
 
-import moment from 'moment';
-
+const moment = require('moment');
 // var nseTools = require('../../../components/nse-data-adapter/index');
 var NSEDataAdapter = require('./index');
 

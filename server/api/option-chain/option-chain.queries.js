@@ -1,6 +1,6 @@
 'use strict'
 
-export function getPiplelineForOCSubset(passedSymbol, ltP) {
+exports.getPiplelineForOCSubset = (passedSymbol, ltP) => {
 
     //* User aggregation framework
     let stage = {};

@@ -1,3 +1,4 @@
+/* jshint ignore:start */
 {
 
     load("server/api/quote/quote.queries.js");
@@ -26,3 +27,5 @@
 }
 
 //load("server/api/quote/quote.queries.test.js");
+
+/* jshint ignore:end */

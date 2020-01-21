@@ -1,6 +1,6 @@
 'use strict'
 
-import moment from 'moment';
+var moment = require('moment');
 
 //import NSEDownload from './downloads';
 var NSEDownload = require('./downloads'); //TD:
@@ -9,35 +9,34 @@ var NSEDownload = require('./downloads'); //TD:
 const tradingHolidays = [
 
     //https://nse-india.com/products/content/derivatives/equities/mrkt_timing_holidays.htm
-    "26-Jan-18",
-    "13-Feb-18",
-    "2-Mar-18",
-    "29-Mar-18",
-    "30-Mar-18",
-    "1-May-18",
-    "15-Aug-18",
-    "22-Aug-18",
-    "13-Sep-18",
-    "20-Sep-18",
-    "2-Oct-18",
-    "18-Oct-18",
-    "7-Nov-18",
-    "8-Nov-18",
-    "23-Nov-18",
-    "25-Dec-18"
-];
+    "21-Feb-2020",
+    "10-Mar-2020",
+    "02-Apr-2020",
+    "06-Apr-2020",
+    "10-Apr-2020",
+    "14-Apr-2020",
+    "01-May-2020",
+    "25-May-2020",
+    "02-Oct-2020",
+    "16-Nov-2020",
+    "30-Nov-2020",
+    "25-Dec-2020"
+    ];
 
-export function isTradingHoliday(calendarDate = moment()) {
+function isTradingHoliday (calendarDate = moment()) {
 
     let mcalendarDate = moment(calendarDate).utcOffset("+05:30").startOf('day');
     let calendarDateString = mcalendarDate.format("DD-MMM-YY");
 
     return tradingHolidays.find((date) =>
-        (calendarDateString == date)) ? true : false;
+        (calendarDateString===date)) ? true : false;
 
 }
 
-export function getNextTradingDate(currentDate = moment()) {
+exports.isTradingHoliday = isTradingHoliday
+
+
+function getNextTradingDate (currentDate = moment()) {
 
     //local moment('2016-01-01T23:35:01') --> "2016-01-01T23:35:01-06:00";
     //utc moment.utc('2016-01-01T23:35:01'); --> "2016-01-01T23:35:01+00:00"
@@ -57,7 +56,10 @@ export function getNextTradingDate(currentDate = moment()) {
     return isTradingHoliday(nextTradingDate) ? getNextTradingDate(nextTradingDate.clone().add(1, "days")) : nextTradingDate.toDate();
 }
 
-export function getMonthlyExpiryDate(tradingDate, dtFormat) {
+exports.getNextTradingDate = getNextTradingDate;
+
+
+function getMonthlyExpiryDate (tradingDate, dtFormat) {
 
     let eom = moment(tradingDate).utcOffset("+05:30").endOf('month');
 
@@ -81,11 +83,15 @@ export function getMonthlyExpiryDate(tradingDate, dtFormat) {
 
 }
 
-export function getFrontMonthExpiryDate(tradingDate = moment(), dtFormat) {
+exports.getMonthlyExpiryDate = getMonthlyExpiryDate
+
+function getFrontMonthExpiryDate (tradingDate = moment(), dtFormat) {
     return getMonthlyExpiryDate(tradingDate, dtFormat);
 }
 
-export function getBackMonthExpiryDate(tradingDate = moment(), dtFormat) {
+exports.getFrontMonthExpiryDate=getFrontMonthExpiryDate
+
+exports.getBackMonthExpiryDate=(tradingDate = moment(), dtFormat) =>{
     let frontMonthExpiryDate = getFrontMonthExpiryDate(tradingDate)
     let backMonthFirstTradingDate = moment(frontMonthExpiryDate).add(1, "days")
 
@@ -93,7 +99,7 @@ export function getBackMonthExpiryDate(tradingDate = moment(), dtFormat) {
 }
 
 
-export function getPreviousMonthExpiryDate(tradingDate = moment(), dtFormat) {
+exports.getPreviousMonthExpiryDate=(tradingDate = moment(), dtFormat) =>{
     let frontMonthExpiryDate = getFrontMonthExpiryDate(tradingDate)
 
     let firstOfMonth = moment(frontMonthExpiryDate).utcOffset("+05:30").startOf('month');
@@ -162,37 +168,38 @@ export function getPreviousMonthExpiryDate(tradingDate = moment(), dtFormat) {
  */
 
 
-export function getSymbolsInWatchList(watchlist) {
+exports.getSymbolsInWatchList=(watchlist) =>{
 
     return NSEDownload.getSymbolsInIndex(watchlist.downloadKey);
 
 }
 
-export function getFCBoardMeetings() {
+exports.getFCBoardMeetings=() =>{
 
     return NSEDownload.getBoardMeetings('All_Forthcoming');
 
 }
 
-export function getBoardMeetingsForLast3Months() {
+exports.getBoardMeetingsForLast3Months=() =>{
 
     return NSEDownload.getBoardMeetings('Last_3_Months'); //12 Months? To deal with boundary value past earningg
 
 }
 
-export function getFnOLotSizes() {
+exports.getFnOLotSizes=() =>{
 
     return NSEDownload.getFnOLotSizes(); //No Download Key
 
 }
 
-export function getDaysToFrontMonthExpiry(tradingDate = moment()) {
+function getDaysToFrontMonthExpiry (tradingDate = moment()) {
 
     return moment(getFrontMonthExpiryDate(tradingDate)).diff(moment(getNextTradingDate(tradingDate)), 'days');
 }
 
+exports.getDaysToFrontMonthExpiry = getDaysToFrontMonthExpiry
 
-export function getQuotesForFnOStocks() {
+exports.getQuotesForFnOStocks=() =>{
 
     return NSEDownload.getQuotesForIndexStocks('foSecStockWatch')
         .then(quotesJSON => {
@@ -206,7 +213,7 @@ export function getQuotesForFnOStocks() {
 
 }
 
-export function getStockOptionChain(symbol, expiryDate) {
+exports.getStockOptionChain =(symbol, expiryDate) =>{
 
     return NSEDownload.getStockOptionChain(symbol, expiryDate);
 

@@ -1,43 +1,34 @@
 //node dist/server/batchApp.job
 
 'use strict';
-import _ from 'lodash';
-import moment from 'moment';
-import jsonpatch from 'fast-json-patch';
-
+const _ = require('lodash');
+const moment = require('moment');
+const jsonpatch = require('fast-json-patch');
 //import NSEDataAdapter from '../../components/nsedata/downloads'; //TD:
 var NSEDataAdapter = require('../../components/nse-data-adapter/index');
 
 //import Model and save to Mongo
-import Quote from './quote.model'
-import OptionChain from '../../api/option-chain/option-chain.model'
-
-export function run() {
-
-  log('Quote Job Fired');
-  return refreshStockQuotes()
-    .then((quotesJSON) => {
-      log(`Refreshed StockQuotes for Index: ${quotesJSON.index} id:${quotesJSON._id.toLocaleString('en-US', IST)} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`)
-      return quotesJSON;
-    })
-    //TS+D: Which one to get. The list is big
-    .then((quotesJSON) => refreshOptionChains(quotesJSON))
-    .then((quotesJSON) => {
-      log(`Refreshed Option chains and updated in ${quotesJSON.quotes.length} quotes`);
-      return quotesJSON;
-    })
-    .then((quotesJSON) => {
-      log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id.toLocaleString('en-US', IST)}`)
-      return quotesJSON.save();
-
-    })
-    .then((saved) => {
-      log(`Saved quotes at:${saved.lastMod.toLocaleString()}`);
-    });
-
-}
+const Quote = require('./quote.model');
+const OptionChain = require('../../api/option-chain/option-chain.model');
 
 let IST = { timeZone: 'Asia/Calcutta', timeZoneName: 'short' };
+
+
+exports.run= async () => {
+
+  log('Quote Job Fired');
+  let quotesJSON = await refreshStockQuotes();
+
+  log(`Refreshed StockQuotes for Index: ${quotesJSON.index} id:${quotesJSON._id.toLocaleString('en-US', IST)} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`)
+
+  quotesJSON = await refreshOptionChains(quotesJSON)
+  log(`Refreshed Option chains and updated in ${quotesJSON.quotes.length} quotes`);
+
+  log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id.toLocaleString('en-US', IST)}`);
+  let saved = await quotesJSON.save();
+  log(`Saved quotes at:${saved.lastMod.toLocaleString()}`);
+
+}
 
 function now() {
   return moment().format('HH:mm:ss Z');
@@ -106,7 +97,7 @@ function refreshOptionChains(quotesJSON) {
     quotesJSON.quotes.map(stockQuote => {
       //avgtrdVol: 40 lacs and avgTurnOver = 100 for 212 symbols for 6 trading hours
       if ((stockQuote.trdVol > (5 * hoursFromOpen)) || (stockQuote.ntP > (15 * hoursFromOpen))) { //TD Previous days value and from config
-        //    if ((stockQuote.symbol == 'RELIANCE') || (stockQuote.symbol == 'HINDALCO')) {
+          //  if ((stockQuote.symbol==='RELIANCE') || (stockQuote.symbol==='HINDALCO')) {
 
         return refreshOptionChain(stockQuote, frontMonthExpiry)
           .then((oc) => getExpectedMoveForQuote(stockQuote))
@@ -155,7 +146,7 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
       expDt: frontMonthExpiry,    //TD: expiry date to date
 
       spot: stockQuote.ltP,
-      mrgnPer: stockQuote.frMnthMrgnPer,
+      mrgnPer: stockQuote.frontMonthMarginPercent,
       //  lotSz: Number, //TD
       expDays: NSEDataAdapter.getDaysToFrontMonthExpiry(),
       strikes: arr
@@ -163,9 +154,12 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
     //Save new options chain in DB
     optionChainDoc = await OptionChain.create(optionChainJSON)
-      .catch(
-        err => log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
-      )
+      // .catch(
+      //   err =>{
+      //     // console.log(JSON.stringify(optionChainJSON));
+      //     log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
+      //   }
+      // )
 
     return optionChainDoc;
   }
@@ -195,5 +189,4 @@ function getExpectedMoveForQuote(stockQuote) {
       log(`Stock ${stockQuote.symbol} has expected high/low as ${stockQuote.expectedHigh}/${stockQuote.expectedLow}`)
       return stockQuote
     })
-  DailyAverageQuotes
 }

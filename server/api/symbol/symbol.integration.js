@@ -3,7 +3,7 @@
 /* globals describe, expect, it, beforeEach, afterEach */
 
 var app = require('../..');
-import request from 'supertest';
+const request = require('supertest');
 
 var newSymbol;
 

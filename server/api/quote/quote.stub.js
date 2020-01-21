@@ -1,4 +1,4 @@
-export default {
+module.exports = {
     niftyStockWatch: {
         "trdVolumesumMil": "142.16",
         "time": "Jul 08, 2016 16:00:00",

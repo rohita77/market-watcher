@@ -34,7 +34,7 @@ class NavbarController {
     KiteConnect.ready(() => {
       // Initialize a new Kite instance.
       // You can initialize multiple instances if you need.
-      kite.connect = new KiteConnect("34dvxrlj3l08i9tv");
+      kite.connect = new KiteConnect('34dvxrlj3l08i9tv');
 
       // Register an (optional) callback.
       // kite.connect.finished(function (status, request_token) {
@@ -45,7 +45,7 @@ class NavbarController {
       // kite.connect.renderButton("#default-button");
 
       // OR, link the basket to any existing element you want
-      kite.connect.link("#custom-button");
+      kite.connect.link('#custom-button');
     });
 
 
@@ -54,4 +54,6 @@ class NavbarController {
 }
 
 angular.module('marketWatcherApp')
+      /*@ngInject*/
+
   .controller('NavbarController', NavbarController);

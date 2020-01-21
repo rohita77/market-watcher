@@ -2,6 +2,7 @@
 
 angular.module('marketWatcherApp')
   .directive('footer', function() {
+    /*@ngInject*/
     return {
       templateUrl: 'components/footer/footer.html',
       restrict: 'E',

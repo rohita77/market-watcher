@@ -1,5 +1,50 @@
 'use strict';
 
+function addOption(strike,callOrPut,scope, kite) {
+  // Add a option to the basket
+
+  let oc = scope.oc;
+  let lotSize = scope.symbol.frontMonthLotSize;
+  let optType = (callOrPut === 'C') ? 'call' : 'put';
+  let askPrice = strike[optType].ask;
+
+  let tradingSymbol = `${oc.symbol}${oc.expDt.slice(7,9)}${oc.expDt.slice(2,5)}${strike.price}${(callOrPut==='C')?'CE':'PE'}`;
+
+  kite.connect.add({
+    exchange: 'NFO',
+    tradingsymbol: tradingSymbol,
+    quantity: lotSize,
+    transaction_type: 'SELL',
+    order_type: 'LIMIT',
+    price: askPrice
+  });
+
+  alert(`Added ${lotSize} of ${tradingSymbol} at ${askPrice}`);
+
+}
+
+function getMoneynessClass(sp, call = false, scope) {
+  let baseClass = ' ', c;
+
+  if (call) {
+    if (sp <= scope.ltp) c = baseClass + 'active';
+    else if (sp >= scope.sdH) c = baseClass + 'success';
+    else if (sp >= scope.expH) c = baseClass + 'warning';
+    else if (sp >= scope.ltp) c = baseClass + 'danger';
+    else c = baseClass + 'default';
+  }
+  else {
+    if (sp >= scope.ltp) c = baseClass + 'active';
+    else if (sp <= scope.sdL) c = baseClass + 'success';
+    else if (sp <= scope.expL) c = baseClass + 'warning';
+    else if (sp <= scope.ltp) c = baseClass + 'danger';
+    else c = baseClass + 'default';
+  }
+
+  return c;
+
+}
+
 (function () {
 
   angular.module('marketWatcherApp.option-chain', [])
@@ -46,53 +91,10 @@
             });
 
         }
-      }
+      };
     }]);
 
-  function addOption(strike,callOrPut,scope, kite) {
-    // Add a option to the basket
 
-    let oc = scope.oc;
-    let lotSize = scope.symbol.frontMonthLotSize;
-    let optType = (callOrPut === 'C') ? 'call' : 'put';
-    let askPrice = strike[optType].ask;
-
-    let tradingSymbol = `${oc.symbol}${oc.expDt.slice(7,9)}${oc.expDt.slice(2,5)}${strike.price}${(callOrPut == 'C')?'CE':'PE'}`
-
-    kite.connect.add({
-      exchange: 'NFO',
-      tradingsymbol: tradingSymbol,
-      quantity: lotSize,
-      transaction_type: 'SELL',
-      order_type: 'LIMIT',
-      price: askPrice
-    });
-
-    alert(`Added ${lotSize} of ${tradingSymbol} at ${askPrice}`);
-
-  }
-
-  function getMoneynessClass(sp, call = false, scope) {
-    let baseClass = ' ', c;
-
-    if (call) {
-      if (sp <= scope.ltp) c = baseClass + 'active';
-      else if (sp >= scope.sdH) c = baseClass + 'success';
-      else if (sp >= scope.expH) c = baseClass + 'warning';
-      else if (sp >= scope.ltp) c = baseClass + 'danger';
-      else c = baseClass + 'default';
-    }
-    else {
-      if (sp >= scope.ltp) c = baseClass + 'active';
-      else if (sp <= scope.sdL) c = baseClass + 'success';
-      else if (sp <= scope.expL) c = baseClass + 'warning';
-      else if (sp <= scope.ltp) c = baseClass + 'danger';
-      else c = baseClass + 'default';
-    }
-
-    return c;
-
-  }
 
 })();
 

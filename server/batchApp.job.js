@@ -1,25 +1,34 @@
 'use strict';
 
-import moment from 'moment';
+let moment = require('moment');
 
 // Set default node environment to development
 var env = process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 if (env === 'development' || env === 'test') {
   // Register the Babel require hook
-  require('babel-register');
+  require('@babel/register');
 }
 
 // Export the application
 //exports = module.exports = require('./app');
 
-import mongoose from 'mongoose';
+let mongoose =require('mongoose');
 mongoose.plugin(require('./components/lastMod'));
 
 mongoose.Promise = require('bluebird');
 var config = require('./config/environment');
 
+
+mongoose.set('useNewUrlParser', true);
+mongoose.set('useFindAndModify', false);
+mongoose.set('useCreateIndex', true);
+mongoose.set('useUnifiedTopology', true);
+
+config.mongo.uri = "mongodb://heroku_1mcgzhnk:25cb69cn9o7ppkbmsu5q1gvho3@ds027628.mlab.com:27628/heroku_1mcgzhnk"
+
 // Connect to MongoDB
+console.log(`Connect to Mongo DB at ${config.mongo.uri.substring(0,30)}`)
 mongoose.connect(config.mongo.uri, config.mongo.options);
 mongoose.connection.on('error', function (err) {
   console.error('MongoDB connection error: ' + err);
@@ -35,7 +44,7 @@ const jobSchedules = [
     jobEndHour: 20
   },
   {
-    //https://www.nseindia.com/products/content/derivatives/equities/mrkt_timing_holidays.htm
+    //https://www1.nseindia.com/products/content/derivatives/equities/mrkt_timing_holidays.htm
     jobName: 'refreshQuotesForFnOStocks',
     jobModule: './api/quote/quote.job',
     jobStartHour: 9,                    //9.15

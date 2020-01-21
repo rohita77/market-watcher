@@ -1,18 +1,17 @@
 'use strict'
 
-import moment from 'moment';
+const moment = require('moment');
 
 // Set default node environment to development
 var env = process.env.NODE_ENV = process.env.NODE_ENV || 'production';
 
 if (env === 'development' || env === 'test') {
     // Register the Babel require hook
-    require('babel-register');
+    require('@babel/register');
 }
 
 
-import mongoose from 'mongoose';
-
+const mongoose = require('mongoose');
 
 mongoose.plugin(require('./components/lastMod'));
 

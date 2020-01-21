@@ -4,12 +4,11 @@
 
 'use strict';
 
-import OptionChainEvents from './option-chain.events';
-
+const OptionChainEvents = require('./option-chain.events');
 // Model events to emit
 var events = ['save', 'remove'];
 
-export function register(socket) {
+exports.register=(socket)=> {
   // Bind model events to socket events
   for(var i = 0, eventsLength = events.length; i < eventsLength; i++) {
     var event = events[i];

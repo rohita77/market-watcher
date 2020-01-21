@@ -1,10 +1,70 @@
 'use strict'
 
-import moment from 'moment';
-
+const moment = require('moment');
 const ISTOffset = 5.5 * 60 * 60000;
 
-export function getPipelineForDailyAverageQuotes(symbols, marketQuoteDate) {
+
+let getPipelineForClosingQuotes = (symbols, marketQuoteDate) => {
+
+    // let n = (n1 = 0) => (typeof n1 !== 'undefined') ? n1 : 0;
+
+    //TD: Convert marketQuoteDate to UTC start and end instead of converting $quoteTime and then match
+    //TD: store Trade Date and Time in IST
+
+    //* User aggregation framework
+    let stage = {};
+    let pipeline = [];
+    let $project = {};
+
+    stage.$addFields = {
+        marketQuoteTime: {
+            $add: ["$quoteTime", ISTOffset]
+        }
+    };
+    pipeline.push(stage);
+
+    stage = {};
+    stage.$addFields = {
+        marketQuoteDate: {
+            $dateToString: { format: "%G%m%d", date: "$marketQuoteTime" }
+        }
+    };
+    pipeline.push(stage);
+
+    pipeline.push({ $sort: { marketQuoteTime: -1 } });
+
+    if (marketQuoteDate) {
+        pipeline.push({
+            $match: {
+                marketQuoteDate: marketQuoteDate
+            }
+        });
+        pipeline.push({ $skip: 1 });
+    }
+
+    stage = {};
+    stage.$group = {
+        _id: "$marketQuoteDate",
+        marketQuoteTime: { $first: "$marketQuoteTime" },
+        refreshTime: { $first: "$refreshTime" },
+        quoteTime: { $first: "$quoteTime" },
+        // quotes : {
+        //     $slice : [{$addToSet : "$quotes"}, 1, 1]
+        // },
+        // quotes: { $first: { $slice: ["$quotes", 1, 1] }},
+        // quotes: { $slice: ["$quotes", 1, 2] },
+        quotes: { $first: "$quotes" },
+    };
+    pipeline.push(stage);
+
+   return pipeline;
+
+}
+
+exports.getPipelineForClosingQuotes = getPipelineForClosingQuotes;
+
+
+exports.getPipelineForDailyAverageQuotes = (symbols, marketQuoteDate) => {
 
     // let n = (n1 = 0) => (typeof n1 !== 'undefined') ? n1 : 0;
 
@@ -89,75 +149,6 @@ export function getPipelineForDailyAverageQuotes(symbols, marketQuoteDate) {
 // load("market-watcher/server/api/quote/quote.queries.js"); */
 
 
-export function getPipelineForClosingQuotesWithSummary(symbols, marketQuoteDate) {
-
-    let stage = {};
-    let pipeline = [];
-    let $project = {};
-
-    let pLCQ = getPipelineForClosingQuotes(symbols, marketQuoteDate);
-    let aQSToPL = getPipelineForQuoteSummary();
-
-   return [...pLCQ,...aQSToPL];
-
-}
-
-export function getPipelineForClosingQuotes(symbols, marketQuoteDate) {
-
-    // let n = (n1 = 0) => (typeof n1 !== 'undefined') ? n1 : 0;
-
-    //TD: Convert marketQuoteDate to UTC start and end instead of converting $quoteTime and then match
-    //TD: store Trade Date and Time in IST
-
-    //* User aggregation framework
-    let stage = {};
-    let pipeline = [];
-    let $project = {};
-
-    stage.$addFields = {
-        marketQuoteTime: {
-            $add: ["$quoteTime", ISTOffset]
-        }
-    };
-    pipeline.push(stage);
-
-    stage = {};
-    stage.$addFields = {
-        marketQuoteDate: {
-            $dateToString: { format: "%G%m%d", date: "$marketQuoteTime" }
-        }
-    };
-    pipeline.push(stage);
-
-    pipeline.push({ $sort: { marketQuoteTime: -1 } });
-
-    if (marketQuoteDate) {
-        pipeline.push({
-            $match: {
-                marketQuoteDate: marketQuoteDate
-            }
-        });
-        pipeline.push({ $skip: 1 });
-    }
-
-    stage = {};
-    stage.$group = {
-        _id: "$marketQuoteDate",
-        marketQuoteTime: { $first: "$marketQuoteTime" },
-        refreshTime: { $first: "$refreshTime" },
-        quoteTime: { $first: "$quoteTime" },
-        // quotes : {
-        //     $slice : [{$addToSet : "$quotes"}, 1, 1]
-        // },
-        // quotes: { $first: { $slice: ["$quotes", 1, 1] }},
-        // quotes: { $slice: ["$quotes", 1, 2] },
-        quotes: { $first: "$quotes" },
-    };
-    pipeline.push(stage);
-
-   return pipeline;
-
-}
 
 function getPipelineForQuoteSummary() {
     let stage = {};
@@ -191,3 +182,18 @@ function getPipelineForQuoteSummary() {
    return pipeline;
 
 }
+
+
+exports.getPipelineForClosingQuotesWithSummary = (symbols, marketQuoteDate) => {
+
+    let stage = {};
+    let pipeline = [];
+    let $project = {};
+
+    let pLCQ = getPipelineForClosingQuotes(symbols, marketQuoteDate);
+    let aQSToPL = getPipelineForQuoteSummary();
+
+   return [...pLCQ,...aQSToPL];
+
+}
+

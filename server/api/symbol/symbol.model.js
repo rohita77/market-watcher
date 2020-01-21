@@ -1,8 +1,7 @@
 'use strict';
-
-import mongoose from 'mongoose';
-import { registerEvents } from './symbol.events';
-import math from 'mathjs';
+const mongoose = require('mongoose');
+let registerEvents = require('./symbol.events').registerEvents;
+const math = require('mathjs');
 
 var SymbolSchema = new mongoose.Schema({
   _id: String,
@@ -38,7 +37,7 @@ SymbolSchema.pre('save', function (next) {
 })
 
 registerEvents(SymbolSchema);
-export default mongoose.model('Symbol', SymbolSchema);
+module.exports = mongoose.model('Symbol', SymbolSchema);
 
 //*
 

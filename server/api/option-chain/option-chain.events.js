@@ -4,10 +4,10 @@
 
 'use strict';
 
-import {EventEmitter} from 'events';
+const EventEmitter = require('events').EventEmitter;
 var OptionChainEvents = new EventEmitter();
 
-// Set max event listeners (0 == unlimited)
+// Set max event listeners (0===unlimited)
 OptionChainEvents.setMaxListeners(0);
 
 // Model events
@@ -31,5 +31,5 @@ function emitEvent(event) {
   };
 }
 
-export {registerEvents};
-export default OptionChainEvents;
+exports.registerEvents = registerEvents;
+exports.OptionChainEvents = OptionChainEvents;

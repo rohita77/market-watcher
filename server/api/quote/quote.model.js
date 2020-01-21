@@ -1,8 +1,7 @@
 'use strict';
 
-import mongoose from 'mongoose';
-import math from 'mathjs';
-
+const mongoose = require('mongoose');
+const math = require('mathjs');
 var queries = require('./quote.queries');
 
 var QuoteDataSchema = new mongoose.Schema({
@@ -44,12 +43,15 @@ QuoteDataSchema.pre('save', function (next) {
   this.expectedHighPercent = rnd(((this.expectedHigh - this.ltP) * 100) / this.ltP, 2);
   this.expectedLowPercent = rnd(((this.ltP - this.expectedLow) * 100) / this.ltP, 2);
 
+  // if (!(this.callROC && this.putROC) && this.expectedHighOptions)
+  // console.log(this);
+
   if (this.expectedHighOptions) {
-    this.expectedHighCallROCPercent = ((this.expectedHighOptions.call.midPrice * 100) / (this.frontMonthMarginPercent * this.ltP));
+    this.expectedHighCallROCPercent = ((this.expectedHighOptions.call.mid * 100) / (this.frontMonthMarginPercent * this.ltP));
     this.expectedHighCallROCPercent = rnd(this.expectedHighCallROCPercent,2);
   }
   if (this.expectedLowOptions) {
-    this.expectedLowPutROCPercent = ((this.expectedLowOptions.put.midPrice * 100) / (this.frontMonthMarginPercent * this.ltP));
+    this.expectedLowPutROCPercent = ((this.expectedLowOptions.put.mid * 100) / (this.frontMonthMarginPercent * this.ltP));
     this.expectedLowPutROCPercent = rnd(this.expectedLowPutROCPercent,2);
   }
 
@@ -57,17 +59,15 @@ QuoteDataSchema.pre('save', function (next) {
   let callROC = 0, putROC = 0;
 
   if (+this.expectedHighPercent > 0 && this.expectedHighOptions) {
-    callROC = (+this.expectedHighOptions.call.percentSpread < 11) ? +this.expectedHighCallROCPercent || 0 : 0;
+    callROC = (+this.expectedHighOptions.call.perSpr < 11) ? +this.expectedHighCallROCPercent || 0 : 0;
   }
 
   if (+this.expectedLowPercent > 0 && this.expectedLowOptions) {
-    putROC = (+this.expectedLowOptions.put.percentSpread < 11) ? +this.expectedLowPutROCPercent || 0 : 0;
+    putROC = (+this.expectedLowOptions.put.perSpr < 11) ? +this.expectedLowPutROCPercent || 0 : 0;
   }
-
 
   this.maxROC = math.max(+callROC || 0, +putROC || 0);
   this.maxROC = rnd(this.maxROC,2);
-
 
   next();
 
@@ -105,7 +105,7 @@ QuotesSchema.statics.getDailyQuoteStats = function (symbols,marketQuoteDate) {
 
 
 
-export default mongoose.model('Quote', QuotesSchema);
+module.exports = mongoose.model('Quote', QuotesSchema);
 
 //Index on reresh time or last mod or quot time/
 //If quote time is duplicate then skip

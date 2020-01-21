@@ -1,9 +1,9 @@
 'use strict';
 
-import crypto from 'crypto';
-import mongoose from 'mongoose';
+const crypto = require('crypto');
+const mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
-import {Schema} from 'mongoose';
+const Schema = require('mongoose').Schema;
 
 var UserSchema = new Schema({
   name: String,
@@ -76,11 +76,11 @@ UserSchema
       .then(function(user) {
         if (user) {
           if (self.id === user.id) {
-            return respond(true);
+            return true;
           }
-          return respond(false);
+          return false;
         }
-        return respond(true);
+        return true;
       })
       .catch(function(err) {
         throw err;
@@ -205,7 +205,7 @@ UserSchema.methods = {
 
     var defaultIterations = 10000;
     var defaultKeyLength = 64;
-    var salt = new Buffer(this.salt, 'base64');
+    var salt = new Buffer.from(this.salt, 'base64');
 
     if (!callback) {
       return crypto.pbkdf2Sync(password, salt, defaultIterations, defaultKeyLength)
@@ -222,4 +222,4 @@ UserSchema.methods = {
   }
 };
 
-export default mongoose.model('User', UserSchema);
+module.exports = mongoose.model('User', UserSchema);

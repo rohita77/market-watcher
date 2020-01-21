@@ -1,8 +1,7 @@
 'use strict';
 
-import mongoose from 'mongoose';
-import { registerEvents } from './board-meeting.events';
-
+const mongoose = require('mongoose');
+const registerEvents = require('./board-meeting.events').registerEvents;
 var BoardMeetingSchema = new mongoose.Schema({
   symbol: String,
   boardMeetingDate: Date,
@@ -11,5 +10,5 @@ var BoardMeetingSchema = new mongoose.Schema({
 });
 
 registerEvents(BoardMeetingSchema);
-export default mongoose.model('BoardMeeting', BoardMeetingSchema);
+module.exports = mongoose.model('BoardMeeting', BoardMeetingSchema);
 

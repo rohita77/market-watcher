@@ -1,5 +1,5 @@
-import app from './';
-import mongoose from 'mongoose';
+const app = require('./');
+const mongoose = require('mongoose');
 
 after(function(done) {
   app.angularFullstack.on('close', () => done());

@@ -4,10 +4,10 @@
 
 'use strict';
 
-import {EventEmitter} from 'events';
+const EventEmitter = require('events').EventEmitter;
 var DailyStatEvents = new EventEmitter();
 
-// Set max event listeners (0 == unlimited)
+// Set max event listeners (0===unlimited)
 DailyStatEvents.setMaxListeners(0);
 
 // Model events
@@ -31,5 +31,5 @@ function emitEvent(event) {
   };
 }
 
-export {registerEvents};
-export default DailyStatEvents;
+exports.registerEvents = registerEvents;
+exports.default = DailyStatEvents;

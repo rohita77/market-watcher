@@ -61,6 +61,7 @@
 
   angular.module('marketWatcherApp')
     .component('main', {
+      /*@ngInject*/
       templateUrl: 'app/main/main.html',
       controller: MainController
     });

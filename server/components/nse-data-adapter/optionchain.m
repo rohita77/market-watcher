@@ -1,6 +1,6 @@
 https://nse-india.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?segmentLink=17&instrument=OPTSTK&symbol=RELIANCE&date=31AUG2017l
 
-et GetOptionChain=(SYMBOL) =>
+let GetOptionChain=(SYMBOL) =>
 let
     Source = Web.Page(Web.Contents("http://nseindia.com/live_market/dynaContent/live_watch/option_chain/optionKeys.jsp?symbol="&Text.Replace(SYMBOL,"&","%26") & "&instrument=OPTSTK&date="&GetCellValues("EXPMONTH"))),
     Data0 = Source{0}[Data],

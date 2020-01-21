@@ -36,12 +36,7 @@ var all = {
   mongo: {
 
     options: {
- ///*
-      db: {
-        safe: true
-      }
- //   */
- //     ,useMongoClient: true
+  //     ,useMongoClient: true
     }
   }
 };

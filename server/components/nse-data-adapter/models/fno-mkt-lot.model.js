@@ -1,7 +1,7 @@
 'use strict';
 
-import mongoose from 'mongoose';
-import moment from 'moment';
+const mongoose = require('mongoose');
+const moment = require('moment');
 
 var FnOMktLotSchema = new mongoose.Schema({
   symbol: String,
@@ -18,4 +18,4 @@ FnOMktLotSchema.statics.getFnOMktLot = function (symbol, expiryMonth) {
     .then(r => r ? r.mktlot[expiryMonth.toUpperCase()] : null);
 }
 
-export default mongoose.model('FNOMktLot', FnOMktLotSchema);
+module.exports = mongoose.model('FNOMktLot', FnOMktLotSchema);

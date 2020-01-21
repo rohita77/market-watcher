@@ -9,8 +9,8 @@
 
 'use strict';
 
-import _ from 'lodash';
-import Watchlist from './watchlist.model';
+const _ = require('lodash');
+const Watchlist = require('./watchlist.model');
 
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
@@ -22,7 +22,7 @@ function respondWithResult(res, statusCode) {
   };
 }
 
-export function saveUpdates(updates) {
+function saveUpdates(updates) {
   return function (entity) {
     var updated = _.merge(entity, updates);
     return updated.save()
@@ -32,10 +32,13 @@ export function saveUpdates(updates) {
   };
 }
 
+exports.saveUpdates = saveUpdates;
+
+
 function removeEntity(res) {
   return function (entity) {
     if (entity) {
-      return entity.remove()
+      return entity.deleteMany()
         .then(() => {
           res.status(204).end();
         });
@@ -61,14 +64,14 @@ function handleError(res, statusCode) {
 }
 
 // Gets a list of Watchlists
-export function index(req, res) {
+exports.index=(req, res)  =>{
   return Watchlist.find({},{name:true}).sort({name:1}).exec()
     .then(respondWithResult(res))
     .catch(handleError(res));
 }
 
 // Gets a single Watchlist from the DB
-export function show(req, res) {
+exports.show=(req, res) =>{
 
   console.log(`Watchlist Param is ${req.params.id}`);
   return Watchlist.findById(req.params.id).exec()
@@ -78,14 +81,14 @@ export function show(req, res) {
 }
 
 // Creates a new Watchlist in the DB
-export function create(req, res) {
+exports.create=(req, res) =>{
   return Watchlist.create(req.body)
     .then(respondWithResult(res, 201))
     .catch(handleError(res));
 }
 
 // Updates an existing Watchlist in the DB
-export function update(req, res) {
+exports.update=(req, res) => {
   if (req.body._id) {
     delete req.body._id;
   }
@@ -97,7 +100,7 @@ export function update(req, res) {
 }
 
 // Deletes a Watchlist from the DB
-export function destroy(req, res) {
+exports.destroy=(req, res) => {
   return Watchlist.findById(req.params.id).exec()
     .then(handleEntityNotFound(res))
     .then(removeEntity(res))

@@ -20,7 +20,7 @@
       this.selectedWatchlist = {
         _id :  'NIFTY100',
         name : 'NIFTY 100 Index'
-      }
+      };
 
       this.query = {
         watchlists: 'NIFTY100'
@@ -59,7 +59,7 @@
           //TD: Emit from Server instead of client refresh
           this.refreshQuoteData(true);
 
-          let refreshQuoteDataPromise = this.$interval(this.refreshQuoteData.bind(this), 5 * 60 * 1000);
+          let refreshQuoteDataPromise = this.$interval(this.refreshQuoteData.bind(this,false), 5 * 60 * 1000);
 
 
         }) //based on format
@@ -85,7 +85,7 @@
     }
 
     filterIndustry(symbol) {
-      this.query.key = (this.query.key == `(${symbol.industry})`) ? '' :  `(${symbol.industry})`;
+      this.query.key = (this.query.key===`(${symbol.industry})`) ? '' :  `(${symbol.industry})`;
     }
 
 
@@ -109,11 +109,11 @@
       this.sortReverse = (this.sortBy === sortBy) ? !this.sortReverse : false;
       this.sortBy = sortBy;
 
-    };
+    }
 
     getReverse (sortBy) {
       return (this.sortBy === sortBy) ? !this.sortReverse : false;
-    };
+    }
 
     $onInit() {
       this.filterIsCollapsed = true;

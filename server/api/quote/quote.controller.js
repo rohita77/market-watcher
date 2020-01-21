@@ -9,11 +9,29 @@
 
 'use strict';
 
-import _ from 'lodash';
-import Quote from './quote.model';
-import stub from './quote.stub';
+const _ = require('lodash');
+const Quote = require('./quote.model');
+const stub = require('./quote.stub');
+const request = require('request-json');
+const quoteJob = require('./quote.job');
 
-import request from 'request-json';
+exports.runQuoteJob= async (req, res) =>{
+
+  let returnFunc;
+  let entity;
+  console.log('hi');
+
+  try {
+    let entity = await quoteJob.run();
+    returnFunc = respondWithResult(res, 201);
+    return await returnFunc(entity);
+  } catch (error) {
+    returnFunc = handleError(res);
+    return await returnFunc(error);
+  }
+
+}
+
 
 function respondWithResult(res, statusCode) {
   statusCode = statusCode || 200;
@@ -37,7 +55,7 @@ function saveUpdates(updates) {
 function removeEntity(res) {
   return function (entity) {
     if (entity) {
-      return entity.remove()
+      return entity.deleteMany()
         .then(() => {
           res.status(204).end();
         });
@@ -63,7 +81,7 @@ function handleError(res, statusCode) {
 }
 
 // Gets a list of Quotes
-export function index(req, res) {
+exports.index=(req, res)  =>{
 
   return Quote.find({},{}).sort({quoteTime:-1,lastMod: -1}).limit(1).exec()
     .then(respondWithResult(res))
@@ -71,7 +89,7 @@ export function index(req, res) {
 }
 
 // Gets a single Quote from the DB
-export function show(req, res) {
+exports.show=(req, res) =>{
 
   //  return res.sendFile(__dirname + '/' + req.params.id + '.stub.json');
   var client = request.createClient('https://www.nseindia.com/live_market/dynaContent/live_watch/stock_watch/');
@@ -97,14 +115,14 @@ export function show(req, res) {
 }
 
 // Creates a new Quote in the DB
-export function create(req, res) {
+exports.create=(req, res) =>{
   return Quote.create(req.body)
     .then(respondWithResult(res, 201))
     .catch(handleError(res));
 }
 
 // Updates an existing Quote in the DB
-export function update(req, res) {
+exports.update=(req, res) => {
   if (req.body._id) {
     delete req.body._id;
   }
@@ -116,7 +134,7 @@ export function update(req, res) {
 }
 
 //Deletes a Quote from the DB
-export function destroy(req, res) {
+exports.destroy = (req, res) => {
   return Quote.findById(req.params.id).exec()
     .then(handleEntityNotFound(res))
     .then(removeEntity(res))
