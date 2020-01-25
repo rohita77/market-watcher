@@ -25,8 +25,6 @@ mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
 mongoose.set('useUnifiedTopology', true);
 
-config.mongo.uri = "mongodb://heroku_1mcgzhnk:25cb69cn9o7ppkbmsu5q1gvho3@ds027628.mlab.com:27628/heroku_1mcgzhnk"
-
 // Connect to MongoDB
 console.log(`Connect to Mongo DB at ${config.mongo.uri.substring(0,30)}`)
 mongoose.connect(config.mongo.uri, config.mongo.options);
