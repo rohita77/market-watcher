@@ -20,10 +20,29 @@ var Quote = require( '../../api/quote/quote.model');
 var OptionChain = require( '../../api/option-chain/option-chain.model');
 var DailyStat = require( '../../api/daily-stat/daily-stat.model');
 
+function now() {
+    return moment().format('HH:mm:ss Z');
+}
+
+const Readable = require('stream').Readable
+const stream = new Readable({
+    objectMode: true,
+    read() {},
+    autoDestroy : true
+  })
+
+function log(message) {
+
+    console.log(`${now()} ${message}`);
+    let json = {}
+    json[`${now()}`] = `${message}`
+    if (stream.readableFlowing) stream.push(json);
+}
 
 exports.run = () => {
-    console.log("Watch List Job Fired Time is :" + new Date());
-    return refreshWatchlists()
+    log("Watch List Job Fired");
+    // return
+        refreshWatchlists()
         .then(() => log(`Finished Refreshing Watchlists`))
         .then(() => refreshAllBoardMeetings())
         .then(() => log(`Finished Refreshing Board Meetings for symbols`))
@@ -46,18 +65,12 @@ exports.run = () => {
             //Store quotes for last 30 days
         })
         .then(() => Symbol.find({}).countDocuments().exec().then((c) => {
-            log(`After Job DB has ${JSON.stringify(c)} symbols`);
+            const msg = `After Job DB has ${JSON.stringify(c)} symbols`;
+            log(msg);
+            stream.push(null);
         }))
-}
 
-
-
-function now() {
-    return moment().format('HH:mm:ss Z');
-}
-
-function log(message) {
-    console.log(`${now()} ${message}`);
+    return stream;
 }
 
 function refreshWatchlists() {
@@ -117,7 +130,6 @@ function updateSymbolsFromWatchlists() {
         }];
 
     log(`Firing Symbol saves`);
-
 
     return Watchlist.aggregate(pipleline)
         //    .limit(2)
@@ -207,8 +219,6 @@ function populateFnOMktLot(symbolDoc) {
             return symbolDoc;
         });
 }
-
-
 
 function updateSymbol(symbolDoc) {
 
