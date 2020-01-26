@@ -11,31 +11,60 @@ var NSEDataAdapter = require('../../components/nse-data-adapter/index');
 const Quote = require('./quote.model');
 const OptionChain = require('../../api/option-chain/option-chain.model');
 
-let IST = { timeZone: 'Asia/Calcutta', timeZoneName: 'short' };
-
-
-exports.run= async () => {
-
-  log('Quote Job Fired');
-  let quotesJSON = await refreshStockQuotes();
-
-  log(`Refreshed StockQuotes for Index: ${quotesJSON.index} id:${quotesJSON._id.toLocaleString('en-US', IST)} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`)
-
-  quotesJSON = await refreshOptionChains(quotesJSON)
-  log(`Refreshed Option chains and updated in ${quotesJSON.quotes.length} quotes`);
-
-  log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id.toLocaleString('en-US', IST)}`);
-  let saved = await quotesJSON.save();
-  log(`Saved quotes at:${saved.lastMod.toLocaleString()}`);
-
+function chunk(array, size) {
+  const chunked_arr = [];
+  let index = 0;
+  while (index < array.length) {
+    chunked_arr.push(array.slice(index, size + index));
+    index += size;
+  }
+  return chunked_arr;
 }
+
+let IST = {
+  timeZone: 'Asia/Calcutta',
+  timeZoneName: 'short'
+};
+
+const Readable = require('stream').Readable
+const stream = new Readable({
+  objectMode: true,
+  read() {},
+  autoDestroy: true
+})
 
 function now() {
   return moment().format('HH:mm:ss Z');
 }
 
 function log(message) {
+
   console.log(`${now()} ${message}`);
+  let json = {}
+  json[`${now()}`] = `${message}`
+  if (stream.readableFlowing) stream.push(json);
+}
+
+async function runJob() {
+  {
+    log('Quote Job Fired');
+    let quotesJSON = await refreshStockQuotes();
+    log(`Refreshed StockQuotes for Index: ${quotesJSON.index} id:${quotesJSON._id.toLocaleString('en-US', IST)} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`);
+    quotesJSON = await refreshOptionChains(quotesJSON);
+    log(`Refreshed Option chains and updated in ${quotesJSON.quotes.length} quotes`);
+    log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id.toLocaleString('en-US', IST)}`);
+    let saved = await quotesJSON.save();
+    log(`Saved quotes at:${saved._id.toLocaleString()}`);
+    await stream.push(saved);
+    stream.push(null);
+  }
+}
+
+exports.run = async () => {
+
+  runJob();
+  return stream;
+
 }
 
 async function refreshStockQuotes() {
@@ -65,23 +94,22 @@ async function refreshStockQuotes() {
 
   return quoteDoc;
 
-/*
-  return NSEDataAdapter.getQuotesForFnOStocks()
-    //save the quotes in the DB once they are downloaded
-    .then(quotesJSON => {
-      log(`Fetched Quotes for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`);
+  /*
+    return NSEDataAdapter.getQuotesForFnOStocks()
+      //save the quotes in the DB once they are downloaded
+      .then(quotesJSON => {
+        log(`Fetched Quotes for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`);
 
-      return Quote.findOneAndUpdate({ _id: quotesJSON.quoteTime }, quotesJSON, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true, runSettersOnQuery: true }).exec()
-        .then((doc, err) => {
-          log(`Upserted Quotes for index: ${quotesJSON.index} / with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)} and refreshTime: ${doc.refreshTime.toLocaleString()}`);
-          if (err) log(err); //undefined
-          return doc;
-        });
+        return Quote.findOneAndUpdate({ _id: quotesJSON.quoteTime }, quotesJSON, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true, runSettersOnQuery: true }).exec()
+          .then((doc, err) => {
+            log(`Upserted Quotes for index: ${quotesJSON.index} / with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)} and refreshTime: ${doc.refreshTime.toLocaleString()}`);
+            if (err) log(err); //undefined
+            return doc;
+          });
 
-    })
-*/
-//resolve the promise for the insert
-
+      })
+  */
+  //resolve the promise for the insert
 }
 
 function refreshOptionChains(quotesJSON) {
@@ -90,28 +118,40 @@ function refreshOptionChains(quotesJSON) {
 
   let frontMonthExpiry = NSEDataAdapter.getFrontMonthExpiryDate(moment(), 'DDMMMYYYY').toUpperCase();
 
+
+  let chunkedQuotes = chunk(quotesJSON.quotes, 3);
+
   log(`Retrieving Option Chains for ${quotesJSON.quotes.length} symbols for ${frontMonthExpiry}`);
 
   //Promise for each stockQuote that is resolved when the Option Chain is retrieved and saved
-  return Promise.all(
-    quotesJSON.quotes.map(stockQuote => {
-      //avgtrdVol: 40 lacs and avgTurnOver = 100 for 212 symbols for 6 trading hours
-      if ((stockQuote.trdVol > (5 * hoursFromOpen)) || (stockQuote.ntP > (15 * hoursFromOpen))) { //TD Previous days value and from config
-          //  if ((stockQuote.symbol==='RELIANCE') || (stockQuote.symbol==='HINDALCO')) {
+  return chunkedQuotes.reduce(async (quoteArr=[],quotesJSON,i) => {
+    let newChunk = await refreshOptionChainForQuoteChunk(quotesJSON, hoursFromOpen, frontMonthExpiry)
+    try {    return [...(await quoteArr),...newChunk];
+    }
+    catch(error) {
+      console.log(`Chunk of length ${newChunk.length} getting into QuoteArray of length ${quoteArr} has error ${error}`)
+    }
+  })
+  .then((quotes) => {
+    let qj = quotesJSON;
+    qj.quotes = quotes;
+    return qj;
+  });
 
-        return refreshOptionChain(stockQuote, frontMonthExpiry)
-          .then((oc) => getExpectedMoveForQuote(stockQuote))
-      }
-      else
-        return stockQuote;
-    }))
-    .then((quotes) => {
-      let qj = quotesJSON;
-      qj.quotes = quotes;
-      return qj;
-    })
 }
 
+function refreshOptionChainForQuoteChunk(quotes, hoursFromOpen, frontMonthExpiry) {
+  return Promise.all(quotes.map(stockQuote => {
+    //avgtrdVol: 40 lacs and avgTurnOver = 100 for 212 symbols for 6 trading hours
+    if ((stockQuote.trdVol > (5 * hoursFromOpen)) || (stockQuote.ntP > (15 * hoursFromOpen))) { //TD Previous days value and from config
+      //  if ((stockQuote.symbol==='RELIANCE') || (stockQuote.symbol==='HINDALCO')) {
+      return refreshOptionChain(stockQuote, frontMonthExpiry)
+        .then((oc) => getExpectedMoveForQuote(stockQuote));
+    }
+    else
+      return stockQuote;
+  }))
+}
 
 async function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
@@ -126,7 +166,8 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
     //Check if option chain already exists in DB TD: Use a better primary key
     let ocQuery = {
-      symbol: stockQuote.symbol, expDt: frontMonthExpiry /*, quoteId:stockQuote._id ,*/
+      symbol: stockQuote.symbol,
+      expDt: frontMonthExpiry /*, quoteId:stockQuote._id ,*/
     }
 
     let optionChainDoc = await OptionChain.findOneAndRemove(ocQuery).exec()
@@ -143,7 +184,7 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
     let optionChainJSON = {
       symbol: stockQuote.symbol,
       quoteId: stockQuote._id,
-      expDt: frontMonthExpiry,    //TD: expiry date to date
+      expDt: frontMonthExpiry, //TD: expiry date to date
 
       spot: stockQuote.ltP,
       mrgnPer: stockQuote.frontMonthMarginPercent,
@@ -154,12 +195,12 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
     //Save new options chain in DB
     optionChainDoc = await OptionChain.create(optionChainJSON)
-      // .catch(
-      //   err =>{
-      //     // console.log(JSON.stringify(optionChainJSON));
-      //     log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
-      //   }
-      // )
+    // .catch(
+    //   err =>{
+    //     // console.log(JSON.stringify(optionChainJSON));
+    //     log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
+    //   }
+    // )
 
     return optionChainDoc;
   }
