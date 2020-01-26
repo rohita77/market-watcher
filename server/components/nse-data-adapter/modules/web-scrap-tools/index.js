@@ -18,14 +18,14 @@ function log(message) {
 
 const headers = {
     // 'Host': 'www.nseindia.com',
-    // 'Accept-Encoding': 'gzip, deflate, sdch, br',
-    // 'Accept-Language': 'en-US,en;q=0.9,vi;q=0.8',
+    'Accept-Encoding': 'gzip, deflate, sdch, br',
+    'Accept-Language': 'en-US,en;q=0.9,vi;q=0.8',
     'Connection': 'keep-alive',
     'Sec-Fetch-User': '?1',
     'Upgrade-Insecure-Requests': 1,
     // 'Referer' : 'https://www1.nseindia.com/products/content/derivatives/equities/historical_fo.htm',
     'User-Agent' : 'Mozilla/5.0 (iPad; CPU OS 11_0 like Mac OS X) AppleWebKit/604.1.34 (KHTML, like Gecko) Version/11.0 Mobile/15A5341f Safari/604.1',
-    // 'Accept' :  '*/*',b
+    'Accept' :  '*/*',
     // 'X-Requested-With': 'XMLHttpRequest'
 
 };
@@ -41,15 +41,13 @@ exports.getSmallJSON=(url) =>{
 
     log(`downloading from url ${url}`);
 
-    /*
-        var options = {
-            uri: url,
-            headers: {
-                'User-Agent': 'Request-Promise'
-            },
-            json: true // Automatically parses the JSON string in the response
-        };
-    */
+// return request.get(options)
+//     .on('response', function(response) {
+//         console.log(`Stauts is ${response.statusCode}`) // 200
+//         console.log(`Headers are \n ${response.headers['content-type']}`) // 'image/png'
+//         console.log(`Response: ${JSON.stringify(response)}`) // 'image/png'
+
+//       })
 
     return requestPromise(options)
 }
@@ -73,7 +71,11 @@ exports.getSmallCsv=(url, csvMapper) =>{
 
         let jsonArray = [];
         let onError = (e) => console.log(`Error gettings symbols from  ${options.url} Error: ${e}`);
-        let onComplete = () => resolve(jsonArray);
+        let onComplete = () => {
+            jsonArray =>  console.log('Found LT:' + jsonArray.find(symbol => { return symbol.symbol.match('\^LT$') }).name)
+
+            resolve(jsonArray)
+        };
 
         // console.log(`CSV is ${JSON.stringify(request.get(options))}`);
 
@@ -86,8 +88,6 @@ exports.getSmallCsv=(url, csvMapper) =>{
                 jsonArray.push(csvMapper(jsonLine)),onError,onComplete
             // }
             )
-
-        jsonArray =>  console.log('Found LT:' + jsonArray.find(symbol => { return symbol.symbol.match('\^LT$') }).name)
 
      });
 
