@@ -15,20 +15,44 @@ const stub = require('./quote.stub');
 const request = require('request-json');
 const quoteJob = require('./quote.job');
 
-exports.runQuoteJob= async (req, res) =>{
+function streamResults(res, stream, statusCode) {
+  statusCode = statusCode || 200;
 
-  let returnFunc;
-  let entity;
-  console.log('hi');
+  res.writeHead(200, {
+    'Content-Type': 'text/json',
+    'Transfer-Encoding': 'chunked'
+  })
 
-  try {
-    let entity = await quoteJob.run();
-    returnFunc = respondWithResult(res, 201);
-    return await returnFunc(entity);
-  } catch (error) {
-    returnFunc = handleError(res);
-    return await returnFunc(error);
+  if (stream) {
+
+    stream.on('data', (data) => {
+      res.write(JSON.stringify(data) + '\n');
+    })
+
+    stream.on('close', () => {
+      console.log('Quote Job finished Asta La Vista Baby!');
+
+      res.end()
+    })
+
   }
+  return null;
+}
+
+
+// exports.runQuoteJob= async (req, res) =>{
+
+//   quoteJob.run()
+//   .then(respondWithResult(res))
+//   .catch(handleError(res));
+
+// }
+
+exports.runQuoteJob = async (req, res) => {
+  let stream = await quoteJob.run()
+  await streamResults(res, stream);
+  // .then(respondWithResult(res))
+  // .catch(handleError(res));
 
 }
 
