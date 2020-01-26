@@ -117,7 +117,10 @@
     "test": "gulp test",
     "update-webdriver": "node node_modules/protractor/bin/webdriver-manager update",
     "start": "node server",
-    "build1": "gulp build"
+    "build1": "copy .tmp/app/*.css dist/client/app/",
+    "gcp-deploy": "copy *.yaml dist && cd dist && gcloud app deploy && gcloud app deploy app.yaml cron.yaml",
+    "gcp-config-deploy": "copy *.yaml dist && cd dist && gcloud app deploy app.yaml cron.yaml"
+
   },
   "private": true
 }
