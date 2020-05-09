@@ -9,7 +9,7 @@ cron:
     job_age_limit: 16h
 - description: "Refresh Delayed Quotes Job"
   url: /api/quotes/refreshQuotesForFnOStocks
-  schedule: every 15 minutes from 09:15 to 16:01
+  schedule: every 15 minutes from 09:16 to 16:01
   timezone: Asia/Kolkata
   retry_parameters:
     min_backoff_seconds: 2.5
