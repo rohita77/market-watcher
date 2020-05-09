@@ -453,10 +453,7 @@ gulp.task('html', function() {
     return gulp.src(`${clientPath}/{app,components}/**/*[.html,.css]`)
         .pipe(plugins.angularTemplatecache({
             module: 'marketWatcherApp'
-            // ,root : '.'
             ,transformUrl : (url) => url.substr(1, url.length)
-            // ,escapeOptions : {'quotes': 'double'}
-
         }))
         .pipe(gulp.dest('.tmp'));
 });
