@@ -10,6 +10,8 @@ mongoose.Promise = require('bluebird');
 const config = require('./config/environment');
 const http = require('http');
 
+mongoose.plugin(require('./components/lastMod'));
+
 mongoose.set('useNewUrlParser', true);
 mongoose.set('useFindAndModify', false);
 mongoose.set('useCreateIndex', true);
@@ -17,6 +19,7 @@ mongoose.set('useUnifiedTopology', true);
 
 
 // Connect to MongoDB
+console.log(`Connecting to mondgodb at ${config.mongo.uri}....`)
 mongoose.connect(config.mongo.uri, config.mongo.options);
 mongoose.connection.on('error', function(err) {
   console.error('MongoDB connection error: ' + err);
