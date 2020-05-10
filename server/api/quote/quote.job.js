@@ -42,7 +42,15 @@ function log(message) {
   console.log(`${now()} ${message}`);
   let json = {}
   json[`${now()}`] = `${message}`
-  if (stream.readableFlowing) stream.push(json);
+
+  try {
+    if (stream.readable) stream.push(json);
+
+  }
+  catch(err) {
+    console.log(`Error logging ${message}`);
+    console.log(error);
+  }
 }
 
 async function runJob() {
@@ -116,8 +124,8 @@ function refreshOptionChains(quotesJSON) {
   let hoursFromOpen = moment().clone().utcOffset('+05:30').hour() - 9;
   hoursFromOpen = hoursFromOpen > 0 ? hoursFromOpen : 1;
 
-  let frontMonthExpiry = NSEDataAdapter.getFrontMonthExpiryDate(moment(), 'DDMMMYYYY').toUpperCase();
-
+  //Change from Front Month to Back Month 1 week before expiry
+  let frontMonthExpiry = NSEDataAdapter.getFrontMonthExpiryDate(moment().add(7, "days"), 'DDMMMYYYY').toUpperCase();
 
   let chunkedQuotes = chunk(quotesJSON.quotes, 3);
 
