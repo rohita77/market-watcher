@@ -63,7 +63,7 @@ async function runJob() {
     log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id.toLocaleString('en-US', IST)}`);
     let saved = await quotesJSON.save();
     log(`Saved quotes at:${saved._id.toLocaleString()}`);
-    await stream.push(saved);
+    // await stream.push(saved);
     stream.push(null);
   }
 }
@@ -197,19 +197,19 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
       spot: stockQuote.ltP,
       mrgnPer: stockQuote.frontMonthMarginPercent,
       //  lotSz: Number, //TD
-      expDays: NSEDataAdapter.getDaysToFrontMonthExpiry(),
+      //Days from Option Chain Expiry
+      expDays: NSEDataAdapter.getDaysToExpiry(moment(frontMonthExpiry,'DDMMMYYYY')),
       strikes: arr
     };
 
     //Save new options chain in DB
-    optionChainDoc = await OptionChain.create(optionChainJSON)
-    // .catch(
-    //   err =>{
-    //     // console.log(JSON.stringify(optionChainJSON));
-    //     log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
-    //   }
-    // )
-
+    try {
+      optionChainDoc = await OptionChain.create(optionChainJSON)
+      }
+    catch(err) {
+        // console.log(JSON.stringify(optionChainJSON));
+        log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
+      }
     return optionChainDoc;
   }
 
