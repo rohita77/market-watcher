@@ -33,10 +33,18 @@ const stream = new Readable({
 
 function log(message) {
 
-    console.log(`${now()} ${message}`);
-    let json = {}
-    json[`${now()}`] = `${message}`
-    if (stream.readableFlowing) stream.push(json);
+  console.log(`${now()} ${message}`);
+  let json = {}
+  json[`${now()}`] = `${message}`
+
+  try {
+    if (stream.readable) stream.push(json);
+
+  }
+  catch(err) {
+    console.log(`Error logging ${message}`);
+    console.log(err);
+  }
 }
 
 exports.run = () => {
@@ -412,7 +420,7 @@ function archiveQuotes() {
     let lastMonthExpiryDate = NSEDataAdapter.getPreviousMonthExpiryDate();
 
     //TD: Retain Last quote of the day
-    log(`Archiving quotes older than previous month expiry date ${moment(lastMonthExpiryDate).format()}`);
+    log(`Archiving quotes older than previous month expiry date ${lastMonthExpiryDate}`);
 
     return Quote.deleteMany({ lastMod: { $lt: lastMonthExpiryDate } });
 }
