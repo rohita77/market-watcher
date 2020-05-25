@@ -85,13 +85,13 @@ function getMonthlyExpiryDate (tradingDate, dtFormat) {
 
 exports.getMonthlyExpiryDate = getMonthlyExpiryDate
 
-function getFrontMonthExpiryDate (tradingDate = moment(), dtFormat) {
+function getFrontMonthExpiryDate (tradingDate = moment(), dtFormat='YYYY-MM-DD') {
     return getMonthlyExpiryDate(tradingDate, dtFormat);
 }
 
 exports.getFrontMonthExpiryDate=getFrontMonthExpiryDate
 
-exports.getBackMonthExpiryDate=(tradingDate = moment(), dtFormat) =>{
+exports.getBackMonthExpiryDate=(tradingDate = moment(), dtFormat='YYYY-MM-DD') =>{
     let frontMonthExpiryDate = getFrontMonthExpiryDate(tradingDate)
     let backMonthFirstTradingDate = moment(frontMonthExpiryDate).add(1, "days")
 
@@ -99,7 +99,7 @@ exports.getBackMonthExpiryDate=(tradingDate = moment(), dtFormat) =>{
 }
 
 
-exports.getPreviousMonthExpiryDate=(tradingDate = moment(), dtFormat) =>{
+exports.getPreviousMonthExpiryDate=(tradingDate = moment(), dtFormat="YYYY-MM-DD") =>{
     let frontMonthExpiryDate = getFrontMonthExpiryDate(tradingDate)
 
     let firstOfMonth = moment(frontMonthExpiryDate).utcOffset("+05:30").startOf('month');
@@ -197,7 +197,16 @@ function getDaysToFrontMonthExpiry (tradingDate = moment()) {
     return moment(getFrontMonthExpiryDate(tradingDate)).diff(moment(getNextTradingDate(tradingDate)), 'days');
 }
 
+function getDaysToExpiry(expiryDate = moment(),tradingDate=moment()) {
+
+    return moment(expiryDate).diff(moment(getNextTradingDate(tradingDate)), 'days');
+}
+
+
 exports.getDaysToFrontMonthExpiry = getDaysToFrontMonthExpiry
+
+exports.getDaysToExpiry = getDaysToExpiry
+
 
 exports.getQuotesForFnOStocks=() =>{
 
