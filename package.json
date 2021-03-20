@@ -12,6 +12,8 @@
     "babel-eslint": "^10.0.3",
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
+    "browserslist": "^4.16.3",
+    "caniuse-lite": "^1.0.30001202",
     "cheerio": "^1.0.0-rc.3",
     "composable-middleware": "^0.3.0",
     "compression": "^1.7.4",
@@ -32,12 +34,14 @@
     "moment": "^2.24.0",
     "mongoose": "^5.8.7",
     "morgan": "^1.9.1",
+    "node-fetch": "^2.6.1",
     "passport": "^0.4.1",
     "passport-local": "^1.0.0",
     "request": "^2.88.0",
     "request-json": "^0.6.4",
     "request-promise": "^4.2.5",
     "serve-favicon": "^2.5.0",
+    "set-cookie-parser": "^2.4.8",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0",
     "socketio-jwt": "^4.5.0"
@@ -120,7 +124,6 @@
     "build1": "copy .tmp/app/*.css dist/client/app/",
     "gcp-deploy": "copy *.yaml dist && cd dist && gcloud app deploy && gcloud app deploy app.yaml cron.yaml",
     "gcp-config-deploy": "copy *.yaml dist && cd dist && gcloud app deploy app.yaml cron.yaml"
-
   },
   "private": true
 }

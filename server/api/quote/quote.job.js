@@ -46,8 +46,7 @@ function log(message) {
   try {
     if (stream.readable) stream.push(json);
 
-  }
-  catch(err) {
+  } catch (err) {
     console.log(`Error logging ${message}`);
     console.log(error);
   }
@@ -55,16 +54,23 @@ function log(message) {
 
 async function runJob() {
   {
-    log('Quote Job Fired');
-    let quotesJSON = await refreshStockQuotes();
-    log(`Refreshed StockQuotes for Index: ${quotesJSON.index} id:${quotesJSON._id.toLocaleString('en-US', IST)} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`);
-    quotesJSON = await refreshOptionChains(quotesJSON);
-    log(`Refreshed Option chains and updated in ${quotesJSON.quotes.length} quotes`);
-    log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id.toLocaleString('en-US', IST)}`);
-    let saved = await quotesJSON.save();
-    log(`Saved quotes at:${saved._id.toLocaleString()}`);
-    // await stream.push(saved);
-    stream.push(null);
+    try {
+      log('Quote Job Fired');
+      let quotesJSON = await refreshStockQuotes();
+
+      log(`Refreshed StockQuotes for Index: ${quotesJSON.index} id:${quotesJSON._id.toLocaleString('en-US', IST)} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`);
+      quotesJSON = await refreshOptionChains(quotesJSON);
+      log(`Refreshed Option chains and updated in ${quotesJSON.quotes.length} quotes`);
+      log(`Saving quote for index ${quotesJSON.index} with id ${quotesJSON._id.toLocaleString('en-US', IST)}`);
+      let saved = await quotesJSON.save();
+      log(`Saved quotes at:${saved._id.toLocaleString()}`);
+      await stream.push(saved);
+    } catch (error) {
+      log(`Quote Job Failed ${error}`)
+    } finally {
+      stream.push(null);
+      return
+    }
   }
 }
 
@@ -77,6 +83,7 @@ exports.run = async () => {
 
 async function refreshStockQuotes() {
 
+  //TD: Try Catch
   let quotesJSON = await NSEDataAdapter.getQuotesForFnOStocks()
 
   let log_suffix = ` for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`
@@ -102,21 +109,6 @@ async function refreshStockQuotes() {
 
   return quoteDoc;
 
-  /*
-    return NSEDataAdapter.getQuotesForFnOStocks()
-      //save the quotes in the DB once they are downloaded
-      .then(quotesJSON => {
-        log(`Fetched Quotes for index: ${quotesJSON.index} with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)}`);
-
-        return Quote.findOneAndUpdate({ _id: quotesJSON.quoteTime }, quotesJSON, { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true, runSettersOnQuery: true }).exec()
-          .then((doc, err) => {
-            log(`Upserted Quotes for index: ${quotesJSON.index} / with ${quotesJSON.quotes.length} symbols and quoteTime: ${quotesJSON.quoteTime.toLocaleString('en-US', IST)} and refreshTime: ${doc.refreshTime.toLocaleString()}`);
-            if (err) log(err); //undefined
-            return doc;
-          });
-
-      })
-  */
   //resolve the promise for the insert
 }
 
@@ -125,38 +117,39 @@ function refreshOptionChains(quotesJSON) {
   hoursFromOpen = hoursFromOpen > 0 ? hoursFromOpen : 1;
 
   //Change from Front Month to Back Month 1 week before expiry
-  let frontMonthExpiry = NSEDataAdapter.getFrontMonthExpiryDate(moment().add(7, "days"), 'DDMMMYYYY').toUpperCase();
+  let frontMonthExpiry = NSEDataAdapter.getFrontMonthExpiryDate(moment().add(7, "days"), 'DD-MMM-YYYY');
 
   let chunkedQuotes = chunk(quotesJSON.quotes, 3);
 
   log(`Retrieving Option Chains for ${quotesJSON.quotes.length} symbols for ${frontMonthExpiry}`);
 
   //Promise for each stockQuote that is resolved when the Option Chain is retrieved and saved
-  return chunkedQuotes.reduce(async (quoteArr=[],quotesJSON,i) => {
-    let newChunk = await refreshOptionChainForQuoteChunk(quotesJSON, hoursFromOpen, frontMonthExpiry)
-    try {    return [...(await quoteArr),...newChunk];
-    }
-    catch(error) {
-      console.log(`Chunk of length ${newChunk.length} getting into QuoteArray of length ${quoteArr} has error ${error}`)
-    }
-  })
-  .then((quotes) => {
-    let qj = quotesJSON;
-    qj.quotes = quotes;
-    return qj;
-  });
+  return chunkedQuotes.reduce(async (quoteArr = [], quotesJSON, i) => {
+      let newChunk = await refreshOptionChainForQuoteChunk(quotesJSON, hoursFromOpen, frontMonthExpiry)
+      try {
+        return [...(await quoteArr), ...newChunk];
+      } catch (error) {
+        console.log(`Chunk of length ${newChunk.length} getting into QuoteArray of length ${quoteArr} has error ${error}`)
+      }
+    })
+    .then((quotes) => {
+      let qj = quotesJSON;
+      qj.quotes = quotes;
+      return qj;
+    });
 
 }
 
 function refreshOptionChainForQuoteChunk(quotes, hoursFromOpen, frontMonthExpiry) {
   return Promise.all(quotes.map(stockQuote => {
     //avgtrdVol: 40 lacs and avgTurnOver = 100 for 212 symbols for 6 trading hours
-    if ((stockQuote.trdVol > (5 * hoursFromOpen)) || (stockQuote.ntP > (15 * hoursFromOpen))) { //TD Previous days value and from config
-      //  if ((stockQuote.symbol==='RELIANCE') || (stockQuote.symbol==='HINDALCO')) {
+    if (((stockQuote.trdVol > (5 * hoursFromOpen)) || (stockQuote.ntP > (15 * hoursFromOpen)))
+      // && (((stockQuote.symbol==='RELIANCE') || (stockQuote.symbol==='HINDALCO')))
+    ) { //TD Previous days value and from config
+      //  if ((stockQuote.symbol==='RELIANCE') || (stockQuote.symbol==='HINDALCO'))
       return refreshOptionChain(stockQuote, frontMonthExpiry)
         .then((oc) => getExpectedMoveForQuote(stockQuote));
-    }
-    else
+    } else
       return stockQuote;
   }))
 }
@@ -164,12 +157,10 @@ function refreshOptionChainForQuoteChunk(quotes, hoursFromOpen, frontMonthExpiry
 async function refreshOptionChain(stockQuote, frontMonthExpiry) {
 
   let optionChainArr = await NSEDataAdapter.getStockOptionChain(stockQuote.symbol, frontMonthExpiry);
-
-  if (!optionChainArr && optionChainArr.length <= 0)
+  if (!optionChainArr || optionChainArr.length <= 0)
     log(`No Option Chain returned for ${stockQuote.symbol} for ${frontMonthExpiry} `);
   //TD: Return Promise?
   else {
-
     log(`Fetched Option Chain for ${stockQuote.symbol}/ ${frontMonthExpiry} with ${optionChainArr.length} strikes and quoteTime: ${stockQuote.quoteTime}`);
 
     //Check if option chain already exists in DB TD: Use a better primary key
@@ -177,6 +168,8 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
       symbol: stockQuote.symbol,
       expDt: frontMonthExpiry /*, quoteId:stockQuote._id ,*/
     }
+
+    //TD: Multiple expirys
 
     let optionChainDoc = await OptionChain.findOneAndRemove(ocQuery).exec()
 
@@ -192,24 +185,24 @@ async function refreshOptionChain(stockQuote, frontMonthExpiry) {
     let optionChainJSON = {
       symbol: stockQuote.symbol,
       quoteId: stockQuote._id,
+      //TD: Multiple expirys
       expDt: frontMonthExpiry, //TD: expiry date to date
 
       spot: stockQuote.ltP,
       mrgnPer: stockQuote.frontMonthMarginPercent,
       //  lotSz: Number, //TD
       //Days from Option Chain Expiry
-      expDays: NSEDataAdapter.getDaysToExpiry(moment(frontMonthExpiry,'DDMMMYYYY')),
+      expDays: NSEDataAdapter.getDaysToExpiry(moment(frontMonthExpiry, 'DDMMMYYYY')),
       strikes: arr
     };
 
     //Save new options chain in DB
     try {
       optionChainDoc = await OptionChain.create(optionChainJSON)
-      }
-    catch(err) {
-        // console.log(JSON.stringify(optionChainJSON));
-        log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
-      }
+    } catch (err) {
+      // console.log(JSON.stringify(optionChainJSON));
+      log(`Error Creating Option Chain for ${optionChainJSON.symbol} / ${frontMonthExpiry}: ${err}`)
+    }
     return optionChainDoc;
   }
 

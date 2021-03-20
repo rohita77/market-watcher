@@ -38,6 +38,13 @@ var QuoteDataSchema = new mongoose.Schema({
 }
 );
 
+/* TD:
+Rank based on 1D 30D and 52D move, ROC and
+Liq Strike: Bid-Ask/Ask * Nifty/UL
+Liq indicator: Liq Strikes %
+Filter based on Liq Indicator
+*/
+
 QuoteDataSchema.pre('save', function (next) {
   this.frontMonthMargin = rnd(this.frontMonthMarginPercent * this.ltP, 0);
   this.expectedHighPercent = rnd(((this.expectedHigh - this.ltP) * 100) / this.ltP, 2);
