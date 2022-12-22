@@ -24,7 +24,7 @@
     "express-jwt": "^5.3.1",
     "express-session": "^1.17.0",
     "fast-json-patch": "^3.0.0-1",
-    "jsonwebtoken": "^8.5.1",
+    "jsonwebtoken": "^9.0.0",
     "lodash": "^4.17.15",
     "lusca": "^1.6.1",
     "mathjs": "^6.5.0",
